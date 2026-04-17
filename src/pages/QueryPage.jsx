@@ -17,6 +17,10 @@ const PRODUCT_OPTIONS = [
   { label: '模切(丝网印)', value: 'DS' },
 ];
 
+const WAIFA_OPTIONS = [
+  { label: '外发', value: '1' },
+];
+
 const PRODUCT_COLORS = { YS: 'blue', YM: 'cyan', ZM: 'green', DS: 'orange' };
 
 export default function QueryPage() {
@@ -25,6 +29,7 @@ export default function QueryPage() {
     huahao: '',
     product_types: ['YS', 'YM', 'ZM', 'DS'],
     dateRange: [],
+    waifa: '',
   });
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
@@ -44,6 +49,7 @@ export default function QueryPage() {
       };
       if (form.company) params.company = form.company.trim();
       if (form.huahao) params.huahao = form.huahao.trim();
+      if (form.waifa) params.waifa = form.waifa;
       if (form.dateRange?.[0]) params.start_date = form.dateRange[0].format('YYYY-MM-DD');
       if (form.dateRange?.[1]) params.end_date = form.dateRange[1].format('YYYY-MM-DD');
 
@@ -65,6 +71,7 @@ export default function QueryPage() {
       };
       if (form.company) params.company = form.company.trim();
       if (form.huahao) params.huahao = form.huahao.trim();
+      if (form.waifa) params.waifa = form.waifa;
       if (form.dateRange?.[0]) params.start_date = form.dateRange[0].format('YYYY-MM-DD');
       if (form.dateRange?.[1]) params.end_date = form.dateRange[1].format('YYYY-MM-DD');
 
@@ -86,10 +93,8 @@ export default function QueryPage() {
         '花号': r.huahao,
         '数量': r.shuliang,
         '基价': r.jijia,
-        '加工费': r.jiagongfei,
         '外发': r.waifa,
         '基价金额': r.jijia_amount?.toFixed(2),
-        '加工费金额': r.jiagongfei_amount?.toFixed(2),
         '总金额': r.total_amount?.toFixed(2),
         '产品线': r.product_name,
       }));
@@ -101,8 +106,8 @@ export default function QueryPage() {
       // 设置列宽
       ws['!cols'] = [
         { wch: 12 }, { wch: 20 }, { wch: 20 }, { wch: 20 },
-        { wch: 15 }, { wch: 12 }, { wch: 10 }, { wch: 10 },
-        { wch: 6 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 15 },
+        { wch: 15 }, { wch: 12 }, { wch: 10 }, { wch: 6 },
+        { wch: 12 }, { wch: 15 },
       ];
 
       const fileName = `订单查询_${dayjs().format('YYYYMMDD_HHmmss')}.xlsx`;
@@ -120,7 +125,8 @@ export default function QueryPage() {
       title: '产品',
       dataIndex: 'product_type',
       key: 'product_type',
-      width: 100,
+      width: 60,
+      fixed: 'left',
       render: (v) => (
         <Tag color={PRODUCT_COLORS[v]}>{v}</Tag>
       ),
@@ -129,21 +135,23 @@ export default function QueryPage() {
       title: '日期',
       dataIndex: 'prouddate',
       key: 'prouddate',
-      width: 110,
+      width: 100,
+      fixed: 'left',
       sorter: (a, b) => (a.prouddate || '').localeCompare(b.prouddate || ''),
     },
     {
       title: '下单公司',
       dataIndex: 'company',
       key: 'company',
-      width: 160,
+      width: 140,
+      fixed: 'left',
       ellipsis: true,
     },
     {
       title: '发货厂家',
       dataIndex: 'fahuodanwei',
       key: 'fahuodanwei',
-      width: 140,
+      width: 100,
       ellipsis: true,
     },
     {
@@ -157,14 +165,14 @@ export default function QueryPage() {
       title: '花号',
       dataIndex: 'huahao',
       key: 'huahao',
-      width: 120,
+      width: 90,
       ellipsis: true,
     },
     {
       title: '数量',
       dataIndex: 'shuliang',
       key: 'shuliang',
-      width: 100,
+      width: 80,
       align: 'right',
       render: (v) => v?.toLocaleString() ?? '-',
     },
@@ -177,32 +185,9 @@ export default function QueryPage() {
       render: (v) => v != null && v !== 0 ? parseFloat(v).toFixed(4) : '-',
     },
     {
-      title: '加工费',
-      dataIndex: 'jiagongfei',
-      key: 'jiagongfei',
-      width: 80,
-      align: 'right',
-      render: (v) => v != null && v !== 0 ? parseFloat(v).toFixed(4) : '-',
-    },
-    {
-      title: '外发',
-      dataIndex: 'waifa',
-      key: 'waifa',
-      width: 60,
-      align: 'center',
-    },
-    {
       title: '基价金额',
       dataIndex: 'jijia_amount',
       key: 'jijia_amount',
-      width: 100,
-      align: 'right',
-      render: (v) => v != null ? parseFloat(v).toFixed(2) : '-',
-    },
-    {
-      title: '加工费金额',
-      dataIndex: 'jiagongfei_amount',
-      key: 'jiagongfei_amount',
       width: 100,
       align: 'right',
       render: (v) => v != null ? parseFloat(v).toFixed(2) : '-',
@@ -222,6 +207,7 @@ export default function QueryPage() {
       <Title level={4} style={{ marginBottom: 16 }}>综合查询</Title>
 
       <Card style={{ marginBottom: 16 }}>
+        {/* 第一行：日期、公司、花号 */}
         <Row gutter={[12, 12]} align="middle">
           <Col>
             <RangePicker
@@ -246,11 +232,22 @@ export default function QueryPage() {
               style={{ width: 140 }}
             />
           </Col>
+        </Row>
+
+        {/* 第二行：产品线、外发、按钮 */}
+        <Row gutter={[12, 12]} align="middle" style={{ marginTop: 16 }}>
           <Col>
             <Checkbox.Group
               options={PRODUCT_OPTIONS}
               value={form.product_types}
               onChange={vals => setForm(f => ({ ...f, product_types: vals }))}
+            />
+          </Col>
+          <Col>
+            <Checkbox.Group
+              options={WAIFA_OPTIONS}
+              value={form.waifa ? ['1'] : []}
+              onChange={vals => setForm(f => ({ ...f, waifa: vals.includes('1') ? '1' : '' }))}
             />
           </Col>
           <Col>
@@ -286,7 +283,7 @@ export default function QueryPage() {
               handleSearch(p);
             },
           }}
-          scroll={{ x: 1200 }}
+          scroll={{ x: 1300 }}
           size="small"
         />
       </Card>

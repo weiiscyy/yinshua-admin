@@ -143,11 +143,11 @@ export default function OrderEntryPage() {
   function handleCreate() {
     var requiredFields = ['ddbh', 'prouddate'];
     if (activeProduct === 'YS' || activeProduct === 'YM') {
-      requiredFields = requiredFields.concat(['company', 'ylzd', 'cpgg', 'shuliang']);
+      requiredFields = requiredFields.concat(['company', 'ylzd', 'cpgg', 'shuliang', 'yjbhao', 'sclcClass']);
     } else if (activeProduct === 'ZM') {
       requiredFields = requiredFields.concat(['huahao', 'proudnumber', 'shuliang']);
     } else if (activeProduct === 'DS') {
-      requiredFields = requiredFields.concat(['yjbhao', 'shuliang']);
+      requiredFields = requiredFields.concat(['yjbhao', 'shuliang', 'company', 'ywy']);
     }
 
     form.validateFields(requiredFields).then(function() {
@@ -182,6 +182,7 @@ export default function OrderEntryPage() {
         'tmG','tmM','tmD','tmS','tmDH','tmQT',
         'cgJG','cgYG','cgMK','cgHK','cgCX','cgQND','cgJG2','cgOT',
         'tsJS','tsWX','tsZS','tsJY','tsOT',
+        'hzl1','hzl2','hzl3','hzl4','hzl5','hzl6','hzl7','hzl8','hzl9','hzl10','hzl11','hzl12','hzl13','hzl14','hzl15','hzl16',
         'waifa'
       ];
       checkboxFields.forEach(function(f) {
@@ -262,9 +263,9 @@ export default function OrderEntryPage() {
                         <Form.Item label={<LabelWithStar required>委印单位</LabelWithStar>} name="company" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="客户公司名称" /></Form.Item>
                         <Form.Item label="发货单位" name="fahuodanwei" style={{ marginBottom: 4 }}><Input placeholder="发货单位" /></Form.Item>
                         <Form.Item label="款号" name="kuanhao" style={{ marginBottom: 4 }}><Input placeholder="款号" /></Form.Item>
-                        <Form.Item label="印件编号" name="yjbhao" style={{ marginBottom: 4 }}><Input placeholder="印件编号" /></Form.Item>
+                        <Form.Item label={<LabelWithStar required>印件编号</LabelWithStar>} name="yjbhao" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="印件编号" /></Form.Item>
                         <Form.Item label="品名" name="proudnumber" style={{ marginBottom: 4 }}><Input placeholder="品名" /></Form.Item>
-                        <Form.Item label="所属车间" name="sclcClass" style={{ marginBottom: 4 }}>
+                        <Form.Item label={<LabelWithStar required>所属车间</LabelWithStar>} name="sclcClass" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}>
                           <Select placeholder="请选择" allowClear>
                             <Option value={1}>纸盒</Option>
                             <Option value={2}>印刷单</Option>
@@ -359,36 +360,28 @@ export default function OrderEntryPage() {
                         <thead>
                           <tr style={{ background: '#f0f4f8' }}>
                             <th style={{ padding: '6px 8px', textAlign: 'left', border: '1px solid #d0dce8', width: '40%' }}>类别</th>
-                            <th style={{ padding: '6px 8px', textAlign: 'right', border: '1px solid #d0dce8', width: '20%' }}>数量</th>
-                            <th style={{ padding: '6px 8px', textAlign: 'right', border: '1px solid #d0dce8', width: '20%' }}>单价(元)</th>
-                            <th style={{ padding: '6px 8px', textAlign: 'right', border: '1px solid #d0dce8', width: '20%' }}>金额</th>
+                            <th style={{ padding: '6px 8px', textAlign: 'right', border: '1px solid #d0dce8', width: '30%' }}>数量</th>
+                            <th style={{ padding: '6px 8px', textAlign: 'right', border: '1px solid #d0dce8', width: '30%' }}>金额</th>
                           </tr>
                         </thead>
                         <tbody>
                           {[
-                            { label: '软片', sl: 'rpban_sl1', dj: 'rpban_dj1', je: 'rpban_je1' },
-                            { label: '印工', sl: 'yingong_sl', dj: 'yingong_dj', je: 'yingong_je' },
-                            { label: 'PS版', sl: 'psban_sl', dj: 'psban_dj', je: 'psban_je' },
-                            { label: '铜锌版', sl: 'tongxin_sl', dj: 'tongxin_dj', je: 'tongxin_je' },
-                            { label: '电化铝', sl: 'dianhua_sl', dj: 'dianhua_dj', je: 'dianhua_je' },
-                            { label: '钢刀', sl: 'gangdao_sl', dj: 'gangdao_dj', je: 'gangdao_je' },
-                            { label: '轧钢刀', sl: 'zhagang_sl', dj: 'zhagang_dj', je: 'zhagang_je' },
-                            { label: '贴塑', sl: 'tiesu_sl', dj: 'tiesu_dj', je: 'tiesu_je' },
-                            { label: 'UV', sl: 'uv_sl', dj: 'uv_dj', je: 'uv_je' },
-                            { label: '切折', sl: 'qiezhe_sl', dj: 'qiezhe_dj', je: 'qiezhe_je' },
-                            { label: '打包', sl: 'dabao_sl', dj: 'dabao_dj', je: 'dabao_je' },
-                            { label: '其他', sl: 'qita_sl', dj: 'qita_dj', je: 'qita_je' },
+                            { label: '软片', sl: 'yssl1', je: 'jine1' },
+                            { label: '印工', sl: 'yssl2', je: 'jine2' },
+                            { label: 'PS版', sl: 'yssl3', je: 'jine3' },
+                            { label: '铜锌版', sl: 'yssl4', je: 'jine4' },
+                            { label: '电化铝', sl: 'yssl5', je: 'jine5' },
+                            { label: '钢刀', sl: 'yssl6', je: 'jine6' },
+                            { label: '轧钢刀', sl: 'yssl7', je: 'jine7' },
+                            { label: '贴塑', sl: 'yssl8', je: 'jine8' },
+                            { label: 'UV', sl: 'yss20', je: 'jine10' },
+                            { label: '切折', sl: 'yssl9', je: 'jine9' },
                           ].map(function(item) {
                             return React.createElement('tr', { key: item.label },
                               React.createElement('td', { style: { padding: '4px 8px', border: '1px solid #d0dce8' } }, item.label),
                               React.createElement('td', { style: { padding: '2px 4px', border: '1px solid #d0dce8' } },
                                 React.createElement(Form.Item, { name: item.sl, style: { marginBottom: 0 } },
                                   React.createElement(Input, { size: 'small', type: 'number', placeholder: '-', style: { textAlign: 'right' } })
-                                )
-                              ),
-                              React.createElement('td', { style: { padding: '2px 4px', border: '1px solid #d0dce8' } },
-                                React.createElement(Form.Item, { name: item.dj, style: { marginBottom: 0 } },
-                                  React.createElement(Input, { size: 'small', type: 'number', placeholder: '-', step: '0.01', style: { textAlign: 'right' } })
                                 )
                               ),
                               React.createElement('td', { style: { padding: '2px 4px', border: '1px solid #d0dce8' } },
@@ -400,8 +393,8 @@ export default function OrderEntryPage() {
                           })}
                           <tr style={{ background: '#e8f4fd', fontWeight: 600 }}>
                             <td style={{ padding: '6px 8px', border: '1px solid #d0dce8' }}>总计 元/只</td>
-                            <td colSpan="3" style={{ padding: '2px 4px', border: '1px solid #d0dce8', textAlign: 'right' }}>
-                              <Form.Item name="total_je" style={{ marginBottom: 0 }}>
+                            <td colSpan="2" style={{ padding: '2px 4px', border: '1px solid #d0dce8', textAlign: 'right' }}>
+                              <Form.Item name="yszj" style={{ marginBottom: 0 }}>
                                 <Input size="small" type="number" placeholder="自动计算" step="0.01" style={{ textAlign: 'right', fontWeight: 600 }} disabled />
                               </Form.Item>
                             </td>
@@ -419,74 +412,394 @@ export default function OrderEntryPage() {
                 ),
               },
               {
-                key: 'YM',
+                                key: 'YM',
                 label: '📄 印刷面(YM)',
                 children: (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px' }}>
-                    <Form.Item label="订单编号" name="ddbh" style={{ marginBottom: 4 }}><Input disabled /></Form.Item>
-                    <Form.Item label="生产日期" name="prouddate" style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
-                    <Form.Item label="交货日期" name="overdate" style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
-                    <Form.Item label="业务员" name="ywy" style={{ marginBottom: 4 }}><Select allowClear>{users.map(u => <Option key={u.UserID || u.userId} value={u.UserID || u.userId}>{u.UserName || u.username}</Option>)}</Select></Form.Item>
-                    <Form.Item label={<LabelWithStar required>委印单位</LabelWithStar>} name="company" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="委印单位" /></Form.Item>
-                    <Form.Item label="发货单位" name="fahuodanwei" style={{ marginBottom: 4 }}><Input placeholder="发货单位" /></Form.Item>
-                    <Form.Item label="款号" name="kuanhao" style={{ marginBottom: 4 }}><Input placeholder="款号" /></Form.Item>
-                    <Form.Item label="外发" name="waifa" valuePropName="checked" style={{ marginBottom: 4 }}><Checkbox /></Form.Item>
-                    <Form.Item label={<LabelWithStar required>用料质地</LabelWithStar>} name="ylzd" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="如128G双铜" /></Form.Item>
-                    <Form.Item label={<LabelWithStar required>成品尺寸</LabelWithStar>} name="cpgg" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="成品尺寸" /></Form.Item>
-                    <Form.Item label={<LabelWithStar required>印刷数量</LabelWithStar>} name="shuliang" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="数量" type="number" /></Form.Item>
-                    <Form.Item label="拼数" name="pingshu" style={{ marginBottom: 4 }}><Input placeholder="拼数" type="number" /></Form.Item>
-                    <Form.Item label="整烫" name="zhengli" style={{ marginBottom: 4 }}><Input placeholder="整烫" /></Form.Item>
-                    <Form.Item label="工艺要求" name="gyyq" style={{ marginBottom: 4 }}><Input.TextArea placeholder="工艺要求" rows={1} /></Form.Item>
-                    <Form.Item label="品名" name="proudnumber" style={{ marginBottom: 4 }}><Input placeholder="品名" /></Form.Item>
-                    <Form.Item label="发料日期" name="lldate" style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
-                    <Form.Item label="备注" name="beizhu" style={{ marginBottom: 4 }}><Input.TextArea placeholder="备注" rows={1} /></Form.Item>
+                  <div>
+                    {/* 基本信息 - 按老系统顺序 */}
+                    <div style={{ marginBottom: 16 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: '#2b6cb0', marginBottom: 8 }}>| 基本信息</div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0 12px' }}>
+                        <Form.Item label="订单编号" name="ddbh" style={{ marginBottom: 4 }}><Input disabled /></Form.Item>
+                        <Form.Item label="生成日期" name="prouddate" style={{ marginBottom: 4 }}><DatePicker disabled style={{ width: '100%' }} /></Form.Item>
+                        <Form.Item label="交货日期" name="overdate" style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
+                        <Form.Item label="制单" name="zhidan" style={{ marginBottom: 4 }}><Input disabled /></Form.Item>
+                        <Form.Item label={<LabelWithStar required>委印单位</LabelWithStar>} name="company" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="客户公司名称" /></Form.Item>
+                        <Form.Item label="发货单位" name="fahuodanwei" style={{ marginBottom: 4 }}><Input placeholder="发货单位" /></Form.Item>
+                        <Form.Item label={<LabelWithStar required>印件编号</LabelWithStar>} name="yjbhao" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="印件编号" /></Form.Item>
+                        <Form.Item label={<LabelWithStar required>印刷数量</LabelWithStar>} name="shuliang" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="数量" type="number" /></Form.Item>
+                        <Form.Item label="拼数" name="pingshu" style={{ marginBottom: 4 }}><Input placeholder="拼数" type="number" /></Form.Item>
+                        <Form.Item label={<LabelWithStar required>成品规格</LabelWithStar>} name="cpgg" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="成品规格" /></Form.Item>
+                        <Form.Item label="所属车间" name="sclcClass" style={{ marginBottom: 4 }}>
+                          <Select placeholder="请选择" allowClear>
+                            <Option value={1}>纸盒</Option>
+                            <Option value={2}>印刷单</Option>
+                            <Option value={3}>客户印</Option>
+                          </Select>
+                        </Form.Item>
+                        <Form.Item label={<LabelWithStar required>用料质地</LabelWithStar>} name="ylzd" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="如128G双铜" /></Form.Item>
+                        <Form.Item label="业务员" name="ywy" style={{ marginBottom: 4 }}>
+                          <Select placeholder="选择业务员" allowClear>
+                            {users.map(u => <Option key={u.UserID || u.userId} value={u.UserID || u.userId}>{u.UserName || u.username}</Option>)}
+                          </Select>
+                        </Form.Item>
+                        <Form.Item label="款号" name="kuanhao" style={{ marginBottom: 4 }}><Input placeholder="款号" /></Form.Item>
+                        <Form.Item label="品名" name="proudnumber" style={{ marginBottom: 4 }}><Input placeholder="品名" /></Form.Item>
+                        <Form.Item label="外发" name="waifa" valuePropName="checked" style={{ marginBottom: 4 }}><Checkbox /></Form.Item>
+                      </div>
+                    </div>
+
+                    {/* 纸张用量及价格 */}
+                    <div style={{ marginBottom: 16 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: '#2b6cb0', marginBottom: 8 }}>| 纸张用量及价格</div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0 12px' }}>
+                        <Form.Item label="实用米数" name="sydazhang" style={{ marginBottom: 4 }}><Input placeholder="实用米数" type="number" /></Form.Item>
+                        <Form.Item label="单价(元/米)" name="danjia" style={{ marginBottom: 4 }}><Input placeholder="单价" type="number" step="0.01" /></Form.Item>
+                        <Form.Item label="金额" name="syMoney" style={{ marginBottom: 4 }}><Input placeholder="金额" type="number" step="0.01" /></Form.Item>
+                      </div>
+                    </div>
+
+                    {/* 要求 */}
+                    <div style={{ marginBottom: 16 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: '#2b6cb0', marginBottom: 8 }}>| 要求</div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 12px' }}>
+                        <Form.Item label="机印要求" name="jyyaoqiu" style={{ marginBottom: 4 }}><Input.TextArea placeholder="机印要求" rows={1} /></Form.Item>
+                        <Form.Item label="工艺要求" name="gyyq" style={{ marginBottom: 4 }}><Input.TextArea placeholder="工艺要求" rows={1} /></Form.Item>
+                      </div>
+                    </div>
+
+                    {/* 后整理工艺 */}
+                    <div style={{ marginBottom: 16 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: '#2b6cb0', marginBottom: 8 }}>| 后整理工艺</div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+                        {[
+                          { label: '烘色牢度', value: 'hzl1' },
+                          { label: '切割', value: 'hzl2' },
+                          { label: '超声波切割', value: 'hzl3' },
+                          { label: '三角折', value: 'hzl7' },
+                          { label: '手工切折', value: 'hzl4' },
+                          { label: '手工对折', value: 'hzl5' },
+                          { label: '其它', value: 'hzl6' },
+                        ].map(function(opt) {
+                          return React.createElement(Form.Item, { key: opt.value, name: opt.value, valuePropName: 'checked', style: { marginBottom: 4 } },
+                            React.createElement(Checkbox, null, opt.label)
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* 印件总价分析 */}
+                    <div style={{ marginBottom: 16 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: '#2b6cb0', marginBottom: 8 }}>| 印件总价分析</div>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                        <thead>
+                          <tr style={{ background: '#f0f4f8' }}>
+                            <th style={{ padding: '6px 8px', textAlign: 'left', border: '1px solid #d0dce8', width: '25%' }}>类别</th>
+                            <th style={{ padding: '6px 8px', textAlign: 'right', border: '1px solid #d0dce8', width: '15%' }}>数量</th>
+                            <th style={{ padding: '6px 8px', textAlign: 'center', border: '1px solid #d0dce8', width: '10%' }}>单位</th>
+                            <th style={{ padding: '6px 8px', textAlign: 'right', border: '1px solid #d0dce8', width: '20%' }}>印量</th>
+                            <th style={{ padding: '6px 8px', textAlign: 'right', border: '1px solid #d0dce8', width: '30%' }}>金额</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {[
+                            { label: '软片', sl: 'yssl1', yl: 'ysyl1', je: 'jine1' },
+                            { label: '印工', sl: 'yssl2', yl: 'ysyl2', je: 'jine2' },
+                            { label: 'PS版', sl: 'yssl3', yl: 'ysyl3', je: 'jine3' },
+                            { label: '铜锌版', sl: 'yssl4', yl: 'ysyl4', je: 'jine4' },
+                            { label: '电化铝', sl: 'yssl5', yl: 'ysyl5', je: 'jine5' },
+                            { label: '钢刀', sl: 'yssl6', yl: 'ysyl6', je: 'jine6' },
+                            { label: '轧钢刀', sl: 'yssl7', yl: 'ysyl7', je: 'jine7' },
+                            { label: '贴塑双(单)面', sl: 'yssl8', yl: 'ysyl8', je: 'jine8' },
+                            { label: '切刀打洞/圆角穿线/整理包扎', sl: 'yssl9', yl: 'ysyl9', je: 'jine9' },
+                          ].map(function(item) {
+                            return React.createElement('tr', { key: item.label },
+                              React.createElement('td', { style: { padding: '4px 8px', border: '1px solid #d0dce8', fontSize: 11 } }, item.label),
+                              React.createElement('td', { style: { padding: '2px 4px', border: '1px solid #d0dce8' } },
+                                React.createElement(Form.Item, { name: item.sl, style: { marginBottom: 0 } },
+                                  React.createElement(Input, { size: 'small', type: 'number', placeholder: '-', style: { textAlign: 'right' } })
+                                )
+                              ),
+                              React.createElement('td', { style: { padding: '4px 8px', border: '1px solid #d0dce8', textAlign: 'center', fontSize: 11, color: '#666' } }, '米/只'),
+                              React.createElement('td', { style: { padding: '2px 4px', border: '1px solid #d0dce8' } },
+                                React.createElement(Form.Item, { name: item.yl, style: { marginBottom: 0 } },
+                                  React.createElement(Input, { size: 'small', type: 'number', placeholder: '-', style: { textAlign: 'right' } })
+                                )
+                              ),
+                              React.createElement('td', { style: { padding: '2px 4px', border: '1px solid #d0dce8' } },
+                                React.createElement(Form.Item, { name: item.je, style: { marginBottom: 0 } },
+                                  React.createElement(Input, { size: 'small', type: 'number', placeholder: '-', step: '0.01', style: { textAlign: 'right' } })
+                                )
+                              )
+                            );
+                          })}
+                          <tr style={{ background: '#e8f4fd', fontWeight: 600 }}>
+                            <td style={{ padding: '6px 8px', border: '1px solid #d0dce8' }}>总计 元/只</td>
+                            <td colSpan="4" style={{ padding: '2px 4px', border: '1px solid #d0dce8', textAlign: 'right' }}>
+                              <Form.Item name="yszj" style={{ marginBottom: 0 }}>
+                                <Input size="small" type="number" placeholder="自动计算" step="0.01" style={{ textAlign: 'right', fontWeight: 600 }} disabled />
+                              </Form.Item>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* 备注及附件 */}
+                    <div style={{ marginBottom: 8 }}>
+                      <Form.Item label="备注" name="beizhuYM" style={{ marginBottom: 4 }}>
+                        <Input.TextArea placeholder="备注" rows={3} />
+                      </Form.Item>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0 12px' }}>
+                      <Form.Item label="印机型号" name="beizhu8" style={{ marginBottom: 4 }}><Input placeholder="印机型号" /></Form.Item>
+                      <Form.Item label="发料日期" name="lldate" style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
+                      <Form.Item label="附件" name="upfile" style={{ marginBottom: 4 }}><Input placeholder="附件" /></Form.Item>
+                    </div>
                   </div>
                 ),
               },
               {
-                key: 'ZM',
+                                key: 'ZM',
                 label: '📦 纸盒(ZM)',
                 children: (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px' }}>
-                    <Form.Item label="订单编号" name="ddbh" style={{ marginBottom: 4 }}><Input disabled /></Form.Item>
-                    <Form.Item label="生产日期" name="prouddate" style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
-                    <Form.Item label="交货日期" name="overdate" style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
-                    <Form.Item label="业务员" name="ywy" style={{ marginBottom: 4 }}><Select allowClear>{users.map(u => <Option key={u.UserID || u.userId} value={u.UserID || u.userId}>{u.UserName || u.username}</Option>)}</Select></Form.Item>
-                    <Form.Item label={<LabelWithStar>花号</LabelWithStar>} name="huahao" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="花号" /></Form.Item>
-                    <Form.Item label={<LabelWithStar>产品编号</LabelWithStar>} name="proudnumber" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="产品编号" /></Form.Item>
-                    <Form.Item label="委印单位" name="company" style={{ marginBottom: 4 }}><Input placeholder="委印单位" /></Form.Item>
-                    <Form.Item label="发货单位" name="fahuodanwei" style={{ marginBottom: 4 }}><Input placeholder="发货单位" /></Form.Item>
-                    <Form.Item label="款号" name="kuanhao" style={{ marginBottom: 4 }}><Input placeholder="款号" /></Form.Item>
-                    <Form.Item label={<LabelWithStar>数量</LabelWithStar>} name="shuliang" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="数量" type="number" /></Form.Item>
-                    <Form.Item label="成品尺寸" name="cpgg" style={{ marginBottom: 4 }}><Input placeholder="成品尺寸" /></Form.Item>
-                    <Form.Item label="单价(元/张)" name="danjia" style={{ marginBottom: 4 }}><Input placeholder="单价" type="number" step="0.01" /></Form.Item>
-                    <Form.Item label="总金额" name="yszj" style={{ marginBottom: 4 }}><Input placeholder="总金额" type="number" step="0.01" /></Form.Item>
-                    <Form.Item label="工艺要求" name="gyyq" style={{ marginBottom: 4 }}><Input.TextArea placeholder="工艺要求" rows={1} /></Form.Item>
-                    <Form.Item label="备注" name="beizhu" style={{ marginBottom: 4 }}><Input.TextArea placeholder="备注" rows={1} /></Form.Item>
+                  <div>
+                    {/* 基本信息 */}
+                    <div style={{ marginBottom: 16 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: '#2b6cb0', marginBottom: 8 }}>| 基本信息</div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0 12px' }}>
+                        <Form.Item label="订单编号" name="ddbh" style={{ marginBottom: 4 }}><Input disabled /></Form.Item>
+                        <Form.Item label="生成日期" name="prouddate" style={{ marginBottom: 4 }}><DatePicker disabled style={{ width: '100%' }} /></Form.Item>
+                        <Form.Item label="交货日期" name="overdate" style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
+                        <Form.Item label="制单" name="zhidan" style={{ marginBottom: 4 }}><Input disabled /></Form.Item>
+                        <Form.Item label={<LabelWithStar required>花号</LabelWithStar>} name="huahao" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="花号" /></Form.Item>
+                        <Form.Item label="订货数量" name="shuliang" style={{ marginBottom: 4 }}><Input placeholder="数量" type="number" /></Form.Item>
+                        <Form.Item label="所需时间" name="sxdate" style={{ marginBottom: 4 }}><Input placeholder="所需时间" /></Form.Item>
+                        <Form.Item label="业务员" name="ywy" style={{ marginBottom: 4 }}>
+                          <Select placeholder="选择业务员" allowClear>
+                            {users.map(u => <Option key={u.UserID || u.userId} value={u.UserID || u.userId}>{u.UserName || u.username}</Option>)}
+                          </Select>
+                        </Form.Item>
+                        <Form.Item label="下单公司" name="company" style={{ marginBottom: 4 }}><Input placeholder="下单公司" /></Form.Item>
+                        <Form.Item label="发货单位" name="fahuodanwei" style={{ marginBottom: 4 }}><Input placeholder="发货单位" /></Form.Item>
+                        <Form.Item label="款号" name="kuanhao" style={{ marginBottom: 4 }}><Input placeholder="款号" /></Form.Item>
+                        <Form.Item label="磁钉号" name="cidiehao" style={{ marginBottom: 4 }}><Input placeholder="磁钉号" /></Form.Item>
+                      </div>
+                    </div>
+
+                    {/* 生产规格 */}
+                    <div style={{ marginBottom: 16 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: '#2b6cb0', marginBottom: 8 }}>| 生产规格</div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0 12px' }}>
+                        <Form.Item label="卷送生产班别" name="proudbanbie" style={{ marginBottom: 4 }}><Input placeholder="卷送生产班别" /></Form.Item>
+                        <Form.Item label="生产机型" name="dhdw" style={{ marginBottom: 4 }}><Input placeholder="生产机型" /></Form.Item>
+                        <Form.Item label="基价" name="jijia" style={{ marginBottom: 4 }}><Input placeholder="基价" type="number" step="0.01" /></Form.Item>
+                        <Form.Item label="总干纬" name="allcount" style={{ marginBottom: 4 }}><Input placeholder="总干纬" type="number" /></Form.Item>
+                        <Form.Item label="纬密" name="weidu" style={{ marginBottom: 4 }}><Input placeholder="纬密" /></Form.Item>
+                        <Form.Item label="宽度" name="kuandu" style={{ marginBottom: 4 }}><Input placeholder="宽度" /></Form.Item>
+                        <Form.Item label="开条数" name="kts" style={{ marginBottom: 4 }}><Input placeholder="开条数" type="number" /></Form.Item>
+                        <Form.Item label="总长" name="changdu" style={{ marginBottom: 4 }}><Input placeholder="总长" /></Form.Item>
+                        <Form.Item label="花长" name="huachang" style={{ marginBottom: 4 }}><Input placeholder="花长" /></Form.Item>
+                        <Form.Item label="成品尺寸" name="chenpingcc" style={{ marginBottom: 4 }}><Input placeholder="成品尺寸" /></Form.Item>
+                        <Form.Item label="加工费" name="jiagongfei" style={{ marginBottom: 4 }}><Input placeholder="加工费" type="number" step="0.01" /></Form.Item>
+                      </div>
+                    </div>
+
+                    {/* 色卡明细表 */}
+                    <div style={{ marginBottom: 16 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: '#2b6cb0', marginBottom: 8 }}>| 色卡明细表</div>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                        <thead>
+                          <tr style={{ background: '#f0f4f8' }}>
+                            <th style={{ padding: '6px 8px', textAlign: 'center', border: '1px solid #d0dce8', width: '10%' }}>#</th>
+                            <th style={{ padding: '6px 8px', textAlign: 'left', border: '1px solid #d0dce8', width: '30%' }}>千纬(QW)</th>
+                            <th style={{ padding: '6px 8px', textAlign: 'left', border: '1px solid #d0dce8', width: '30%' }}>色纱(SS)</th>
+                            <th style={{ padding: '6px 8px', textAlign: 'left', border: '1px solid #d0dce8', width: '30%' }}>备注(BZ)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {[1,2,3,4,5,6,7,8,9,10,11,12].map(function(n) {
+                            var qw = 'qw' + n;
+                            var ss = 'ss' + n;
+                            var bz = 'bz' + n;
+                            return React.createElement('tr', { key: n },
+                              React.createElement('td', { style: { padding: '2px 4px', border: '1px solid #d0dce8', textAlign: 'center', background: '#f0f4f8' } }, n),
+                              React.createElement('td', { style: { padding: '2px 4px', border: '1px solid #d0dce8' } },
+                                React.createElement(Form.Item, { name: qw, style: { marginBottom: 0 } },
+                                  React.createElement(Input, { size: 'small', placeholder: '-' })
+                                )
+                              ),
+                              React.createElement('td', { style: { padding: '2px 4px', border: '1px solid #d0dce8' } },
+                                React.createElement(Form.Item, { name: ss, style: { marginBottom: 0 } },
+                                  React.createElement(Input, { size: 'small', placeholder: '-' })
+                                )
+                              ),
+                              React.createElement('td', { style: { padding: '2px 4px', border: '1px solid #d0dce8' } },
+                                React.createElement(Form.Item, { name: bz, style: { marginBottom: 0 } },
+                                  React.createElement(Input, { size: 'small', placeholder: '-' })
+                                )
+                              )
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* 尺码明细表 */}
+                    <div style={{ marginBottom: 16 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: '#2b6cb0', marginBottom: 8 }}>| 尺码明细表</div>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                        <thead>
+                          <tr style={{ background: '#f0f4f8' }}>
+                            <th style={{ padding: '6px 4px', textAlign: 'center', border: '1px solid #d0dce8' }}>尺码号</th>
+                            {[1,2,3,4,5,6,7,8,9,10].map(function(n) {
+                              return React.createElement('th', { key: n, style: { padding: '6px 4px', textAlign: 'center', border: '1px solid #d0dce8', minWidth: 60 } }, n);
+                            })}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td style={{ padding: '2px 4px', border: '1px solid #d0dce8', background: '#f0f4f8', textAlign: 'center', fontSize: 11 }}>尺码</td>
+                            {[1,2,3,4,5,6,7,8,9,10].map(function(n) {
+                              return React.createElement('td', { key: n, style: { padding: '2px 2px', border: '1px solid #d0dce8' } },
+                                React.createElement(Form.Item, { name: 'cmh' + n, style: { marginBottom: 0 } },
+                                  React.createElement(Input, { size: 'small', placeholder: '-', style: { textAlign: 'center' } })
+                                )
+                              );
+                            })}
+                          </tr>
+                          <tr>
+                            <td style={{ padding: '2px 4px', border: '1px solid #d0dce8', background: '#f0f4f8', textAlign: 'center', fontSize: 11 }}>数量</td>
+                            {[1,2,3,4,5,6,7,8,9,10].map(function(n) {
+                              return React.createElement('td', { key: n, style: { padding: '2px 2px', border: '1px solid #d0dce8' } },
+                                React.createElement(Form.Item, { name: 'sl' + n, style: { marginBottom: 0 } },
+                                  React.createElement(Input, { size: 'small', placeholder: '-', type: 'number', style: { textAlign: 'center' } })
+                                )
+                              );
+                            })}
+                          </tr>
+                          <tr>
+                            <td style={{ padding: '2px 4px', border: '1px solid #d0dce8', background: '#f0f4f8', textAlign: 'center', fontSize: 11 }}>列数</td>
+                            {[1,2,3,4,5,6,7,8,9,10].map(function(n) {
+                              return React.createElement('td', { key: n, style: { padding: '2px 2px', border: '1px solid #d0dce8' } },
+                                React.createElement(Form.Item, { name: 'lieshu' + n, style: { marginBottom: 0 } },
+                                  React.createElement(Input, { size: 'small', placeholder: '-', type: 'number', style: { textAlign: 'center' } })
+                                )
+                              );
+                            })}
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* 整理工序 */}
+                    <div style={{ marginBottom: 16 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: '#2b6cb0', marginBottom: 8 }}>| 整理工序</div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+                        {[
+                          { label: '切折', value: 'hzl1' },
+                          { label: '三角折', value: 'hzl2' },
+                          { label: '对折', value: 'hzl3' },
+                          { label: '切割', value: 'hzl4' },
+                          { label: '超声波', value: 'hzl5' },
+                          { label: '热切粘衬', value: 'hzl6' },
+                          { label: '包边', value: 'hzl7' },
+                          { label: '卷装', value: 'hzl8' },
+                          { label: '留样', value: 'hzl9' },
+                          { label: '热切', value: 'hzl10' },
+                          { label: '划口', value: 'hzl11' },
+                          { label: '充棉', value: 'hzl12' },
+                          { label: '打汽眼', value: 'hzl13' },
+                          { label: '踩线', value: 'hzl14' },
+                          { label: '烫钻', value: 'hzl15' },
+                          { label: '盒装', value: 'hzl16' },
+                        ].map(function(opt) {
+                          return React.createElement(Form.Item, { key: opt.value, name: opt.value, valuePropName: 'checked', style: { marginBottom: 4 } },
+                            React.createElement(Checkbox, null, opt.label)
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* 工艺要求 */}
+                    <div style={{ marginBottom: 16 }}>
+                      <Form.Item label="工艺要求" name="gyyq" style={{ marginBottom: 4 }}>
+                        <Input.TextArea placeholder="工艺要求" rows={2} />
+                      </Form.Item>
+                    </div>
+
+                    {/* 质检 */}
+                    <div style={{ marginBottom: 16 }}>
+                      <Form.Item label="质检" name="zm_zhijian" style={{ marginBottom: 4 }}>
+                        <Input.TextArea placeholder="质检记录" rows={2} />
+                      </Form.Item>
+                    </div>
+
+                    {/* 送检记录 */}
+                    <div style={{ marginBottom: 16 }}>
+                      <Form.Item label="送检记录" name="soujianjl" style={{ marginBottom: 4 }}>
+                        <Input.TextArea placeholder="送检记录" rows={1} />
+                      </Form.Item>
+                    </div>
+
+                    {/* 备注 */}
+                    <div style={{ marginBottom: 8 }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0 12px' }}>
+                        <Form.Item label="发货单位" name="fhdw" style={{ marginBottom: 4 }}><Input placeholder="发货单位" /></Form.Item>
+                        <Form.Item label="发货日期" name="fhdate" style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
+                        <Form.Item label="发货人" name="fhr" style={{ marginBottom: 4 }}><Input placeholder="发货人" /></Form.Item>
+                      </div>
+                    </div>
                   </div>
                 ),
               },
               {
-                key: 'DS',
+                                key: 'DS',
                 label: '🃏 模切(DS)',
                 children: (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px' }}>
-                    <Form.Item label="订单编号" name="ddbh" style={{ marginBottom: 4 }}><Input disabled /></Form.Item>
-                    <Form.Item label="生产日期" name="prouddate" style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
-                    <Form.Item label="交货日期" name="overdate" style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
-                    <Form.Item label="业务员" name="ywy" style={{ marginBottom: 4 }}><Select allowClear>{users.map(u => <Option key={u.UserID || u.userId} value={u.UserID || u.userId}>{u.UserName || u.username}</Option>)}</Select></Form.Item>
-                    <Form.Item label="委印单位" name="company" style={{ marginBottom: 4 }}><Input placeholder="委印单位" /></Form.Item>
-                    <Form.Item label="发货单位" name="fhdw" style={{ marginBottom: 4 }}><Input placeholder="发货单位" /></Form.Item>
-                    <Form.Item label="发货人" name="fhr" style={{ marginBottom: 4 }}><Input placeholder="发货人" /></Form.Item>
-                    <Form.Item label="款号" name="kuanhao" style={{ marginBottom: 4 }}><Input placeholder="款号" /></Form.Item>
-                    <Form.Item label={<LabelWithStar>印件编号</LabelWithStar>} name="yjbhao" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="印件编号" /></Form.Item>
-                    <Form.Item label="外发" name="waifa" valuePropName="checked" style={{ marginBottom: 4 }}><Checkbox /></Form.Item>
-                    <Form.Item label={<LabelWithStar>数量</LabelWithStar>} name="shuliang" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="数量" type="number" /></Form.Item>
-                    <Form.Item label="成品尺寸" name="cpgg" style={{ marginBottom: 4 }}><Input placeholder="成品尺寸" /></Form.Item>
-                    <Form.Item label="单价" name="jiage" style={{ marginBottom: 4 }}><Input placeholder="单价" type="number" step="0.01" /></Form.Item>
-                    <Form.Item label="整烫" name="zhengli" style={{ marginBottom: 4 }}><Input placeholder="整烫" /></Form.Item>
-                    <Form.Item label="总金额" name="yszj" style={{ marginBottom: 4 }}><Input placeholder="总金额" type="number" step="0.01" /></Form.Item>
-                    <Form.Item label="备注" name="beizhu" style={{ marginBottom: 4 }}><Input.TextArea placeholder="备注" rows={1} /></Form.Item>
+                  <div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0 12px', marginBottom: 12 }}>
+                      <Form.Item label="订单编号" name="ddbh" style={{ marginBottom: 4 }}><Input disabled /></Form.Item>
+                      <Form.Item label={<LabelWithStar required>印件编号</LabelWithStar>} name="yjbhao" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="印件编号" /></Form.Item>
+                      <Form.Item label="交货日期" name="overdate" style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
+                      <Form.Item label="生产日期" name="prouddate" style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
+                      <Form.Item label={<LabelWithStar required>委印单位</LabelWithStar>} name="company" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="委印单位" /></Form.Item>
+                      <Form.Item label="款号" name="kuanhao" style={{ marginBottom: 4 }}><Input placeholder="款号" /></Form.Item>
+                      <Form.Item label="价格" name="jiage" style={{ marginBottom: 4 }}><Input placeholder="价格" type="number" step="0.01" /></Form.Item>
+                      <Form.Item label="发货" name="dhdw" style={{ marginBottom: 4 }}><Input placeholder="发货" /></Form.Item>
+                      <Form.Item label="品名" name="proudnumber" style={{ marginBottom: 4 }}><Input placeholder="品名" /></Form.Item>
+                    </div>
+
+                    <div style={{ marginBottom: 12, padding: '8px 12px', border: '1px solid #d0dce8', borderRadius: 4 }}>
+                      <div style={{ fontSize: 12, color: '#666', marginBottom: 6 }}>请选择整理环节</div>
+                      <div style={{ display: 'flex', gap: 24 }}>
+                        <Form.Item name="hzl1" valuePropName="checked" style={{ marginBottom: 0 }}>
+                          <Checkbox>制版</Checkbox>
+                        </Form.Item>
+                        <Form.Item name="hzl2" valuePropName="checked" style={{ marginBottom: 0 }}>
+                          <Checkbox>生产</Checkbox>
+                        </Form.Item>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0 12px', marginBottom: 12 }}>
+                      <Form.Item label="制单人" name="zhidan" style={{ marginBottom: 4 }}><Input disabled /></Form.Item>
+                      <Form.Item label="发货日期" name="fhdate" style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
+                      <Form.Item label={<LabelWithStar required>业务员</LabelWithStar>} name="ywy" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}>
+                        <Select placeholder="选择业务员" allowClear>
+                          {users.map(function(u) { return React.createElement(Option, { key: u.UserID || u.userId, value: u.UserID || u.userId }, u.UserName || u.username); })}
+                        </Select>
+                      </Form.Item>
+                      <Form.Item label="发货人" name="fhr" style={{ marginBottom: 4 }}><Input placeholder="发货人" /></Form.Item>
+                      <Form.Item label="发货单位" name="fahuodanwei" style={{ marginBottom: 4 }}><Input placeholder="发货单位" /></Form.Item>
+                      <Form.Item label="整烫" name="zhengli" style={{ marginBottom: 4 }}><Input placeholder="整烫" /></Form.Item>
+                      <Form.Item label="外发" name="waifa" valuePropName="checked" style={{ marginBottom: 4 }}><Checkbox /></Form.Item>
+                      <Form.Item label="加工费" name="jiagongfei" style={{ marginBottom: 4 }}><Input placeholder="加工费" type="number" step="0.01" /></Form.Item>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0 12px' }}>
+                      <Form.Item label="附件" name="upfile" style={{ marginBottom: 4 }}><Input placeholder="附件" /></Form.Item>
+                    </div>
                   </div>
                 ),
               },

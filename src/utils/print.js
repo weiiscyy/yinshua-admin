@@ -2,6 +2,8 @@
 import dayjs from 'dayjs';
 import QRCode from 'qrcode';
 
+const COMPANY_NAME = '兰花印刷包装有限公司';
+
 // ── 共享 CSS ────────────────────────────────────────────────────────────────
 const PRINT_CSS = `
 <style>
@@ -145,18 +147,31 @@ function jhkStepsHtml(steps, qrUrls) {
 function printFahuoHtml(data) {
   var r = data;
   var items = [];
-  for (var i = 1; i <= 9; i++) {
-    if (r['pingming' + i] || r['khao' + i] || r['shuliang' + i]) {
-      items.push({
-        pingming: r['pingming' + i] || '',
-        khao: r['khao' + i] || '',
-        dnbh: r['dnbh' + i] || '',
-        shuliang: r['shuliang' + i] || '',
-        beizhu: r['beizhu' + i] || '',
-      });
+  // 支持两种数据来源：orders数组（订单模式） 或 pingming1-9老字段（手工模式）
+  if (r.orders && r.orders.length > 0) {
+    items = r.orders.map(function(o) {
+      return {
+        pingming: o.proudnumber || '',
+        khao: o.kuanhao || '',
+        dnbh: o.ddbh || '',
+        shuliang: o.shuliang_sent || o.shuliang_total || '',
+        beizhu: o.beizhu || '',
+      };
+    });
+  } else {
+    for (var i = 1; i <= 9; i++) {
+      if (r['pingming' + i] || r['khao' + i] || r['shuliang' + i]) {
+        items.push({
+          pingming: r['pingming' + i] || '',
+          khao: r['khao' + i] || '',
+          dnbh: r['dnbh' + i] || '',
+          shuliang: r['shuliang' + i] || '',
+          beizhu: r['beizhu' + i] || '',
+        });
+      }
     }
   }
-  var printDate = r.RegTime ? fmtDate(r.RegTime) : '';
+  var printDate = r.regtime ? fmtDate(r.regtime) : '';
   var rowsHtml = items.map(function(item) {
     return '<tr><td>' + item.pingming + '</td><td>' + item.khao + '</td><td>' + item.dnbh + '</td><td>' + item.shuliang + '</td><td>' + item.beizhu + '</td></tr>';
   }).join('');
@@ -166,7 +181,7 @@ function printFahuoHtml(data) {
   }
   var now = new Date();
   var printTime = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0') + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
-  return '<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><title>发货单打印 - NO:' + r.ID + '</title>' + PRINT_CSS + '</head><body><div class="print-toolbar"><button onclick="window.print()">🖨️ 打印</button><button onclick="window.close()">关闭</button></div><div class="print-content"><div class="print-header"><div class="print-company">兰花印刷包装有限公司</div><div class="print-title">装 箱 发 货 单</div><div class="print-subtitle">NO: <span class="print-id">' + r.ID + '</span></div></div><div class="print-info"><div class="print-info-row"><span class="print-label">收货单位：</span><span class="print-field">' + (r.company || '') + '</span><span class="print-label">日  期：</span><span class="print-field" style="flex:0.8">' + printDate + '</span></div><div class="print-info-row"><span class="print-label">快递公司：</span><span class="print-field">' + (r.kdgs || '') + '</span><span class="print-label">快递单号：</span><span class="print-field">' + (r.kdhao || '') + '</span></div></div><table class="print-table"><thead><tr><th>品名</th><th>款号</th><th>订单编号</th><th>数量</th><th>备注</th></tr></thead><tbody>' + rowsHtml + emptyRows + '</tbody></table><div class="print-footer"><div class="print-footer-row"><span>发货人：<span class="print-field-sm">' + (r.fhr || '') + '</span></span></div></div></div><script>window.onload = function() { setTimeout(function() { window.print(); }, 400); };<\/script></body></html>';
+  return '<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><title>发货单打印 - NO:' + r.id + '</title>' + PRINT_CSS + '</head><body><div class="print-toolbar"><button onclick="window.print()">🖨️ 打印</button><button onclick="window.close()">关闭</button></div><div class="print-content"><div class="print-header"><div class="print-company">' + COMPANY_NAME + '</div><div class="print-title">装 箱 发 货 单</div><div class="print-subtitle">NO: <span class="print-id">' + r.id + '</span></div></div><div class="print-info"><div class="print-info-row"><span class="print-label">收货单位：</span><span class="print-field">' + (r.company || '') + '</span><span class="print-label">日  期：</span><span class="print-field" style="flex:0.8">' + printDate + '</span></div><div class="print-info-row"><span class="print-label">快递公司：</span><span class="print-field">' + (r.kdgs || '') + '</span><span class="print-label">快递单号：</span><span class="print-field">' + (r.kdhao || '') + '</span></div></div><table class="print-table"><thead><tr><th>品名</th><th>款号</th><th>订单编号</th><th>数量</th><th>备注</th></tr></thead><tbody>' + rowsHtml + emptyRows + '</tbody></table><div class="print-footer"><div class="print-footer-row"><span>发货人：<span class="print-field-sm">' + (r.fhr || '') + '</span></span></div></div></div><script>window.onload = function() { setTimeout(function() { window.print(); }, 400); };<\/script></body></html>';
 }
 
 // ── 生成订单打印 HTML（异步，含二维码）──────────────────────────────────────
@@ -197,7 +212,7 @@ async function buildPrintHtml(order, productType) {
   var baseInfoItems = [
     { label: '客户', value: o.company || '' },
     { label: '品名', value: o.pingshu || o.proudnumber || '' },
-    { label: '料号', value: o.yjbhao || o.huahao || '' },
+    { label: '料号/花号', value: o.yjbhao || o.huahao || '' },
     { label: '订单日期', value: fmtDate(o.prouddate) },
     { label: '交货日期', value: fmtDate(o.overdate) },
     { label: '数量', value: o.shuliang || '' },
@@ -205,10 +220,13 @@ async function buildPrintHtml(order, productType) {
     { label: '制单人', value: o.zhidan || '' },
   ];
   if (o.danjia) baseInfoItems.push({ label: '单价', value: o.danjia });
-  if (o.jiage) baseInfoItems.push({ label: '单价', value: o.jiage });
+  if (o.jiage) baseInfoItems.push({ label: '单价(DS)', value: o.jiage });
   if (o.jijia) baseInfoItems.push({ label: '基价', value: o.jijia });
   if (o.yszj) baseInfoItems.push({ label: '总价', value: o.yszj });
   if (o.jiagongfei) baseInfoItems.push({ label: '加工费', value: o.jiagongfei });
+  if (o.kuanhao) baseInfoItems.push({ label: '款号', value: o.kuanhao });
+  if (o.fahuodanwei) baseInfoItems.push({ label: '发货单位', value: o.fahuodanwei });
+  if (o.waifa) baseInfoItems.push({ label: '外发', value: '是' });
 
   var baseInfoGrid = '';
   for (var bi = 0; bi < baseInfoItems.length; bi++) {
@@ -220,11 +238,24 @@ async function buildPrintHtml(order, productType) {
   var specRows = [];
   if (o.cpgg) specRows.push('<div style="grid-column:span 2"><span class="label">产品规格：</span><span class="value">' + o.cpgg + '</span></div>');
   if (o.gyyq) specRows.push('<div style="grid-column:span 2"><span class="label">工艺要求：</span><span class="value">' + o.gyyq + '</span></div>');
+  if (o.gyyq_ym) specRows.push('<div style="grid-column:span 2"><span class="label">工艺要求(印面)：</span><span class="value">' + o.gyyq_ym + '</span></div>');
+  if (o.ylzd) specRows.push('<div style="grid-column:span 2"><span class="label">印刷内容：</span><span class="value">' + o.ylzd + '</span></div>');
+  if (o.klcc) specRows.push('<div style="grid-column:span 2"><span class="label">开料尺寸：</span><span class="value">' + o.klcc + '</span></div>');
+  if (o.kaishu) specRows.push('<div><span class="label">开数：</span><span class="value">' + o.kaishu + '</span></div>');
+  if (o.xukaisl) specRows.push('<div><span class="label">需开数量：</span><span class="value">' + o.xukaisl + '</span></div>');
+  if (o.bcsl) specRows.push('<div><span class="label">白参数量：</span><span class="value">' + o.bcsl + '</span></div>');
   if (o.klyaoqiu) specRows.push('<div style="grid-column:span 2"><span class="label">开料要求：</span><span class="value">' + o.klyaoqiu + '</span></div>');
   if (o.jyyaoqiu) specRows.push('<div style="grid-column:span 2"><span class="label">经验要求：</span><span class="value">' + o.jyyaoqiu + '</span></div>');
-  if (o.kuanhao) specRows.push('<div><span class="label">款号：</span><span class="value">' + o.kuanhao + '</span></div>');
-  if (o.huahao) specRows.push('<div><span class="label">花号：</span><span class="value">' + o.huahao + '</span></div>');
+  if (o.zhengli) specRows.push('<div><span class="label">整烫：</span><span class="value">' + o.zhengli + '</span></div>');
+  if (o.yssj) specRows.push('<div><span class="label">样色色价：</span><span class="value">' + o.yssj + '</span></div>');
   if (o.cidiehao) specRows.push('<div><span class="label">刺绣号：</span><span class="value">' + o.cidiehao + '</span></div>');
+  if (o.zm_zhijian) specRows.push('<div><span class="label">纸盒质检：</span><span class="value">' + o.zm_zhijian + '</span></div>');
+  if (o.allcount) specRows.push('<div><span class="label">总数量：</span><span class="value">' + o.allcount + '</span></div>');
+  if (o.weidu) specRows.push('<div><span class="label">纬度：</span><span class="value">' + o.weidu + '</span></div>');
+  if (o.kuandu) specRows.push('<div><span class="label">宽度：</span><span class="value">' + o.kuandu + '</span></div>');
+  if (o.changdu) specRows.push('<div><span class="label">长度：</span><span class="value">' + o.changdu + '</span></div>');
+  if (o.huachang) specRows.push('<div><span class="label">花长：</span><span class="value">' + o.huachang + '</span></div>');
+  if (o.chenpingcc) specRows.push('<div><span class="label">陈平尺寸：</span><span class="value">' + o.chenpingcc + '</span></div>');
   if (o.beizhu) specRows.push('<div style="grid-column:span 2"><span class="label">备注：</span><span class="value">' + o.beizhu + '</span></div>');
   if (o.beizhuYS) specRows.push('<div style="grid-column:span 2"><span class="label">印刷备注：</span><span class="value">' + o.beizhuYS + '</span></div>');
   if (o.beizhuZM) specRows.push('<div style="grid-column:span 2"><span class="label">纸盒备注：</span><span class="value">' + o.beizhuZM + '</span></div>');
@@ -260,7 +291,7 @@ async function buildPrintHtml(order, productType) {
   var now2 = new Date();
   var printTime = now2.getFullYear() + '-' + String(now2.getMonth() + 1).padStart(2, '0') + '-' + String(now2.getDate()).padStart(2, '0') + ' ' + String(now2.getHours()).padStart(2, '0') + ':' + String(now2.getMinutes()).padStart(2, '0');
 
-  return '<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><title>订单打印 - ' + (o.ddbh || '') + '</title>' + PRINT_CSS + '</head><body><div class="print-toolbar"><button onclick="window.print()">🖨️ 打印</button><button onclick="window.close()">关闭</button></div><div class="print-content"><div class="print-header"><div class="print-company">兰花印刷包装有限公司</div><div class="print-title">订 单 明 细 单</div><div class="print-subtitle"><span style="margin-right:20px">NO: <strong>' + (o.ddbh || '') + '</strong></span><span>产品线: ' + ptLabel + '</span></div></div><div class="print-section"><div class="print-section-title">📋 基本信息</div><div class="print-grid">' + baseInfoGrid + '</div></div>' + gongyiHtml + productSectionHtml + stepsHtml + '<div class="print-footer"><div class="print-footer-row" style="justify-content:flex-end"><span>打印时间：' + printTime + '</span></div></div></div><script>window.onload = function() { setTimeout(function() { window.print(); }, 600); };<\/script></body></html>';
+  return '<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><title>订单打印 - ' + (o.ddbh || '') + '</title>' + PRINT_CSS + '</head><body><div class="print-toolbar"><button onclick="window.print()">🖨️ 打印</button><button onclick="window.close()">关闭</button></div><div class="print-content"><div class="print-header"><div class="print-company">' + COMPANY_NAME + '</div><div class="print-title">订 单 明 细 单</div><div class="print-subtitle"><span style="margin-right:20px">NO: <strong>' + (o.ddbh || '') + '</strong></span><span>产品线: ' + ptLabel + '</span></div></div><div class="print-section"><div class="print-section-title">📋 基本信息</div><div class="print-grid">' + baseInfoGrid + '</div></div>' + gongyiHtml + productSectionHtml + stepsHtml + '<div class="print-footer"><div class="print-footer-row" style="justify-content:flex-end"><span>打印时间：' + printTime + '</span></div></div></div><script>window.onload = function() { setTimeout(function() { window.print(); }, 600); };<\/script></body></html>';
 }
 
 // ── 打开发货单打印窗口 ───────────────────────────────────────────────────────

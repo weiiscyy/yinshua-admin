@@ -163,7 +163,7 @@ export default function OrderDetailPage() {
               {/* 共同字段 */}
               <InfoRow label="加工费" value={order.jiagongfei || '-'} />
               <InfoRow label="外发" value={order.waifa ? '是' : '否'} />
-              <InfoRow label="备注" value={order.beizhu || '-'} style={{ gridColumn: '1 / -1' }} />
+              <InfoRow label="备注" value={order.beizhuYS || order.beizhu || '-'} style={{ gridColumn: '1 / -1' }} />
             </div>
           </Card>
 

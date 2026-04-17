@@ -78,6 +78,8 @@ export const fahuoGet = (id) => api.get(`/api/fahuo/${id}`);
 export const fahuoCreate = (data) => api.post('/api/fahuo', data);
 export const fahuoUpdate = (id, data) => api.put(`/api/fahuo/${id}`, data);
 export const fahuoDelete = (id) => api.delete(`/api/fahuo/${id}`);
+export const fahuoGetPending = (params) => api.get('/api/fahuo/orders/pending', { params });
+export const fahuoCancelOrder = (fhId, ddId) => api.delete(`/api/fahuo/${fhId}/orders/${ddId}`);
 
 // 综合查询
 export const queryOrders = (params) =>

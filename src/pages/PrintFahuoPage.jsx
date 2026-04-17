@@ -5,6 +5,8 @@ import { fahuoGet } from '../api';
 import dayjs from 'dayjs';
 import './PrintPage.css';
 
+const COMPANY_NAME = '兰花印刷包装有限公司';
+
 export default function PrintFahuoPage({ fahuoId }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -32,16 +34,32 @@ export default function PrintFahuoPage({ fahuoId }) {
   if (!data) return null;
 
   const r = data;
-  const items = [];
-  for (let i = 1; i <= 9; i++) {
-    if (r['pingming' + i] || r['khao' + i] || r['shuliang' + i]) {
-      items.push({
-        pingming: r['pingming' + i] || '',
-        khao: r['khao' + i] || '',
-        dnbh: r['dnbh' + i] || '',
-        shuliang: r['shuliang' + i] || '',
-        beizhu: r['beizhu' + i] || '',
-      });
+
+  // 优先使用 orders 数组（新的），其次用老字段 pingming1-9（兼容）
+  let items = [];
+  if (r.orders && r.orders.length > 0) {
+    // 新订单模式：从 FahuoOrder 表取数据
+    items = r.orders.map(function(o) {
+      return {
+        pingming: o.proudnumber || '',
+        khao: o.kuanhao || '',
+        dnbh: o.ddbh || '',
+        shuliang: o.shuliang_sent !== undefined ? o.shuliang_sent : (o.shuliang_total || ''),
+        beizhu: o.beizhu || '',
+      };
+    });
+  } else {
+    // 老手工模式：直接从 FaHuoDan 的 pingming1-9 取
+    for (let i = 1; i <= 9; i++) {
+      if (r['pingming' + i] || r['khao' + i] || r['shuliang' + i]) {
+        items.push({
+          pingming: r['pingming' + i] || '',
+          khao: r['khao' + i] || '',
+          dnbh: r['dnbh' + i] || '',
+          shuliang: r['shuliang' + i] || '',
+          beizhu: r['beizhu' + i] || '',
+        });
+      }
     }
   }
 
@@ -57,9 +75,9 @@ export default function PrintFahuoPage({ fahuoId }) {
       <div className="print-content">
         {/* 标题 */}
         <div className="print-header">
-          <div className="print-company">兰花印刷包装有限公司</div>
+          <div className="print-company">{COMPANY_NAME}</div>
           <div className="print-title">装 箱 发 货 单</div>
-          <div className="print-subtitle">NO: <span className="print-id">{r.ID}</span></div>
+          <div className="print-subtitle">NO: <span className="print-id">{r.id}</span></div>
         </div>
 
         {/* 基本信息 */}
