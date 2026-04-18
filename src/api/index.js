@@ -71,6 +71,17 @@ export const adminListUsers = () =>
 export const salespersonsList = () =>
   api.get('/api/base-data/salespersons');
 
+// 用户管理
+export const getUsers = (params) => api.get('/api/users', { params });
+export const getUser = (id) => api.get(`/api/users/${id}`);
+export const createUser = (data) => api.post('/api/users', data);
+export const updateUser = (id, data) => api.put(`/api/users/${id}`, data);
+export const deleteUser = (id) => api.delete(`/api/users/${id}`);
+export const resetUserPassword = (id) => api.post(`/api/users/${id}/reset-password`);
+export const changePassword = (data) => api.post('/api/users/change-password', data);
+export const getDeptOptions = () => api.get('/api/users/options/departments');
+export const getCjOptions = () => api.get('/api/users/options/cj');
+
 // 发货单
 const fh = (method, url, data) => api[method](`/api/fahuo${url}`, data);
 export const fahuoList = (params) => api.get('/api/fahuo/list', { params });
