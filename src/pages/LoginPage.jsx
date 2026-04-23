@@ -11,8 +11,9 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 扫码枪登录后返回目标页面
-  const redirectTo = new URLSearchParams(location.search).get('redirect') || '/';
+  // 扫码枪登录后返回目标页面（白名单校验防止钓鱼）
+  const rawRedirect = new URLSearchParams(location.search).get('redirect') || '/';
+  const redirectTo = rawRedirect.startsWith('/') ? rawRedirect : '/';
 
   const onFinish = async (values) => {
     setLoading(true);
