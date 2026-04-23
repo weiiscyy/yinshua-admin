@@ -4,7 +4,7 @@ import { Form, Input, Select, DatePicker, Button, Card, Tabs, Checkbox, message 
 import { Plus } from 'lucide-react';
 import dayjs from 'dayjs';
 import AppLayout from '../components/AppLayout';
-import { adminListUsers } from '../api';
+import { adminCreateOrder } from '../api';
 
 const { Option } = Select;
 
@@ -79,18 +79,21 @@ export default function OrderEntryPage() {
 
   const [ysSteps, setYsSteps] = useState({});
 
-  // Decode JWT to get current user for zhidan field
+  // Decode JWT to get current user for zhidan field (使用 base64url 解码，兼容 JWT)
   useEffect(function() {
     try {
       var token = localStorage.getItem('token');
       if (!token) return;
       var parts = token.split('.');
       if (parts.length !== 3) return;
-      var payload = JSON.parse(atob(parts[1]));
+      // 标准 base64url 解码（JWT 使用 URL-safe base64）
+      var payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
       setCurrentUser(payload);
       form.setFieldValue('zhidan', payload.username || payload.UserName || '');
       form.setFieldValue('prouddate', payload.prouddate || null);
-    } catch (e) {}
+    } catch (e) {
+      console.error('[OrderEntry] JWT decode failed:', e);
+    }
   }, []);
 
   // Auto-set prouddate to today
@@ -138,7 +141,7 @@ export default function OrderEntryPage() {
     else if (activeProduct === 'YM') setStepsMap(ymSteps);
     else if (activeProduct === 'ZM') setStepsMap(zmSteps);
     else if (activeProduct === 'DS') setStepsMap(dsSteps);
-  }, [activeProduct, ymSteps, zmSteps, dsSteps]);
+  }, [activeProduct, ysSteps, ymSteps, zmSteps, dsSteps]);
 
   function handleCreate() {
     var requiredFields = ['ddbh', 'prouddate'];

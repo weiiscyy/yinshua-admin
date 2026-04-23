@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import * as XLSX from 'xlsx';
 import { queryOrders, exportOrders } from '../api';
 import AppLayout from '../components/AppLayout';
-import { PRODUCT_COLORS_CSS } from '../utils/productColors';
+import { PRODUCT_COLORS_CSS, PRODUCT_COLORS_ANTD } from '../utils/productColors';
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
@@ -20,8 +20,6 @@ const PRODUCT_OPTIONS = [
 const WAIFA_OPTIONS = [
   { label: '外发', value: '1' },
 ];
-
-const PRODUCT_COLORS = { YS: 'blue', YM: 'cyan', ZM: 'green', DS: 'orange' };
 
 export default function QueryPage() {
   const [form, setForm] = useState({
@@ -128,7 +126,7 @@ export default function QueryPage() {
       width: 60,
       fixed: 'left',
       render: (v) => (
-        <Tag color={PRODUCT_COLORS[v]}>{v}</Tag>
+        <Tag color={PRODUCT_COLORS_ANTD[v]}>{v}</Tag>
       ),
     },
     {

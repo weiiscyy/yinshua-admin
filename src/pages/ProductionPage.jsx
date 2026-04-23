@@ -5,12 +5,10 @@ import dayjs from 'dayjs';
 import { ScanOutlined, HistoryOutlined, BarChartOutlined, CheckCircleFilled, ClockCircleOutlined, ExclamationCircleFilled, SendOutlined, ArrowLeftOutlined, MinusCircleFilled } from '@ant-design/icons';
 import AppLayout from '../components/AppLayout';
 import { getProductionOrders, getProductionOrder, submitReport, getMyReports, getProductionStatsDaily } from '../api';
+import { PRODUCT_MAP, PRODUCT_COLORS } from '../utils/productColors';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
-
-const PRODUCT_MAP = { YS: '印刷', YM: '印刷面', ZM: '纸盒', DS: '模切' };
-const PRODUCT_COLORS = { YS: '#2563eb', YM: '#0891b2', ZM: '#059669', DS: '#d97706' };
 
 // 工序步骤（与后端STEPS一致）
 const STEPS_DEF = [

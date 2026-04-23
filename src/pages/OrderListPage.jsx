@@ -4,12 +4,8 @@ import { SearchOutlined, PlusOutlined, FilterOutlined, ArrowRightOutlined } from
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
 import { adminListOrders, adminListUsers } from '../api';
+import { PRODUCT_MAP, PRODUCT_COLORS, PRODUCT_BORDER } from '../utils/productColors';
 import dayjs from 'dayjs';
-
-const PRODUCT_MAP = { YS: '印刷', YM: '印刷面', ZM: '纸盒', DS: '模切' };
-const PRODUCT_COLORS = { YS: '#2563eb', YM: '#0891b2', ZM: '#059669', DS: '#d97706' };
-const PRODUCT_BG = { YS: '#eff6ff', YM: '#ecfeff', ZM: '#ecfdf5', DS: '#fffbeb' };
-const PRODUCT_BORDER = { YS: '#bfdbfe', YM: '#a5f3fc', ZM: '#a7f3d0', DS: '#fde68a' };
 
 const PRODUCT_TABS = [
   { key: '', label: '全部', color: '#64748b' },

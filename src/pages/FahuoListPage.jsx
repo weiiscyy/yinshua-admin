@@ -456,11 +456,11 @@ export default function FahuoListPage() {
     const existing = (form.selectedOrders || []).find(o => o.dd_id === order.dd_id && o.product_type === order.product_type);
     if (existing) {
       // Remove it
-      const key = keyForOrder(order);
+      const key = keyFor(order);
       const next = (form.selectedOrders || []).filter(o => !(o.dd_id === order.dd_id && o.product_type === order.product_type));
       selectedOrdersRef.current = next;
       setForm({ ...form, selectedOrders: next });
-      setSelectedKeys(selectedKeys.filter(k => k !== key));
+      setSelectedKeys(prev => prev.filter(k => k !== key));
     } else {
       // Add it
       const next = [...(form.selectedOrders || []), {
@@ -470,7 +470,7 @@ export default function FahuoListPage() {
       }];
       selectedOrdersRef.current = next;
       setForm({ ...form, selectedOrders: next });
-      setSelectedKeys([...selectedKeys, keyForOrder(order)]);
+      setSelectedKeys(prev => [...prev, keyFor(order)]);
     }
   };
 

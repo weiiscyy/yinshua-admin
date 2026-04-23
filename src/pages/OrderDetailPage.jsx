@@ -5,10 +5,9 @@ import { openOrderPrint } from '../utils/print';
 import { useNavigate, useParams } from 'react-router-dom';
 import { adminGetOrder, adminUpdateStep } from '../api';
 import AppLayout from '../components/AppLayout';
+import { PRODUCT_MAP, PRODUCT_COLORS } from '../utils/productColors';
 
 const { Text } = Typography;
-const PRODUCT_MAP = { YS: '印刷', YM: '印刷面', ZM: '纸盒', DS: '模切' };
-const PRODUCT_COLORS = { YS: '#2563eb', YM: '#06b6d4', ZM: '#10b981', DS: '#f59e0b' };
 
 // ============== 辅助函数 ==============
 function fmtDate(v) {
