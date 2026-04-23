@@ -5,7 +5,7 @@ import { fahuoGet } from '../api';
 import dayjs from 'dayjs';
 import './PrintPage.css';
 
-const COMPANY_NAME = '兰花印刷包装有限公司';
+const COMPANY_NAME = '嘉兴亚欣商标印务有限公司';
 
 export default function PrintFahuoPage({ fahuoId }) {
   const [data, setData] = useState(null);

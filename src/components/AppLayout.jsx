@@ -59,7 +59,7 @@ export default function AppLayout({ children, title, extra }) {
       <aside className="sidebar">
         <div className="sidebar-logo">
           <div className="sidebar-logo-title">📋 印刷订单管理系统</div>
-          <div className="sidebar-logo-sub">兰花印刷包装有限公司</div>
+          <div className="sidebar-logo-sub">嘉兴亚欣商标印务有限公司</div>
         </div>
 
         <nav className="sidebar-nav">

@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 import './PrintPage.css';
 
 const PRODUCT_LABELS = { YS: '印刷', YM: '印刷面', ZM: '纸盒', DS: '模切' };
-const COMPANY_NAME = '兰花印刷包装有限公司';
+const COMPANY_NAME = '嘉兴亚欣商标印务有限公司';
 
 export default function PrintOrderPage({ productType, ddId }) {
   const [order, setOrder] = useState(null);

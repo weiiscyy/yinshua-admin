@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { message } from 'antd';
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://10.147.19.81:8000';
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 
 const api = axios.create({
   baseURL: API_BASE,

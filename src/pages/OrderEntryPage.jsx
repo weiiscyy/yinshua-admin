@@ -601,7 +601,7 @@ export default function OrderEntryPage() {
                         <Form.Item label="总长" name="changdu" style={{ marginBottom: 4 }}><Input placeholder="总长" /></Form.Item>
                         <Form.Item label="花长" name="huachang" style={{ marginBottom: 4 }}><Input placeholder="花长" /></Form.Item>
                         <Form.Item label="成品尺寸" name="chenpingcc" style={{ marginBottom: 4 }}><Input placeholder="成品尺寸" /></Form.Item>
-                        <Form.Item label="加工费" name="jiagongfei" style={{ marginBottom: 4 }}><Input placeholder="加工费" type="number" step="0.01" /></Form.Item>
+                        <Form.Item label="加工费" name="jiagongfei" style={{ marginBottom: 4 }}><Input placeholder="加工费" type="number" step="0.0001" /></Form.Item>
                       </div>
                     </div>
 
@@ -794,7 +794,7 @@ export default function OrderEntryPage() {
                       <Form.Item label="发货单位" name="fahuodanwei" style={{ marginBottom: 4 }}><Input placeholder="发货单位" /></Form.Item>
                       <Form.Item label="整烫" name="zhengli" style={{ marginBottom: 4 }}><Input placeholder="整烫" /></Form.Item>
                       <Form.Item label="外发" name="waifa" valuePropName="checked" style={{ marginBottom: 4 }}><Checkbox /></Form.Item>
-                      <Form.Item label="加工费" name="jiagongfei" style={{ marginBottom: 4 }}><Input placeholder="加工费" type="number" step="0.01" /></Form.Item>
+                      <Form.Item label="加工费" name="jiagongfei" style={{ marginBottom: 4 }}><Input placeholder="加工费" type="number" step="0.0001" /></Form.Item>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0 12px' }}>
