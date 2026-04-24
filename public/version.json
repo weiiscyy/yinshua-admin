@@ -1,6 +1,6 @@
 {
-  "version": "26042420-faac320",
-  "hash": "faac320",
-  "msg": "fix: 修复FahuoListPage selectedKeys bug、useEffect依赖、JWT解码、产品线常量重复定义",
-  "time": "2026-04-24T12:10:35.674Z"
+  "version": "26042422-f5665d8",
+  "hash": "f5665d8",
+  "msg": "feat: YS订单总计元/只计算公式 + 4产品线交货日期不能早于生成日期校验",
+  "time": "2026-04-24T14:53:59.526Z"
 }

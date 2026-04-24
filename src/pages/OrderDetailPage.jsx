@@ -194,6 +194,10 @@ function YSOrderDetail({ order, productColor }) {
                   <td style={{ padding: '3px 6px', border: '1px solid #e8e8e8', textAlign: 'right', fontSize: 12 }}>{fmtNum(order[r.je], 2) ?? '-'}</td>
                 </tr>
               ))}
+              <tr style={{ background: '#e8f4fd', fontWeight: 600 }}>
+                <td style={{ padding: '4px 6px', border: '1px solid #d0dce8' }}>总价 元/只</td>
+                <td colSpan="2" style={{ padding: '4px 6px', border: '1px solid #d0dce8', textAlign: 'right', fontSize: 13 }}>{fmtNum(order.yszj, 3) ?? '-'}</td>
+              </tr>
             </tbody>
           </table>
         </>
@@ -230,6 +234,7 @@ const YM_ANALYSIS = [
 
 function ymAnalysisRowHasValue(order, item) {
   const v1 = order[item.sl]; const v2 = order[item.je];
+  if (item.yl) { const v3 = order[item.yl]; return v3 != null && v3 !== ''; }
   return (v1 != null && v1 !== '') || (v2 != null && v2 !== '');
 }
 
@@ -308,6 +313,10 @@ function YMOrderDetail({ order, productColor }) {
                   <td style={{ padding: '3px 6px', border: '1px solid #e8e8e8', textAlign: 'right', fontSize: 12 }}>{fmtNum(order[r.je], 2) ?? '-'}</td>
                 </tr>
               ))}
+              <tr style={{ background: '#e8f4fd', fontWeight: 600 }}>
+                <td style={{ padding: '4px 6px', border: '1px solid #d0dce8' }}>总价 元/只</td>
+                <td colSpan="3" style={{ padding: '4px 6px', border: '1px solid #d0dce8', textAlign: 'right', fontSize: 13 }}>{fmtNum(order.yszj, 3) ?? '-'}</td>
+              </tr>
             </tbody>
           </table>
         </>
