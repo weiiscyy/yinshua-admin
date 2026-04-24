@@ -26,7 +26,7 @@ function hasValue(order, fields) {
 
 // ============== 通用组件 ==============
 function FieldRow({ label, value }) {
-  if (value == null || value === '' || value === 0) return null;
+  if (value == null || value === '' || value === 0) value = '-';
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8, padding: '3px 0', borderBottom: '1px solid #f0f0f0' }}>
       <Text style={{ fontSize: 12, color: '#666', flexShrink: 0 }}>{label}</Text>
@@ -49,7 +49,7 @@ function FieldGrid({ children }) {
   );
 }
 function FieldRow2({ label, value }) {
-  if (!value) return null;
+  if (!value) value = '-';
   return (
     <div style={{ padding: '3px 0', borderBottom: '1px solid #f0f0f0' }}>
       <Text style={{ fontSize: 12, color: '#666' }}>{label}：</Text>

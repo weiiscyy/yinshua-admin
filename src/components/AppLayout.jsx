@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   DashboardOutlined, UnorderedListOutlined, PlusSquareOutlined,
@@ -34,7 +34,15 @@ const BOTTOM_TABS = [
 export default function AppLayout({ children, title, extra }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const [appVersion, setAppVersion] = useState('');
   const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+  useEffect(() => {
+    fetch('/version.json?t=' + Date.now())
+      .then(r => r.json())
+      .then(d => setAppVersion(d.version || ''))
+      .catch(() => {});
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -85,6 +93,11 @@ export default function AppLayout({ children, title, extra }) {
         </nav>
 
         <div className="sidebar-footer">
+          {appVersion && (
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', padding: '4px 12px', textAlign: 'center' }}>
+              v{appVersion}
+            </div>
+          )}
           <div className="sidebar-user">
             <div className="sidebar-user-avatar">
               {user.UserName ? user.UserName.slice(0, 1).toUpperCase() : 'U'}

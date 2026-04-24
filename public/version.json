@@ -1,0 +1,6 @@
+{
+  "version": "26042420-faac320",
+  "hash": "faac320",
+  "msg": "fix: 修复FahuoListPage selectedKeys bug、useEffect依赖、JWT解码、产品线常量重复定义",
+  "time": "2026-04-24T12:10:35.674Z"
+}

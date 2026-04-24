@@ -4,7 +4,7 @@ import { Form, Input, Select, DatePicker, Button, Card, Tabs, Checkbox, message 
 import { Plus } from 'lucide-react';
 import dayjs from 'dayjs';
 import AppLayout from '../components/AppLayout';
-import { adminCreateOrder } from '../api';
+import { adminCreateOrder, adminListUsers } from '../api';
 
 const { Option } = Select;
 
@@ -58,7 +58,7 @@ const STEPS_MAP_YMGX = {
   hzl6: '贴膜', hzl7: '打包',
 };
 
-const YM_PROCESS_LIST = ['晒版', '显影', '烘版', '拼版', '擦版', '贴膜', '打包'];
+const YM_PROCESS_LIST = ['烘色牢度', '切割', '超声波切割', '三角折', '手工切折', '手工对折', '其它'];
 
 const ZM_PROCESS_LIST = ['开料', '印刷', '裱纸', '模切', '冲孔', '钉粘', '打包'];
 const ZM_PROCESS_FIELDS = ['hzl1','hzl2','hzl3','hzl4','hzl5','hzl6','hzl7'];
@@ -137,11 +137,23 @@ export default function OrderEntryPage() {
   }, []);
 
   useEffect(() => {
-    if (activeProduct === 'YS') setStepsMap(ysSteps);
+    if (activeProduct === 'YS') { setStepsMap(ysSteps); calcYsTotal(form, 'YS'); }
     else if (activeProduct === 'YM') setStepsMap(ymSteps);
     else if (activeProduct === 'ZM') setStepsMap(zmSteps);
     else if (activeProduct === 'DS') setStepsMap(dsSteps);
   }, [activeProduct, ysSteps, ymSteps, zmSteps, dsSteps]);
+
+  // 计算 YS 总计 元/只 = (软片+印工+PS版+铜锌版+电化铝+钢刀+轧钢刀+单价) / 印刷数量 + 贴塑 + UV + 切折
+  function calcYsTotal(f, product) {
+    if (product !== 'YS') return;
+    var v = f.getFieldsValue();
+    var n = function(x){ return Number(x)||0; };
+    var shuliang = n(v.shuliang);
+    var part1 = n(v.jine1) + n(v.jine2) + n(v.jine3) + n(v.jine4) + n(v.jine5) + n(v.jine6) + n(v.jine7) + n(v.danjia);
+    var part2 = n(v.jine8) + n(v.jine10) + n(v.jine9);
+    var total = shuliang ? part1 / shuliang + part2 : 0;
+    if (!isNaN(total) && isFinite(total)) f.setFieldsValue({ yszj: Math.round(total * 1000) / 1000 });
+  }
 
   function handleCreate() {
     var requiredFields = ['ddbh', 'prouddate'];
@@ -245,7 +257,7 @@ export default function OrderEntryPage() {
           <Button type="primary" icon={<Plus size={15} />} onClick={handleCreate} style={{ display: 'flex', alignItems: 'center', borderRadius: 6 }}>提交订单</Button>
         </div>
 
-        <Form form={form} layout="vertical" labelAlign="right">
+        <Form form={form} layout="vertical" labelAlign="right" onValuesChange={function() { calcYsTotal(form, activeProduct); }}>
           <Tabs
             activeKey={activeProduct}
             onChange={setActiveProduct}
@@ -261,7 +273,16 @@ export default function OrderEntryPage() {
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0 12px' }}>
                         <Form.Item label="订单编号" name="ddbh" style={{ marginBottom: 4 }}><Input disabled /></Form.Item>
                         <Form.Item label="生成日期" name="prouddate" style={{ marginBottom: 4 }}><DatePicker disabled style={{ width: '100%' }} /></Form.Item>
-                        <Form.Item label="交货日期" name="overdate" style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
+                        <Form.Item label="交货日期" name="overdate" rules={[{ validator: function(_, value) {
+                          if (!value) return Promise.resolve();
+                          var pd = form.getFieldValue('prouddate');
+                          if (pd && value && value.isBefore) {
+                            if (value.isBefore(pd, 'day') || value.isSame(pd, 'day')) {
+                              return Promise.reject('交货日期不能早于生成日期');
+                            }
+                          }
+                          return Promise.resolve();
+                        } }]} style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
                         <Form.Item label="制单" name="zhidan" style={{ marginBottom: 4 }}><Input disabled /></Form.Item>
                         <Form.Item label={<LabelWithStar required>委印单位</LabelWithStar>} name="company" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="客户公司名称" /></Form.Item>
                         <Form.Item label="发货单位" name="fahuodanwei" style={{ marginBottom: 4 }}><Input placeholder="发货单位" /></Form.Item>
@@ -398,7 +419,7 @@ export default function OrderEntryPage() {
                             <td style={{ padding: '6px 8px', border: '1px solid #d0dce8' }}>总计 元/只</td>
                             <td colSpan="2" style={{ padding: '2px 4px', border: '1px solid #d0dce8', textAlign: 'right' }}>
                               <Form.Item name="yszj" style={{ marginBottom: 0 }}>
-                                <Input size="small" type="number" placeholder="自动计算" step="0.01" style={{ textAlign: 'right', fontWeight: 600 }} disabled />
+                                <Input size="small" type="number" placeholder="自动计算" step="0.001" style={{ textAlign: 'right', fontWeight: 600 }} disabled />
                               </Form.Item>
                             </td>
                           </tr>
@@ -425,7 +446,16 @@ export default function OrderEntryPage() {
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0 12px' }}>
                         <Form.Item label="订单编号" name="ddbh" style={{ marginBottom: 4 }}><Input disabled /></Form.Item>
                         <Form.Item label="生成日期" name="prouddate" style={{ marginBottom: 4 }}><DatePicker disabled style={{ width: '100%' }} /></Form.Item>
-                        <Form.Item label="交货日期" name="overdate" style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
+                        <Form.Item label="交货日期" name="overdate" rules={[{ validator: function(_, value) {
+                          if (!value) return Promise.resolve();
+                          var pd = form.getFieldValue('prouddate');
+                          if (pd && value && value.isBefore) {
+                            if (value.isBefore(pd, 'day') || value.isSame(pd, 'day')) {
+                              return Promise.reject('交货日期不能早于生成日期');
+                            }
+                          }
+                          return Promise.resolve();
+                        } }]} style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
                         <Form.Item label="制单" name="zhidan" style={{ marginBottom: 4 }}><Input disabled /></Form.Item>
                         <Form.Item label={<LabelWithStar required>委印单位</LabelWithStar>} name="company" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="客户公司名称" /></Form.Item>
                         <Form.Item label="发货单位" name="fahuodanwei" style={{ marginBottom: 4 }}><Input placeholder="发货单位" /></Form.Item>
@@ -447,6 +477,7 @@ export default function OrderEntryPage() {
                           </Select>
                         </Form.Item>
                         <Form.Item label="款号" name="kuanhao" style={{ marginBottom: 4 }}><Input placeholder="款号" /></Form.Item>
+                        <Form.Item label="加工费" name="jiagongfei" style={{ marginBottom: 4 }}><Input placeholder="加工费" type="number" step="0.01" /></Form.Item>
                         <Form.Item label="品名" name="proudnumber" style={{ marginBottom: 4 }}><Input placeholder="品名" /></Form.Item>
                         <Form.Item label="外发" name="waifa" valuePropName="checked" style={{ marginBottom: 4 }}><Checkbox /></Form.Item>
                       </div>
@@ -540,7 +571,7 @@ export default function OrderEntryPage() {
                             <td style={{ padding: '6px 8px', border: '1px solid #d0dce8' }}>总计 元/只</td>
                             <td colSpan="4" style={{ padding: '2px 4px', border: '1px solid #d0dce8', textAlign: 'right' }}>
                               <Form.Item name="yszj" style={{ marginBottom: 0 }}>
-                                <Input size="small" type="number" placeholder="自动计算" step="0.01" style={{ textAlign: 'right', fontWeight: 600 }} disabled />
+                                <Input size="small" type="number" placeholder="自动计算" step="0.001" style={{ textAlign: 'right', fontWeight: 600 }} disabled />
                               </Form.Item>
                             </td>
                           </tr>
@@ -573,7 +604,16 @@ export default function OrderEntryPage() {
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0 12px' }}>
                         <Form.Item label="订单编号" name="ddbh" style={{ marginBottom: 4 }}><Input disabled /></Form.Item>
                         <Form.Item label="生成日期" name="prouddate" style={{ marginBottom: 4 }}><DatePicker disabled style={{ width: '100%' }} /></Form.Item>
-                        <Form.Item label="交货日期" name="overdate" style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
+                        <Form.Item label="交货日期" name="overdate" rules={[{ validator: function(_, value) {
+                          if (!value) return Promise.resolve();
+                          var pd = form.getFieldValue('prouddate');
+                          if (pd && value && value.isBefore) {
+                            if (value.isBefore(pd, 'day') || value.isSame(pd, 'day')) {
+                              return Promise.reject('交货日期不能早于生成日期');
+                            }
+                          }
+                          return Promise.resolve();
+                        } }]} style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
                         <Form.Item label="制单" name="zhidan" style={{ marginBottom: 4 }}><Input disabled /></Form.Item>
                         <Form.Item label={<LabelWithStar required>花号</LabelWithStar>} name="huahao" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="花号" /></Form.Item>
                         <Form.Item label="订货数量" name="shuliang" style={{ marginBottom: 4 }}><Input placeholder="数量" type="number" /></Form.Item>
@@ -764,7 +804,16 @@ export default function OrderEntryPage() {
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0 12px', marginBottom: 12 }}>
                       <Form.Item label="订单编号" name="ddbh" style={{ marginBottom: 4 }}><Input disabled /></Form.Item>
                       <Form.Item label={<LabelWithStar required>印件编号</LabelWithStar>} name="yjbhao" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="印件编号" /></Form.Item>
-                      <Form.Item label="交货日期" name="overdate" style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
+                      <Form.Item label="交货日期" name="overdate" rules={[{ validator: function(_, value) {
+                          if (!value) return Promise.resolve();
+                          var pd = form.getFieldValue('prouddate');
+                          if (pd && value && value.isBefore) {
+                            if (value.isBefore(pd, 'day') || value.isSame(pd, 'day')) {
+                              return Promise.reject('交货日期不能早于生成日期');
+                            }
+                          }
+                          return Promise.resolve();
+                        } }]} style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
                       <Form.Item label="生产日期" name="prouddate" style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
                       <Form.Item label={<LabelWithStar required>委印单位</LabelWithStar>} name="company" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="委印单位" /></Form.Item>
                       <Form.Item label="款号" name="kuanhao" style={{ marginBottom: 4 }}><Input placeholder="款号" /></Form.Item>

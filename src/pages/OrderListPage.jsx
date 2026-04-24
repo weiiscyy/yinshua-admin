@@ -4,7 +4,7 @@ import { SearchOutlined, PlusOutlined, FilterOutlined, ArrowRightOutlined } from
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
 import { adminListOrders, adminListUsers } from '../api';
-import { PRODUCT_MAP, PRODUCT_COLORS, PRODUCT_BORDER } from '../utils/productColors';
+import { PRODUCT_MAP, PRODUCT_COLORS, PRODUCT_BORDER, PRODUCT_BG } from '../utils/productColors';
 import dayjs from 'dayjs';
 
 const PRODUCT_TABS = [

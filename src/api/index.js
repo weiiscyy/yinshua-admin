@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { message } from 'antd';
+import { getRouter } from '../router';
 
 const API_BASE = import.meta.env.VITE_API_BASE || '';
 
@@ -23,7 +24,14 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      // 用 React Router 跳转替代 window.location.href，避免全页刷新
+      try {
+        const router = getRouter();
+        if (router) router.navigate('/login', { replace: true });
+        else window.location.href = '/login';
+      } catch {
+        window.location.href = '/login';
+      }
     }
     const errMsg = error.response?.data?.error || '请求失败';
     message.error(errMsg);

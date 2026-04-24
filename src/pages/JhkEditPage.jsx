@@ -14,7 +14,7 @@ import AppLayout from '../components/AppLayout';
 import { adminGetOrder, adminUpdateOrder, adminUpdateStep } from '../api';
 
 const { Title, Text } = Typography;
-const PRODUCT_MAP = { YS: '印刷', YM: '印刷面', ZM: '纸盒', DS: '模切' };
+// 已迁移到 productColors.js
 const PRODUCT_COLORS = { YS: '#2563eb', YM: '#0891b2', ZM: '#059669', DS: '#d97706' };
 
 // JHK 流水线步骤（与 admin.js 一致）
