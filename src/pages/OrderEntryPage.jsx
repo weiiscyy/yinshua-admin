@@ -332,9 +332,9 @@ export default function OrderEntryPage() {
                       <div style={{ fontSize: 13, fontWeight: 600, color: '#2b6cb0', marginBottom: 8 }}>| 纸张用量及价格</div>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0 12px' }}>
                         <Form.Item label="实印大张" name="sydazhang" style={{ marginBottom: 4 }}><Input placeholder="实印大张" type="number" /></Form.Item>
-                        <Form.Item label="单价(元/张)" name="danjia" style={{ marginBottom: 4 }}><Input placeholder="单价" type="number" step="0.01" /></Form.Item>
-                        <Form.Item label="实印金额" name="syMoney" style={{ marginBottom: 4 }}><Input placeholder="实印金额" type="number" step="0.01" /></Form.Item>
-                        <Form.Item label="订单总价" name="yszj" style={{ marginBottom: 4 }}><Input placeholder="订单总价" type="number" step="0.01" /></Form.Item>
+                        <Form.Item label="单价(元/张)" name="danjia" style={{ marginBottom: 4 }}><Input placeholder="单价" type="number" step="0.0001" /></Form.Item>
+                        <Form.Item label="实印金额" name="syMoney" style={{ marginBottom: 4 }}><Input placeholder="实印金额" type="number" step="0.0001" /></Form.Item>
+                        <Form.Item label="订单总价" name="yszj" style={{ marginBottom: 4 }}><Input placeholder="订单总价" type="number" step="0.0001" /></Form.Item>
                       </div>
                     </div>
 
@@ -417,7 +417,7 @@ export default function OrderEntryPage() {
                               ),
                               React.createElement('td', { style: { padding: '2px 4px', border: '1px solid #d0dce8' } },
                                 React.createElement(Form.Item, { name: item.je, style: { marginBottom: 0 } },
-                                  React.createElement(Input, { size: 'small', type: 'number', placeholder: '-', step: '0.01', style: { textAlign: 'right' } })
+                                  React.createElement(Input, { size: 'small', type: 'number', placeholder: '-', step: '0.0001', style: { textAlign: 'right' } })
                                 )
                               )
                             );
@@ -426,7 +426,7 @@ export default function OrderEntryPage() {
                             <td style={{ padding: '6px 8px', border: '1px solid #d0dce8' }}>总计 元/只</td>
                             <td colSpan="2" style={{ padding: '2px 4px', border: '1px solid #d0dce8', textAlign: 'right' }}>
                               <Form.Item name="yszj" style={{ marginBottom: 0 }}>
-                                <Input size="small" type="number" placeholder="自动计算" step="0.001" style={{ textAlign: 'right', fontWeight: 600 }} disabled />
+                                <Input size="small" type="number" placeholder="自动计算" step="0.0001" style={{ textAlign: 'right', fontWeight: 600 }} disabled />
                               </Form.Item>
                             </td>
                           </tr>
@@ -494,9 +494,9 @@ export default function OrderEntryPage() {
                     <div style={{ marginBottom: 16 }}>
                       <div style={{ fontSize: 13, fontWeight: 600, color: '#2b6cb0', marginBottom: 8 }}>| 纸张用量及价格</div>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0 12px' }}>
-                        <Form.Item label="实用米数" name="sydazhang" style={{ marginBottom: 4 }}><Input placeholder="实用米数" type="number" /></Form.Item>
-                        <Form.Item label="单价(元/米)" name="danjia" style={{ marginBottom: 4 }}><Input placeholder="单价" type="number" step="0.01" /></Form.Item>
-                        <Form.Item label="金额" name="syMoney" style={{ marginBottom: 4 }}><Input placeholder="金额" type="number" step="0.01" /></Form.Item>
+                        <Form.Item label="实用米数" name="sydazhang" style={{ marginBottom: 4 }}><Input placeholder="实用米数" type="number" step="0.0001" /></Form.Item>
+                        <Form.Item label="单价(元/米)" name="danjia" style={{ marginBottom: 4 }}><Input placeholder="单价" type="number" step="0.0001" /></Form.Item>
+                        <Form.Item label="金额" name="syMoney" style={{ marginBottom: 4 }}><Input placeholder="金额" type="number" step="0.0001" /></Form.Item>
                       </div>
                     </div>
 
@@ -569,7 +569,7 @@ export default function OrderEntryPage() {
                               ),
                               React.createElement('td', { style: { padding: '2px 4px', border: '1px solid #d0dce8' } },
                                 React.createElement(Form.Item, { name: item.je, style: { marginBottom: 0 } },
-                                  React.createElement(Input, { size: 'small', type: 'number', placeholder: '-', step: '0.01', style: { textAlign: 'right' } })
+                                  React.createElement(Input, { size: 'small', type: 'number', placeholder: '-', step: '0.0001', style: { textAlign: 'right' } })
                                 )
                               )
                             );
