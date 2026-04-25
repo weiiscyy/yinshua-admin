@@ -1,6 +1,6 @@
 {
-  "version": "26042509-f02131d",
-  "hash": "f02131d",
-  "msg": "fix(OrderEntryPage): 删除调试标记",
-  "time": "2026-04-25T01:28:36.196Z"
+  "version": "26042510-a6ce65a",
+  "hash": "a6ce65a",
+  "msg": "fix(OrderDetailPage): URL productType toUpperCase + YM后整理工艺onChange修复",
+  "time": "2026-04-25T02:40:58.164Z"
 }

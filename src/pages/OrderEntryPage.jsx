@@ -138,22 +138,27 @@ export default function OrderEntryPage() {
   }, []);
 
   useEffect(() => {
-    if (activeProduct === 'YS') { setStepsMap(ysSteps); calcYsTotal(form, 'YS'); }
-    else if (activeProduct === 'YM') setStepsMap(ymSteps);
+    if (activeProduct === 'YS') { setStepsMap(ysSteps); calcTotal(form, 'YS'); }
+    else if (activeProduct === 'YM') { setStepsMap(ymSteps); calcTotal(form, 'YM'); }
     else if (activeProduct === 'ZM') setStepsMap(zmSteps);
     else if (activeProduct === 'DS') setStepsMap(dsSteps);
   }, [activeProduct, ysSteps, ymSteps, zmSteps, dsSteps]);
 
   // 计算 YS 总计 元/只 = (软片+印工+PS版+铜锌版+电化铝+钢刀+轧钢刀+单价) / 印刷数量 + 贴塑 + UV + 切折
-  function calcYsTotal(f, product) {
-    if (product !== 'YS') return;
+  // 计算 YM 总计 元/只 = (软片+PS版) / 印刷数量 + 单价 + 印工 + 切刀打洞/圆角穿线/整理包扎
+  function calcTotal(f, product) {
     var v = f.getFieldsValue();
     var n = function(x){ return Number(x)||0; };
     var shuliang = n(v.shuliang);
-    var part1 = n(v.jine1) + n(v.jine2) + n(v.jine3) + n(v.jine4) + n(v.jine5) + n(v.jine6) + n(v.jine7) + n(v.danjia);
-    var part2 = n(v.jine8) + n(v.jine10) + n(v.jine9);
-    var total = shuliang ? part1 / shuliang + part2 : 0;
-    if (!isNaN(total) && isFinite(total)) f.setFieldsValue({ yszj: Math.round(total * 1000) / 1000 });
+    if (product === 'YS') {
+      var part1 = n(v.jine1) + n(v.jine2) + n(v.jine3) + n(v.jine4) + n(v.jine5) + n(v.jine6) + n(v.jine7) + n(v.danjia);
+      var part2 = n(v.jine8) + n(v.jine10) + n(v.jine9);
+      var total = shuliang ? part1 / shuliang + part2 : 0;
+      if (!isNaN(total) && isFinite(total)) f.setFieldsValue({ yszj: Math.round(total * 1000) / 1000 });
+    } else if (product === 'YM') {
+      var total = shuliang ? (n(v.jine1) + n(v.jine3)) / shuliang + n(v.danjia) + n(v.jine2) + n(v.jine9) : 0;
+      if (!isNaN(total) && isFinite(total)) f.setFieldsValue({ yszj: Math.round(total * 1000) / 1000 });
+    }
   }
 
   function handleCreate() {
@@ -259,7 +264,7 @@ export default function OrderEntryPage() {
           <Button type="primary" icon={<Plus size={15} />} onClick={handleCreate} style={{ display: 'flex', alignItems: 'center', borderRadius: 6 }}>提交订单</Button>
         </div>
 
-        <Form form={form} layout="vertical" labelAlign="right" onValuesChange={function() { calcYsTotal(form, activeProduct); }}>
+        <Form form={form} layout="vertical" labelAlign="right" onValuesChange={function() { calcTotal(form, activeProduct); }}>
           <Tabs
             activeKey={activeProduct}
             onChange={setActiveProduct}
