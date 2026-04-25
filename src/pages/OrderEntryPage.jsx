@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Input, Select, DatePicker, Button, Card, Tabs, Checkbox, message } from 'antd';
 import { Plus } from 'lucide-react';
@@ -121,6 +120,7 @@ export default function OrderEntryPage() {
       const updated = { ...ymSteps };
       if (updated[field]) { delete updated[field]; } else { updated[field] = true; }
       setYmSteps(updated);
+      setStepsMap(updated);
     } else if (product === 'ZM') {
       const updated = { ...zmSteps };
       if (updated[field]) { delete updated[field]; } else { updated[field] = true; }
@@ -176,8 +176,9 @@ export default function OrderEntryPage() {
           return idx >= 0 ? 'hzl' + (idx + 1) + '-' + field : field;
         }
         if (activeProduct === 'YM') {
-          var idx = YM_PROCESS_LIST.indexOf(field);
-          return idx >= 0 ? 'hzl' + (idx + 1) + '-' + field : field;
+          // stepsMap key 是 hzl1/hzl2...，通过 STEPS_MAP_YMGX 反查索引
+          var idx = Object.keys(STEPS_MAP_YMGX).indexOf(field);
+          return idx >= 0 ? 'hzl' + (idx + 1) + '-' + STEPS_MAP_YMGX[field] : field;
         }
         if (activeProduct === 'DS') {
           var idx = DS_PROCESS_LIST.indexOf(field);
