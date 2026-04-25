@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Button, Tag, Typography, message, Spin, Tooltip, Popconfirm } from 'antd';
-import { ArrowLeftOutlined, CheckOutlined, UndoOutlined, PrinterOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, CheckOutlined, UndoOutlined, PrinterOutlined, EditOutlined } from '@ant-design/icons';
 import { openOrderPrint } from '../utils/print';
 import { useNavigate, useParams } from 'react-router-dom';
 import { adminGetOrder, adminUpdateStep } from '../api';
@@ -566,6 +566,11 @@ export default function OrderDetailPage() {
         <Button icon={<PrinterOutlined />} onClick={() => openOrderPrint(order, productType)} style={{ borderRadius: 8 }}>
           打印订单
         </Button>
+        {(!order.jhkprint || !order.jhkprintTime) && (
+          <Button icon={<EditOutlined />} onClick={() => navigate('/orders/edit/' + productType + '/' + ddId)} style={{ borderRadius: 8 }}>
+            编辑订单
+          </Button>
+        )}
         <Tag className={order.fahuo ? 'tag-shipped' : 'tag-pending'} style={{ fontSize: 12, padding: '2px 10px', borderRadius: 20 }}>
           {order.fahuo ? '✓ 已发货' : '○ 进行中'}
         </Tag>

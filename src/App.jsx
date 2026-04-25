@@ -43,6 +43,7 @@ export default function App() {
             <Route path="/orders" element={<ProtectedRoute><OrderListPage /></ProtectedRoute>} />
             <Route path="/orders/:productType/:ddId" element={<ProtectedRoute><OrderDetailPage /></ProtectedRoute>} />
             <Route path="/orders/new" element={<ProtectedRoute><OrderEntryPage /></ProtectedRoute>} />
+            <Route path="/orders/edit/:productType/:ddId" element={<ProtectedRoute><OrderEntryPage /></ProtectedRoute>} />
             <Route path="/query" element={<ProtectedRoute><QueryPage /></ProtectedRoute>} />
             <Route path="/fahuo" element={<ProtectedRoute><FahuoListPage /></ProtectedRoute>} />
             <Route path="/stats" element={<ProtectedRoute><StatsPage /></ProtectedRoute>} />

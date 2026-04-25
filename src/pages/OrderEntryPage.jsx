@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Form, Input, Select, DatePicker, Button, Card, Tabs, Checkbox, message } from 'antd';
-import { Plus } from 'lucide-react';
+import { Plus, Pencil } from 'lucide-react';
 import dayjs from 'dayjs';
 import AppLayout from '../components/AppLayout';
-import { adminCreateOrder, adminListUsers } from '../api';
+import { adminCreateOrder, adminGetOrder, adminUpdateOrder, adminListUsers } from '../api';
 
 const { Option } = Select;
 
@@ -71,11 +71,16 @@ const YSS_PROCESS_FIELDS = Object.keys(STEPS_MAP_YSS);
 
 export default function OrderEntryPage() {
   const [form] = Form.useForm();
-  const navigate = useNavigate();
   const [activeProduct, setActiveProduct] = useState('YS');
   const [stepsMap, setStepsMap] = useState({});
   const [users, setUsers] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+  const [isEdit, setIsEdit] = useState(false);
+  const [editDdId, setEditDdId] = useState(null);
+  const [editProductType, setEditProductType] = useState(null);
+
+  const navigate = useNavigate();
+  const params = useParams();
 
   const [ysSteps, setYsSteps] = useState({});
 
@@ -94,6 +99,74 @@ export default function OrderEntryPage() {
     } catch (e) {
       console.error('[OrderEntry] JWT decode failed:', e);
     }
+  }, []);
+
+  // 编辑模式：从 URL 参数判断，加载订单数据
+  useEffect(function() {
+    if (!params.productType || !params.ddId) return;
+    setIsEdit(true);
+    setEditDdId(params.ddId);
+    setEditProductType(params.productType);
+    setActiveProduct(params.productType);
+
+    var token = localStorage.getItem('token');
+    fetch('/api/admin/orders/' + params.productType.toUpperCase() + '/' + params.ddId, {
+      headers: { 'Authorization': 'Bearer ' + (token || '') }
+    }).then(function(r) { return r.json(); })
+    .then(function(result) {
+      var d = result && result.data ? result.data : (result || {});
+      if (!d || (result && result.error)) { message.error('加载订单数据失败'); return; }
+      // 填充表单字段
+      var setFields = {};
+      ['ddbh','prouddate','overdate','company','fahuodanwei','yjbhao','cpgg','pingshu','shuliang',
+       'kuanhao','proudnumber','ywy','zhengli','jiagongfei','klyaoqiu','jyyaoqiu','gyyq',
+       'beizhu','beizhuYS','beizhuYM','beizhuZM','beizhu8',
+       'danjia','sydazhang','syMoney','yszj',
+       'lldate','sclcClass','ylzd','klcc','kaishu','xukaisl','bcsl',
+       'hzl1','hzl2','hzl3','hzl4','hzl5','hzl6','hzl7',
+       'huahao','jijia','allcount','weidu','soujianjl','sxdate','zm_zhijian','proudbanbie',
+       'jiage','fhdw','fhdate','fhr','cidiehao',
+       'UpFile','beizhu1','beizhu2','beizhu3','beizhu4','beizhu5',
+       'jine1','jine2','jine3','jine4','jine5','jine6','jine7','jine8','jine9','jine10',
+       'yssl1','yssl2','yssl3','yssl4','yssl5','yssl6','yssl7','yssl8','yssl9',
+       'yss20','ysdw1','ysdw2','ysdw3','ysdw4','ysdw5','ysdw6','ysdw7','ysdw8','ysdw9','ysdw10',
+       'ysyl1','ysyl2','ysyl3','ysyl4','ysyl5','ysyl6','ysyl7','ysyl8','ysyl9',
+       'ysy20',
+      ].forEach(function(k) {
+        if (d[k] !== undefined && d[k] !== null) {
+          if (k === 'prouddate' || k === 'overdate' || k === 'lldate' || k === 'fhdate' || k === 'sxdate') {
+            setFields[k] = d[k] ? dayjs(d[k]) : null;
+          } else {
+            setFields[k] = d[k];
+          }
+        }
+      });
+      form.setFieldsValue(setFields);
+
+      // 恢复工序勾选状态
+      if (params.productType === 'YS') {
+        var ysMap = {};
+        YSS_PROCESS_FIELDS.forEach(function(f) { if (d[f] === 1 || d[f] === true) ysMap[f] = true; });
+        setYsSteps(ysMap);
+        setStepsMap(ysMap);
+      } else if (params.productType === 'YM') {
+        var ymMap = {};
+        for (var i = 1; i <= 7; i++) { if (d['hzl' + i] === 1 || d['hzl' + i] === true) ymMap['hzl' + i] = true; }
+        setYmSteps(ymMap);
+        setStepsMap(ymMap);
+      } else if (params.productType === 'ZM') {
+        var zmMap = {};
+        Object.keys(STEPS_MAP_ZM || {}).forEach(function(f) { if (d[f] === 1 || d[f] === true) zmMap[f] = true; });
+        setZmSteps(zmMap);
+      } else if (params.productType === 'DS') {
+        var dsMap = {};
+        Object.keys(STEPS_MAP_DS || {}).forEach(function(f) { if (d[f] === 1 || d[f] === true) dsMap[f] = true; });
+        setDsSteps(dsMap);
+      }
+    }).catch(function(err) {
+      console.error('[OrderEntry] load order error:', err);
+      message.error('加载订单数据失败');
+    });
   }, []);
 
   // Auto-set prouddate to today
@@ -163,8 +236,10 @@ export default function OrderEntryPage() {
 
   function handleCreate() {
     var requiredFields = ['ddbh', 'prouddate'];
-    if (activeProduct === 'YS' || activeProduct === 'YM') {
-      requiredFields = requiredFields.concat(['company', 'ylzd', 'cpgg', 'shuliang', 'yjbhao', 'sclcClass']);
+    if (activeProduct === 'YS') {
+      requiredFields = requiredFields.concat(['company', 'ylzd', 'cpgg', 'shuliang', 'yjbhao']);
+    } else if (activeProduct === 'YM') {
+      requiredFields = requiredFields.concat(['company', 'ylzd', 'cpgg', 'shuliang', 'yjbhao']);
     } else if (activeProduct === 'ZM') {
       requiredFields = requiredFields.concat(['huahao', 'proudnumber', 'shuliang']);
     } else if (activeProduct === 'DS') {
@@ -227,6 +302,38 @@ export default function OrderEntryPage() {
       });
 
       var token = localStorage.getItem('token');
+
+      // 编辑模式：调用 PATCH 更新接口
+      if (isEdit) {
+        var token = localStorage.getItem('token') || '';
+        console.log('[OrderEntry] PATCH token:', token.substring(0, 20) + '...');
+        console.log('[OrderEntry] PATCH body:', JSON.stringify(data).substring(0, 200));
+        fetch('/api/admin/orders/' + activeProduct + '/' + editDdId, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token,
+          },
+          body: JSON.stringify(data),
+        }).then(function(r) { return r.text().then(function(text) { console.log('[OrderEntry] PATCH response status:', r.status, 'body:', text.substring(0, 300)); return { ok: r.ok, status: r.status, data: text }; }); })
+        .then(function(result) {
+          try { result.data = JSON.parse(result.data); } catch(e) {}
+          if (result.data.success) {
+            message.success('修改成功');
+            setTimeout(function() {
+              navigate('/orders/' + activeProduct + '/' + editDdId);
+            }, 1200);
+          } else {
+            message.error(result.data.message || result.data.error || '修改失败');
+          }
+        }).catch(function(err) {
+          console.error('[OrderEntry] update error:', err);
+          message.error('修改失败');
+        });
+        return;
+      }
+
+      // 新建模式
       fetch('/api/order-entry', {
         method: 'POST',
         headers: {
@@ -250,7 +357,7 @@ export default function OrderEntryPage() {
         if (err.errorFields) errMsg = '请检查：' + err.errorFields.map(function(f) { return f.name; }).join(', ');
         message.error(errMsg);
       });
-    }).catch(function(err) {
+  }).catch(function(err) {
       var errMsg = err.errorFields ? '请检查必填字段：' + err.errorFields.map(function(f) { return f.name; }).join(', ') : (err.message || '验证失败');
       message.error(errMsg);
     });
@@ -260,8 +367,8 @@ export default function OrderEntryPage() {
     <AppLayout>
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '16px 16px 60px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <h2 style={{ margin: 0, fontSize: 16 }}>新建订单</h2>
-          <Button type="primary" icon={<Plus size={15} />} onClick={handleCreate} style={{ display: 'flex', alignItems: 'center', borderRadius: 6 }}>提交订单</Button>
+          <h2 style={{ margin: 0, fontSize: 16 }}>{isEdit ? '编辑订单' : '新建订单'}</h2>
+          <Button type="primary" icon={isEdit ? <Pencil size={15} /> : <Plus size={15} />} onClick={handleCreate} style={{ display: 'flex', alignItems: 'center', borderRadius: 6 }}>{isEdit ? '保存修改' : '提交订单'}</Button>
         </div>
 
         <Form form={form} layout="vertical" labelAlign="right" onValuesChange={function() { calcTotal(form, activeProduct); }}>
