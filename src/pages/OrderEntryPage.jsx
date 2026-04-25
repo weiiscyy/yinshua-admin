@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Input, Select, DatePicker, Button, Card, Tabs, Checkbox, message } from 'antd';
 import { Plus } from 'lucide-react';
@@ -507,7 +508,7 @@ export default function OrderEntryPage() {
                     <div style={{ marginBottom: 16 }}>
                       <div style={{ fontSize: 13, fontWeight: 600, color: '#2b6cb0', marginBottom: 8 }}>| 后整理工艺</div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-                        {[
+                        {[ // 后整理工艺 - YM
                           { label: '烘色牢度', value: 'hzl1' },
                           { label: '切割', value: 'hzl2' },
                           { label: '超声波切割', value: 'hzl3' },
@@ -517,7 +518,7 @@ export default function OrderEntryPage() {
                           { label: '其它', value: 'hzl6' },
                         ].map(function(opt) {
                           return React.createElement(Form.Item, { key: opt.value, name: opt.value, valuePropName: 'checked', style: { marginBottom: 4 } },
-                            React.createElement(Checkbox, null, opt.label)
+                            React.createElement(Checkbox, { onChange: function() { handleStepToggle('YM', opt.value); } }, opt.label)
                           );
                         })}
                       </div>

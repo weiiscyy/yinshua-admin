@@ -59,13 +59,13 @@ export const adminListOrders = (params) =>
   api.get('/api/admin/orders', { params });
 
 export const adminGetOrder = (productType, ddId) =>
-  api.get(`/api/admin/orders/${productType}/${ddId}`);
+  api.get(`/api/admin/orders/${productType.toUpperCase()}/${ddId}`);
 
 export const adminUpdateStep = (productType, ddId, step, completed) =>
-  api.post(`/api/admin/orders/${productType}/${ddId}/step`, { step, completed });
+  api.post(`/api/admin/orders/${productType.toUpperCase()}/${ddId}/step`, { step, completed });
 
 export const adminUpdateOrder = (productType, ddId, fields) =>
-  api.patch(`/api/admin/orders/${productType}/${ddId}`, fields);
+  api.patch(`/api/admin/orders/${productType.toUpperCase()}/${ddId}`, fields);
 
 export const adminCreateOrder = (data) =>
   api.post('/api/admin/orders', data);

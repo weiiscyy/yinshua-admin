@@ -507,14 +507,15 @@ function DSOrderDetail({ order, productColor }) {
 // ============== 主组件 ==============
 export default function OrderDetailPage() {
   const navigate = useNavigate();
-  const { productType, ddId } = useParams();
+  const { productType: rawProductType, ddId } = useParams();
+  const productType = rawProductType.toUpperCase();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
 
   const load = async () => {
     try {
-      const res = await adminGetOrder(productType, ddId);
+      const res = await adminGetOrder(rawProductType, ddId);
       setOrder(res);
     } catch (e) {
       message.error('加载失败');
@@ -528,7 +529,7 @@ export default function OrderDetailPage() {
   const handleStep = async (stepField, completed) => {
     setUpdating(true);
     try {
-      const res = await adminUpdateStep(productType, ddId, stepField, completed);
+      const res = await adminUpdateStep(rawProductType, ddId, stepField, completed);
       message.success(res.message);
       setOrder(res.data);
     } catch (e) {
