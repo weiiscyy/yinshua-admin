@@ -13,48 +13,57 @@ const LabelWithStar = ({ children, required }) => (
 );
 
 // 贴膜选项
-// 贴膜工艺选项 (hzlA1-6)
+// 贴膜选项 (hzlA1-6 + hzlC3外加工上光)
+// 来源: 旧系统 YSinput_Add.asp
 const TIEMO_OPTIONS = [
-  { label: '光膜', value: 'hzlA1' },
-  { label: '哑膜', value: 'hzlA2' },
-  { label: '单面', value: 'hzlA3' },
-  { label: '双面', value: 'hzlA4' },
-  { label: '镀铝', value: 'hzlA5' },
-  { label: '其他', value: 'hzlA6' },
+  { label: '单面光膜', value: 'hzlA1' },
+  { label: '单面亚膜', value: 'hzlA2' },
+  { label: '双面光膜', value: 'hzlA3' },
+  { label: '双面亚膜', value: 'hzlA4' },
+  { label: '单面专用膜', value: 'hzlA5' },
+  { label: '双面专用膜', value: 'hzlA6' },
+  { label: '外加工上光', value: 'hzlC3' },
 ];
 
-// 常规工艺选项 (hzlB3-15)
+// 常规工艺选项 (hzlB3-8/11-15)
+// 来源: 旧系统 YSinput_Add.asp
 const CHANGGUI_OPTIONS = [
-  { label: '模切', value: 'hzlB3' },
-  { label: '糊盒', value: 'hzlB4' },
-  { label: '钉箱', value: 'hzlB5' },
-  { label: '打包', value: 'hzlB6' },
-  { label: '复膜', value: 'hzlB7' },
-  { label: '压痕', value: 'hzlB9' },
-  { label: '激光', value: 'hzlB11' },
-  { label: '其他', value: 'hzlB15' },
+  { label: '烫金', value: 'hzlB3' },
+  { label: '压钢刀', value: 'hzlB4' },
+  { label: '穿线', value: 'hzlB5' },
+  { label: '糊纸粘合', value: 'hzlB6' },
+  { label: '打汽眼', value: 'hzlB7' },
+  { label: '凹凸', value: 'hzlB8' },
+  { label: '激光切割', value: 'hzlB11' },
+  { label: '穿别针', value: 'hzlB12' },
+  { label: '路线', value: 'hzlB13' },
+  { label: '敲柳钉', value: 'hzlB14' },
+  { label: '包边', value: 'hzlB15' },
 ];
 
-// 特殊工艺选项 (hzlC1, hzlC3-10)
+// 特殊工艺选项 (hzlC1/4-10)
+// 来源: 旧系统 YSinput_Add.asp
 const TESHU_OPTIONS = [
-  { label: '磨光', value: 'hzlC1' },
-  { label: '过油磨光', value: 'hzlC3' },
-  { label: '烫金', value: 'hzlC4' },
-  { label: '压纹', value: 'hzlC6' },
-  { label: 'UV', value: 'hzlC7' },
-  { label: '植绒', value: 'hzlC8' },
-  { label: '复膜', value: 'hzlC9' },
-  { label: '模切', value: 'hzlC10' },
+  { label: '局部丝网印', value: 'hzlC1' },
+  { label: '绣花', value: 'hzlC4' },
+  { label: '烫钻', value: 'hzlC5' },
+  { label: '胶印上光', value: 'hzlC6' },
+  { label: '粘备用袋', value: 'hzlC7' },
+  { label: '揉皱', value: 'hzlC8' },
+  { label: '敲毛边', value: 'hzlC9' },
+  { label: '其它', value: 'hzlC10' },
 ];
 
+// STEPS_MAP_YSS 仅用于详情页显示标签，key与YSGX表列名一致
 const STEPS_MAP_YSS = {
-  hzlA1: '贴膜', hzlA2: '折页', hzlA3: '压线', hzlA4: 'UV',
-  hzlA5: '烫金', hzlA6: '凹凸',
-  hzlB3: '模切', hzlB4: '糊盒', hzlB5: '钉箱', hzlB6: '打包',
-  hzlB7: '复膜', hzlB8: '折页', hzlB9: '压痕', hzlB10: '打孔',
-  hzlB11: '激光', hzlB12: '切成品', hzlB13: '表面整饰', hzlB14: '局部UV', hzlB15: '其他',
-  hzlC1: '磨光', hzlC3: '过油磨光', hzlC4: '烫金', hzlC5: '凹凸',
-  hzlC6: '压纹', hzlC7: 'UV', hzlC8: '植绒', hzlC9: '复膜', hzlC10: '模切',
+  hzlA1: '单面光膜', hzlA2: '单面亚膜', hzlA3: '双面光膜',
+  hzlA4: '双面亚膜', hzlA5: '单面专用膜', hzlA6: '双面专用膜',
+  hzlB3: '烫金', hzlB4: '压钢刀', hzlB5: '穿线', hzlB6: '糊纸粘合',
+  hzlB7: '打汽眼', hzlB8: '凹凸', hzlB11: '激光切割',
+  hzlB12: '穿别针', hzlB13: '路线', hzlB14: '敲柳钉', hzlB15: '包边',
+  hzlC1: '局部丝网印', hzlC3: '外加工上光', hzlC4: '绣花',
+  hzlC5: '烫钻', hzlC6: '胶印上光', hzlC7: '粘备用袋',
+  hzlC8: '揉皱', hzlC9: '敲毛边', hzlC10: '其它',
 };
 
 const STEPS_MAP_YMGX = {
@@ -153,6 +162,8 @@ export default function OrderEntryPage() {
         YSS_PROCESS_FIELDS.forEach(function(f) { if (d[f] === 1 || d[f] === true) ysMap[f] = true; });
         setYsSteps(ysMap);
         setStepsMap(ysMap);
+        // 同步到 form，让 Checkbox 默认显示勾选
+        Object.keys(ysMap).forEach(function(f) { form.setFieldValue(f, true); });
       } else if (params.productType === 'YM') {
         var ymMap = {};
         for (var i = 1; i <= 7; i++) { if (d['hzl' + i] === 1 || d['hzl' + i] === true) ymMap['hzl' + i] = true; }
@@ -254,9 +265,19 @@ export default function OrderEntryPage() {
       var values = form.getFieldsValue();
       console.log('[OrderEntry] product_type:', activeProduct, 'company:', values.company, 'overdate:', values.overdate);
 
-      var sclcSteps = Object.keys(stepsMap).map(function(field) {
-        if (activeProduct === 'YS') return field;
-        if (activeProduct === 'ZM') {
+      // YS 工艺配置：直接从 form 取 hzl* 字段值，忽略 stepsMap（stepsMap 在 YS 没有 onChange 同步）
+      var sclcSteps = [];
+      if (activeProduct === 'YS') {
+        var ysHzlFields = ['hzlA1','hzlA2','hzlA3','hzlA4','hzlA5','hzlA6',
+          'hzlB3','hzlB4','hzlB5','hzlB6','hzlB7','hzlB8',
+          'hzlB11','hzlB12','hzlB13','hzlB14','hzlB15',
+          'hzlC1','hzlC3','hzlC4','hzlC6','hzlC7','hzlC8','hzlC9','hzlC10'];
+        ysHzlFields.forEach(function(f) {
+          if (values[f] === 1 || values[f] === true) sclcSteps.push(f);
+        });
+      } else {
+        sclcSteps = Object.keys(stepsMap).map(function(field) {
+          if (activeProduct === 'ZM') {
           var idx = ZM_PROCESS_LIST.indexOf(field);
           return idx >= 0 ? 'hzl' + (idx + 1) + '-' + field : field;
         }
@@ -270,7 +291,8 @@ export default function OrderEntryPage() {
           return idx >= 0 ? 'hzl' + (idx + 1) + '-' + field : field;
         }
         return field;
-      });
+        });
+      }
 
       var fmtDate = function(v) {
         if (!v) return null;
@@ -284,6 +306,9 @@ export default function OrderEntryPage() {
         'cgJG','cgYG','cgMK','cgHK','cgCX','cgQND','cgJG2','cgOT',
         'tsJS','tsWX','tsZS','tsJY','tsOT',
         'hzl1','hzl2','hzl3','hzl4','hzl5','hzl6','hzl7','hzl8','hzl9','hzl10','hzl11','hzl12','hzl13','hzl14','hzl15','hzl16',
+        'hzlA1','hzlA2','hzlA3','hzlA4','hzlA5','hzlA6',
+        'hzlB3','hzlB4','hzlB5','hzlB6','hzlB7','hzlB8','hzlB11','hzlB12','hzlB13','hzlB14','hzlB15',
+        'hzlC1','hzlC3','hzlC4','hzlC6','hzlC7','hzlC8','hzlC9','hzlC10',
         'waifa'
       ];
       checkboxFields.forEach(function(f) {

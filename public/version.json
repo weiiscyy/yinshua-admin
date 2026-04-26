@@ -1,6 +1,6 @@
 {
-  "version": "26042623-fa1eb39",
-  "hash": "fa1eb39",
-  "msg": "fix: YS工艺配置OPTIONS的value字段改为YSGX实际列名(hzlA*/hzlB*/hzlC*)",
-  "time": "2026-04-26T15:11:43.767Z"
+  "version": "26042700-6ea03bf",
+  "hash": "6ea03bf",
+  "msg": "fix: OrderDetailPage TESHU_OPTIONS value改为YSGX列名(hzlC*)，移除不存在的列",
+  "time": "2026-04-26T16:10:40.862Z"
 }

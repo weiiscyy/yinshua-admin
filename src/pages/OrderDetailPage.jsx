@@ -68,31 +68,30 @@ function ReadOnlyCheckboxGroup({ options, order }) {
 }
 
 // ============== YS 详情 ==============
-// YSGX 表字段映射：hzlA1-6 / hzlB3-15(缺几个) / hzlC1-10(缺几个)
-// 与 OrderEntryPage 的 STEPS_MAP_YSS 保持一致
+// 来源: 旧系统 YSinput_Add.asp
+// 贴膜: hzlA1-6 + hzlC3(外加工上光)
 const TIEMO_OPTIONS = [
-  { label: '贴膜', value: 'hzlA1' }, { label: '折页', value: 'hzlA2' },
-  { label: '压线', value: 'hzlA3' }, { label: 'UV', value: 'hzlA4' },
-  { label: '烫金', value: 'hzlA5' }, { label: '凹凸', value: 'hzlA6' },
-  { label: '磨光', value: 'hzlC1' }, { label: '过油磨光', value: 'hzlC3' },
-  { label: '压纹', value: 'hzlC6' }, { label: 'UV', value: 'hzlC7' },
-  { label: '植绒', value: 'hzlC8' }, { label: '复膜', value: 'hzlC9' },
+  { label: '单面光膜', value: 'hzlA1' }, { label: '单面亚膜', value: 'hzlA2' },
+  { label: '双面光膜', value: 'hzlA3' }, { label: '双面亚膜', value: 'hzlA4' },
+  { label: '单面专用膜', value: 'hzlA5' }, { label: '双面专用膜', value: 'hzlA6' },
+  { label: '外加工上光', value: 'hzlC3' },
 ];
+// 常规工艺: hzlB3-8/11-15
 const CHANGGUI_OPTIONS = [
-  { label: '模切', value: 'hzlB3' }, { label: '糊盒', value: 'hzlB4' },
-  { label: '钉箱', value: 'hzlB5' }, { label: '打包', value: 'hzlB6' },
-  { label: '复膜', value: 'hzlB7' }, { label: '折页', value: 'hzlB8' },
-  { label: '压痕', value: 'hzlB9' }, { label: '打孔', value: 'hzlB10' },
-  { label: '激光', value: 'hzlB11' }, { label: '切成品', value: 'hzlB12' },
-  { label: '表面整饰', value: 'hzlB13' }, { label: '局部UV', value: 'hzlB14' },
-  { label: '其他', value: 'hzlB15' }, { label: '烫金', value: 'hzlC4' },
-  { label: '凹凸', value: 'hzlC5' }, { label: '模切', value: 'hzlC10' },
+  { label: '烫金', value: 'hzlB3' }, { label: '压钢刀', value: 'hzlB4' },
+  { label: '穿线', value: 'hzlB5' }, { label: '糊纸粘合', value: 'hzlB6' },
+  { label: '打汽眼', value: 'hzlB7' }, { label: '凹凸', value: 'hzlB8' },
+  { label: '激光切割', value: 'hzlB11' }, { label: '穿别针', value: 'hzlB12' },
+  { label: '路线', value: 'hzlB13' }, { label: '敲柳钉', value: 'hzlB14' },
+  { label: '包边', value: 'hzlB15' },
 ];
+// 特殊工艺: hzlC1/4-10
 const TESHU_OPTIONS = [
-  { label: '磨光', value: 'hzlC1' }, { label: '过油磨光', value: 'hzlC3' },
-  { label: '烫金', value: 'hzlC4' }, { label: '压纹', value: 'hzlC6' },
-  { label: 'UV', value: 'hzlC7' }, { label: '植绒', value: 'hzlC8' },
-  { label: '复膜', value: 'hzlC9' }, { label: '模切', value: 'hzlC10' },
+  { label: '局部丝网印', value: 'hzlC1' },
+  { label: '绣花', value: 'hzlC4' }, { label: '烫钻', value: 'hzlC5' },
+  { label: '胶印上光', value: 'hzlC6' }, { label: '粘备用袋', value: 'hzlC7' },
+  { label: '揉皱', value: 'hzlC8' }, { label: '敲毛边', value: 'hzlC9' },
+  { label: '其它', value: 'hzlC10' },
 ];
 const YSS_ANALYSIS = [
   { label: '软片', sl: 'yssl1', je: 'jine1' },
