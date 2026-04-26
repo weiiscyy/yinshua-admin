@@ -13,34 +13,38 @@ const LabelWithStar = ({ children, required }) => (
 );
 
 // 贴膜选项
+// 贴膜工艺选项 (hzlA1-6)
 const TIEMO_OPTIONS = [
-  { label: '光膜', value: 'tmG' },
-  { label: '哑膜', value: 'tmM' },
-  { label: '单面', value: 'tmD' },
-  { label: '双面', value: 'tmS' },
-  { label: '镀铝', value: 'tmDH' },
-  { label: '其他', value: 'tmQT' },
+  { label: '光膜', value: 'hzlA1' },
+  { label: '哑膜', value: 'hzlA2' },
+  { label: '单面', value: 'hzlA3' },
+  { label: '双面', value: 'hzlA4' },
+  { label: '镀铝', value: 'hzlA5' },
+  { label: '其他', value: 'hzlA6' },
 ];
 
-// 常规工艺选项
+// 常规工艺选项 (hzlB3-15)
 const CHANGGUI_OPTIONS = [
-  { label: '烫金', value: 'cgJG' },
-  { label: '压痕', value: 'cgYG' },
-  { label: '模切', value: 'cgMK' },
-  { label: '糊盒', value: 'cgHK' },
-  { label: '穿线', value: 'cgCX' },
-  { label: '敲钉', value: 'cgQND' },
-  { label: '激光', value: 'cgJG2' },
-  { label: '其他', value: 'cgOT' },
+  { label: '模切', value: 'hzlB3' },
+  { label: '糊盒', value: 'hzlB4' },
+  { label: '钉箱', value: 'hzlB5' },
+  { label: '打包', value: 'hzlB6' },
+  { label: '复膜', value: 'hzlB7' },
+  { label: '压痕', value: 'hzlB9' },
+  { label: '激光', value: 'hzlB11' },
+  { label: '其他', value: 'hzlB15' },
 ];
 
-// 特殊工艺选项
+// 特殊工艺选项 (hzlC1, hzlC3-10)
 const TESHU_OPTIONS = [
-  { label: '局部丝印', value: 'tsJS' },
-  { label: '绣花', value: 'tsWX' },
-  { label: '烫钻', value: 'tsZS' },
-  { label: '胶印上光', value: 'tsJY' },
-  { label: '其他', value: 'tsOT' },
+  { label: '磨光', value: 'hzlC1' },
+  { label: '过油磨光', value: 'hzlC3' },
+  { label: '烫金', value: 'hzlC4' },
+  { label: '压纹', value: 'hzlC6' },
+  { label: 'UV', value: 'hzlC7' },
+  { label: '植绒', value: 'hzlC8' },
+  { label: '复膜', value: 'hzlC9' },
+  { label: '模切', value: 'hzlC10' },
 ];
 
 const STEPS_MAP_YSS = {

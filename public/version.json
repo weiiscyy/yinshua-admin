@@ -1,6 +1,6 @@
 {
-  "version": "26042620-5b0afd2",
-  "hash": "5b0afd2",
-  "msg": "fix: 订单编辑保存权限+requiredFields按产品线分开+字段精度",
-  "time": "2026-04-26T12:30:38.253Z"
+  "version": "26042622-c433ae3",
+  "hash": "c433ae3",
+  "msg": "fix: 编辑模式禁用产品类型Tab切换",
+  "time": "2026-04-26T14:19:34.661Z"
 }

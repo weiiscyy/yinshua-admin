@@ -68,16 +68,25 @@ function ReadOnlyCheckboxGroup({ options, order }) {
 }
 
 // ============== YS 详情 ==============
+// YSGX 表字段映射：hzlA1-6 / hzlB3-15(缺几个) / hzlC1-10(缺几个)
+// 与 OrderEntryPage 的 STEPS_MAP_YSS 保持一致
 const TIEMO_OPTIONS = [
-  { label: '光膜', value: 'tmG' }, { label: '哑膜', value: 'tmM' },
-  { label: '单面', value: 'tmD' }, { label: '双面', value: 'tmS' },
-  { label: '镀铝', value: 'tmDH' }, { label: '其他', value: 'tmQT' },
+  { label: '贴膜', value: 'hzlA1' }, { label: '折页', value: 'hzlA2' },
+  { label: '压线', value: 'hzlA3' }, { label: 'UV', value: 'hzlA4' },
+  { label: '烫金', value: 'hzlA5' }, { label: '凹凸', value: 'hzlA6' },
+  { label: '磨光', value: 'hzlC1' }, { label: '过油磨光', value: 'hzlC3' },
+  { label: '压纹', value: 'hzlC6' }, { label: 'UV', value: 'hzlC7' },
+  { label: '植绒', value: 'hzlC8' }, { label: '复膜', value: 'hzlC9' },
 ];
 const CHANGGUI_OPTIONS = [
-  { label: '烫金', value: 'cgJG' }, { label: '压痕', value: 'cgYG' },
-  { label: '模切', value: 'cgMK' }, { label: '糊盒', value: 'cgHK' },
-  { label: '穿线', value: 'cgCX' }, { label: '敲钉', value: 'cgQND' },
-  { label: '激光', value: 'cgJG2' }, { label: '其他', value: 'cgOT' },
+  { label: '模切', value: 'hzlB3' }, { label: '糊盒', value: 'hzlB4' },
+  { label: '钉箱', value: 'hzlB5' }, { label: '打包', value: 'hzlB6' },
+  { label: '复膜', value: 'hzlB7' }, { label: '折页', value: 'hzlB8' },
+  { label: '压痕', value: 'hzlB9' }, { label: '打孔', value: 'hzlB10' },
+  { label: '激光', value: 'hzlB11' }, { label: '切成品', value: 'hzlB12' },
+  { label: '表面整饰', value: 'hzlB13' }, { label: '局部UV', value: 'hzlB14' },
+  { label: '其他', value: 'hzlB15' }, { label: '烫金', value: 'hzlC4' },
+  { label: '凹凸', value: 'hzlC5' }, { label: '模切', value: 'hzlC10' },
 ];
 const TESHU_OPTIONS = [
   { label: '局部丝印', value: 'tsJS' }, { label: '绣花', value: 'tsWX' },
@@ -102,7 +111,14 @@ function yssAnalysisRowHasValue(order, item) {
 }
 
 function YSOrderDetail({ order, productColor }) {
-  const hasAnyCraft = hasValue(order, ['tmG','tmM','tmD','tmS','tmDH','tmQT','cgJG','cgYG','cgMK','cgHK','cgCX','cgQND','cgJG2','cgOT','tsJS','tsWX','tsZS','tsJY','tsOT']);
+  // YSGX 表字段：hzlA1-6 / hzlB3-15(缺几个) / hzlC1-10(缺几个)，不在 YS 主表
+  const hasAnyCraft = hasValue(order, [
+    'hzlA1','hzlA2','hzlA3','hzlA4','hzlA5','hzlA6',
+    'hzlB3','hzlB4','hzlB5','hzlB6','hzlB7','hzlB8','hzlB9','hzlB10','hzlB11','hzlB12','hzlB13','hzlB14','hzlB15',
+    'hzlC1','hzlC3','hzlC4','hzlC5','hzlC6','hzlC7','hzlC8','hzlC9','hzlC10',
+    // ts*/cg*/tm* 是前端误用字段，仅作兼容（数据库不存在这些列）
+    'tsJS','tsWX','tsZS','tsJY','tsOT',
+  ]);
   const hasAnyAnalysis = YSS_ANALYSIS.some(r => yssAnalysisRowHasValue(order, r));
   const hasAnyRequire = hasValue(order, ['klyaoqiu', 'jyyaoqiu']);
   const hasAnyPrice = hasValue(order, ['sydazhang', 'danjia', 'syMoney', 'yszj']);
