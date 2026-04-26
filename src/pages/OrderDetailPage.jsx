@@ -465,7 +465,7 @@ function ZMOrderDetail({ order, productColor }) {
       <SectionTitle color={productColor}>其他信息</SectionTitle>
       <FieldRow2 label="工艺要求" value={order.gyyq} />
       <FieldRow2 label="质检" value={order.zm_zhijian} />
-      <FieldRow2 label="送检记录" value={order.soujianjl} />
+      <FieldRow2 label="首检记录" value={order.soujianjl} />
       <FieldGrid>
         <FieldRow label="发货单位" value={order.fhdw} />
         <FieldRow label="发货日期" value={fmtDate(order.fhdate)} />
