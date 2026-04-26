@@ -772,6 +772,7 @@ export default function OrderEntryPage() {
                         <Form.Item label="下单公司" name="company" style={{ marginBottom: 4 }}><Input placeholder="下单公司" /></Form.Item>
                         <Form.Item label="发货单位" name="fahuodanwei" style={{ marginBottom: 4 }}><Input placeholder="发货单位" /></Form.Item>
                         <Form.Item label="款号" name="kuanhao" style={{ marginBottom: 4 }}><Input placeholder="款号" /></Form.Item>
+                        <Form.Item label="外发" name="waifa" valuePropName="checked" style={{ marginBottom: 4 }}><Checkbox /></Form.Item>
 
                       </div>
                     </div>
