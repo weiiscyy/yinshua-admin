@@ -89,9 +89,10 @@ const CHANGGUI_OPTIONS = [
   { label: '凹凸', value: 'hzlC5' }, { label: '模切', value: 'hzlC10' },
 ];
 const TESHU_OPTIONS = [
-  { label: '局部丝印', value: 'tsJS' }, { label: '绣花', value: 'tsWX' },
-  { label: '烫钻', value: 'tsZS' }, { label: '胶印上光', value: 'tsJY' },
-  { label: '其他', value: 'tsOT' },
+  { label: '磨光', value: 'hzlC1' }, { label: '过油磨光', value: 'hzlC3' },
+  { label: '烫金', value: 'hzlC4' }, { label: '压纹', value: 'hzlC6' },
+  { label: 'UV', value: 'hzlC7' }, { label: '植绒', value: 'hzlC8' },
+  { label: '复膜', value: 'hzlC9' }, { label: '模切', value: 'hzlC10' },
 ];
 const YSS_ANALYSIS = [
   { label: '软片', sl: 'yssl1', je: 'jine1' },

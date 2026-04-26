@@ -1,6 +1,6 @@
 {
-  "version": "26042622-c433ae3",
-  "hash": "c433ae3",
-  "msg": "fix: 编辑模式禁用产品类型Tab切换",
-  "time": "2026-04-26T14:19:34.661Z"
+  "version": "26042623-fa1eb39",
+  "hash": "fa1eb39",
+  "msg": "fix: YS工艺配置OPTIONS的value字段改为YSGX实际列名(hzlA*/hzlB*/hzlC*)",
+  "time": "2026-04-26T15:11:43.767Z"
 }
