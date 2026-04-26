@@ -144,12 +144,11 @@ export default function PrintOrderPage({ productType, ddId }) {
         )}
 
         {/* ZM 特有字段 */}
-        {productType === 'ZM' && (o.huahao || o.cidiehao || o.zm_zhijian || o.allcount || o.weidu || o.kuandu || o.changdu) && (
+        {productType === 'ZM' && (o.huahao || o.zm_zhijian || o.allcount || o.weidu || o.kuandu || o.changdu) && (
           <div className="print-order-section">
             <div className="print-order-section-title">📦 纸盒特有信息</div>
             <div className="print-order-grid">
               {o.huahao ? <div><span className="label">花号：</span><span className="value">{o.huahao}</span></div> : null}
-              {o.cidiehao ? <div><span className="label">刺绣号：</span><span className="value">{o.cidiehao}</span></div> : null}
               {o.zm_zhijian ? <div><span className="label">纸盒质检：</span><span className="value">{o.zm_zhijian}</span></div> : null}
               {o.allcount ? <div><span className="label">总数量：</span><span className="value">{o.allcount}</span></div> : null}
               {o.weidu ? <div><span className="label">纬度：</span><span className="value">{o.weidu}</span></div> : null}

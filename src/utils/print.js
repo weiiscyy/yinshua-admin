@@ -248,7 +248,6 @@ async function buildPrintHtml(order, productType) {
   if (o.jyyaoqiu) specRows.push('<div style="grid-column:span 2"><span class="label">经验要求：</span><span class="value">' + o.jyyaoqiu + '</span></div>');
   if (o.zhengli) specRows.push('<div><span class="label">整烫：</span><span class="value">' + o.zhengli + '</span></div>');
   if (o.yssj) specRows.push('<div><span class="label">样色色价：</span><span class="value">' + o.yssj + '</span></div>');
-  if (o.cidiehao) specRows.push('<div><span class="label">刺绣号：</span><span class="value">' + o.cidiehao + '</span></div>');
   if (o.zm_zhijian) specRows.push('<div><span class="label">纸盒质检：</span><span class="value">' + o.zm_zhijian + '</span></div>');
   if (o.allcount) specRows.push('<div><span class="label">总数量：</span><span class="value">' + o.allcount + '</span></div>');
   if (o.weidu) specRows.push('<div><span class="label">纬度：</span><span class="value">' + o.weidu + '</span></div>');
