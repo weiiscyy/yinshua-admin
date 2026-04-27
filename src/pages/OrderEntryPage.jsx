@@ -795,6 +795,13 @@ export default function OrderEntryPage() {
                       </div>
                     </div>
 
+                    {/* 首检记录 */}
+                    <div style={{ marginBottom: 16 }}>
+                      <Form.Item label="首检记录" name="soujianjl" style={{ marginBottom: 4 }}>
+                        <Input.TextArea placeholder="首检记录" rows={1} />
+                      </Form.Item>
+                    </div>
+
                     {/* 色卡明细表 */}
                     <div style={{ marginBottom: 16 }}>
                       <div style={{ fontSize: 13, fontWeight: 600, color: '#2b6cb0', marginBottom: 8 }}>| 色卡明细表</div>
@@ -922,13 +929,6 @@ export default function OrderEntryPage() {
                     <div style={{ marginBottom: 16 }}>
                       <Form.Item label="质检" name="zm_zhijian" style={{ marginBottom: 4 }}>
                         <Input.TextArea placeholder="质检记录" rows={2} />
-                      </Form.Item>
-                    </div>
-
-                    {/* 送检记录 */}
-                    <div style={{ marginBottom: 16 }}>
-                      <Form.Item label="首检记录" name="soujianjl" style={{ marginBottom: 4 }}>
-                        <Input.TextArea placeholder="首检记录" rows={1} />
                       </Form.Item>
                     </div>
                   </div>
