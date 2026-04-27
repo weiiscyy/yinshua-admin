@@ -294,9 +294,15 @@ export default function OrderEntryPage() {
         });
       }
 
+      // dayjs: { $y:2026, $M:3, $D:28, format:f }
+      // Luxon: { $L:obj, $u:undefined, $d:Date, $y:2026, $M:3, c:[...], isLuxon:true }
       var fmtDate = function(v) {
         if (!v || v === 'undefined' || v === 'null') return null;
+        // dayjs: isDayjsObject:true, 有 $y/$M/$D, format 是 fn
+        if (v && v.isDayjsObject === true && typeof v.format === 'function') return v.format('YYYY-MM-DD');
+        // 其他有 format 的对象（兜底）
         if (typeof v.format === 'function') return v.format('YYYY-MM-DD');
+        // 已是字符串或原始值，直接返回
         return v;
       };
 
@@ -763,6 +769,12 @@ export default function OrderEntryPage() {
                         <Form.Item label="制单" name="zhidan" style={{ marginBottom: 4 }}><Input disabled /></Form.Item>
                         <Form.Item label={<LabelWithStar required>花号</LabelWithStar>} name="huahao" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="花号" /></Form.Item>
                         <Form.Item label="订货数量" name="shuliang" style={{ marginBottom: 4 }}><Input placeholder="数量" type="number" /></Form.Item>
+                        <Form.Item name="dhdw" style={{ marginBottom: 4 }}>
+                          <Select placeholder="单位" style={{ width: '100%' }}>
+                            <Option value="只">只</Option>
+                            <Option value="米">米</Option>
+                          </Select>
+                        </Form.Item>
                         <Form.Item label="所需时间" name="sxdate" style={{ marginBottom: 4 }}><Input placeholder="所需时间" /></Form.Item>
                         <Form.Item label="业务员" name="ywy" style={{ marginBottom: 4 }}>
                           <Select placeholder="选择业务员" allowClear>
@@ -782,7 +794,7 @@ export default function OrderEntryPage() {
                       <div style={{ fontSize: 13, fontWeight: 600, color: '#2b6cb0', marginBottom: 8 }}>| 生产规格</div>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0 12px' }}>
                         <Form.Item label="卷送生产班别" name="proudbanbie" style={{ marginBottom: 4 }}><Input placeholder="卷送生产班别" /></Form.Item>
-                        <Form.Item label="生产机型" name="dhdw" style={{ marginBottom: 4 }}><Input placeholder="生产机型" /></Form.Item>
+                        <Form.Item label="生产机型" name="proudnumber" style={{ marginBottom: 4 }}><Input placeholder="生产机型" /></Form.Item>
                         <Form.Item label="基价" name="jijia" style={{ marginBottom: 4 }}><Input placeholder="基价" type="number" step="0.01" /></Form.Item>
                         <Form.Item label="总干纬" name="allcount" style={{ marginBottom: 4 }}><Input placeholder="总干纬" type="number" /></Form.Item>
                         <Form.Item label="纬密" name="weidu" style={{ marginBottom: 4 }}><Input placeholder="纬密" /></Form.Item>
@@ -951,8 +963,8 @@ export default function OrderEntryPage() {
                       <Form.Item label={<LabelWithStar required>委印单位</LabelWithStar>} name="company" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="委印单位" /></Form.Item>
                       <Form.Item label="款号" name="kuanhao" style={{ marginBottom: 4 }}><Input placeholder="款号" /></Form.Item>
                       <Form.Item label="价格" name="jiage" style={{ marginBottom: 4 }}><Input placeholder="价格" type="number" step="0.01" /></Form.Item>
-                      <Form.Item label="发货" name="dhdw" style={{ marginBottom: 4 }}><Input placeholder="发货" /></Form.Item>
-                      <Form.Item label="品名" name="proudnumber" style={{ marginBottom: 4 }}><Input placeholder="品名" /></Form.Item>
+                      <Form.Item label="发货" name="fahuodanwei" style={{ marginBottom: 4 }}><Input placeholder="发货单位" /></Form.Item>
+                      <Form.Item label="生产机型" name="proudnumber" style={{ marginBottom: 4 }}><Input placeholder="生产机型" /></Form.Item>
                     </div>
 
                     <div style={{ marginBottom: 12, padding: '8px 12px', border: '1px solid #d0dce8', borderRadius: 4 }}>
