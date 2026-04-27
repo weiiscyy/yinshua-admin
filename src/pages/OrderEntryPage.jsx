@@ -792,7 +792,7 @@ export default function OrderEntryPage() {
                         <Form.Item label="花长" name="huachang" style={{ marginBottom: 4 }}><Input placeholder="花长" /></Form.Item>
                         <Form.Item label="成品尺寸" name="chenpingcc" style={{ marginBottom: 4 }}><Input placeholder="成品尺寸" /></Form.Item>
                         <Form.Item label="加工费" name="jiagongfei" style={{ marginBottom: 4 }}><Input placeholder="加工费" type="number" step="0.0001" /></Form.Item>
-                        <Form.Item label="首检记录" name="soujianjl" style={{ marginBottom: 4, gridColumn: '1 / -1' }}><Input placeholder="首检记录" /></Form.Item>
+                        <Form.Item label="首检记录" name="soujianjl" style={{ marginBottom: 4 }}><Input placeholder="首检记录" /></Form.Item>
                       </div>
                     </div>
 
