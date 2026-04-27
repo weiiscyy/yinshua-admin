@@ -71,6 +71,18 @@ const STEPS_MAP_YMGX = {
   hzl6: '贴膜', hzl7: '打包',
 };
 
+const STEPS_MAP_ZM = {
+  jhkddClass: '接单', jhkprint: '打印/晒版', sccjjs: '车间接收',
+  sccjyl: '预领料', sccjdn: '电脑制版', sccjsc: '生产', sccjwc: '完成',
+  hzljs: '质检', fahuo: '发货',
+};
+
+const STEPS_MAP_DS = {
+  jhkddClass: '接单', jhkprint: '打印/晒版', sccjjs: '车间接收',
+  sccjyl: '预领料', sccjdn: '电脑制版', sccjsc: '生产', sccjwc: '完成',
+  hzljs: '质检', fahuo: '发货',
+};
+
 const YM_PROCESS_LIST = ['烘色牢度', '切割', '超声波切割', '三角折', '手工切折', '手工对折', '其它'];
 
 const ZM_PROCESS_LIST = ['开料', '印刷', '裱纸', '模切', '冲孔', '钉粘', '打包'];
@@ -171,11 +183,11 @@ export default function OrderEntryPage() {
         setStepsMap(ymMap);
       } else if (params.productType === 'ZM') {
         var zmMap = {};
-        Object.keys(STEPS_MAP_ZM || {}).forEach(function(f) { if (d[f] === 1 || d[f] === true) zmMap[f] = true; });
+        Object.keys(STEPS_MAP_ZM).forEach(function(f) { if (d[f] === 1 || d[f] === true) zmMap[f] = true; });
         setZmSteps(zmMap);
       } else if (params.productType === 'DS') {
         var dsMap = {};
-        Object.keys(STEPS_MAP_DS || {}).forEach(function(f) { if (d[f] === 1 || d[f] === true) dsMap[f] = true; });
+        Object.keys(STEPS_MAP_DS).forEach(function(f) { if (d[f] === 1 || d[f] === true) dsMap[f] = true; });
         setDsSteps(dsMap);
       }
     }).catch(function(err) {
