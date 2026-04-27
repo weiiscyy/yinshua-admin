@@ -295,7 +295,7 @@ export default function OrderEntryPage() {
       }
 
       var fmtDate = function(v) {
-        if (!v) return null;
+        if (!v || v === 'undefined' || v === 'null') return null;
         if (typeof v.format === 'function') return v.format('YYYY-MM-DD');
         return v;
       };
