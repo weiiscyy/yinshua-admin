@@ -931,15 +931,6 @@ export default function OrderEntryPage() {
                         <Input.TextArea placeholder="首检记录" rows={1} />
                       </Form.Item>
                     </div>
-
-                    {/* 备注 */}
-                    <div style={{ marginBottom: 8 }}>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0 12px' }}>
-                        <Form.Item label="发货单位" name="fhdw" style={{ marginBottom: 4 }}><Input placeholder="发货单位" /></Form.Item>
-                        <Form.Item label="发货日期" name="fhdate" style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
-                        <Form.Item label="发货人" name="fhr" style={{ marginBottom: 4 }}><Input placeholder="发货人" /></Form.Item>
-                      </div>
-                    </div>
                   </div>
                 ),
               },
