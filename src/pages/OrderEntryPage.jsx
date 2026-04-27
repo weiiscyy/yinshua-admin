@@ -131,7 +131,7 @@ export default function OrderEntryPage() {
       if (!d || (result && result.error)) { message.error('加载订单数据失败'); return; }
       // 填充表单字段
       var setFields = {};
-      ['ddbh','prouddate','overdate','company','fahuodanwei','yjbhao','cpgg','pingshu','shuliang',
+      ['ddbh','prouddate','overdate','company','fahuodanwei','yjbhao','cpgg','pingshu','shuliang','dhdw',
        'kuanhao','proudnumber','ywy','zhengli','jiagongfei','klyaoqiu','jyyaoqiu','gyyq',
        'beizhu','beizhuYS','beizhuYM','beizhuZM','beizhu8',
        'danjia','sydazhang','syMoney','yszj',
@@ -768,12 +768,18 @@ export default function OrderEntryPage() {
                         } }]} style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
                         <Form.Item label="制单" name="zhidan" style={{ marginBottom: 4 }}><Input disabled /></Form.Item>
                         <Form.Item label={<LabelWithStar required>花号</LabelWithStar>} name="huahao" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="花号" /></Form.Item>
-                        <Form.Item label="订货数量" name="shuliang" style={{ marginBottom: 4 }}><Input placeholder="数量" type="number" /></Form.Item>
-                        <Form.Item name="dhdw" style={{ marginBottom: 4 }}>
-                          <Select placeholder="单位" style={{ width: '100%' }}>
-                            <Option value="只">只</Option>
-                            <Option value="米">米</Option>
-                          </Select>
+                        <Form.Item label="订货数量" style={{ marginBottom: 4 }}>
+                          <div style={{ display: 'flex', gap: 8 }}>
+                            <Form.Item name="shuliang" style={{ marginBottom: 0, flex: 2 }}>
+                              <Input placeholder="数量" type="number" />
+                            </Form.Item>
+                            <Form.Item name="dhdw" style={{ marginBottom: 0, flex: 1 }}>
+                              <Select placeholder="单位">
+                                <Option value="只">只</Option>
+                                <Option value="米">米</Option>
+                              </Select>
+                            </Form.Item>
+                          </div>
                         </Form.Item>
                         <Form.Item label="所需时间" name="sxdate" style={{ marginBottom: 4 }}><Input placeholder="所需时间" /></Form.Item>
                         <Form.Item label="业务员" name="ywy" style={{ marginBottom: 4 }}>
