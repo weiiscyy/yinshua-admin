@@ -798,7 +798,7 @@ export default function OrderEntryPage() {
                     {/* 首检记录 */}
                     <div style={{ marginBottom: 16 }}>
                       <Form.Item label="首检记录" name="soujianjl" style={{ marginBottom: 4 }}>
-                        <Input.TextArea placeholder="首检记录" rows={1} />
+                        <Input placeholder="首检记录" />
                       </Form.Item>
                     </div>
 
