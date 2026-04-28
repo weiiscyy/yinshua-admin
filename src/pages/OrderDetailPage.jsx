@@ -402,6 +402,7 @@ function ZMOrderDetail({ order, productColor }) {
         <FieldRow label="花长" value={order.huachang} />
         <FieldRow label="成品尺寸" value={order.chenpingcc} />
         <FieldRow label="加工费" value={fmtNum(order.jiagongfei, 4)} />
+        <FieldRow2 label="首检记录" value={order.soujianjl} />
       </FieldGrid>
 
       {colorRows.length > 0 && (
@@ -465,7 +466,6 @@ function ZMOrderDetail({ order, productColor }) {
       <SectionTitle color={productColor}>其他信息</SectionTitle>
       <FieldRow2 label="工艺要求" value={order.gyyq} />
       <FieldRow2 label="质检" value={order.zm_zhijian} />
-      <FieldRow2 label="首检记录" value={order.soujianjl} />
     </div>
   );
 }
