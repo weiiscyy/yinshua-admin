@@ -108,6 +108,8 @@ export default function OrderEntryPage() {
   const params = useParams();
 
   const [ysSteps, setYsSteps] = useState({});
+  const [priceMode, setPriceMode] = useState('calc'); // YS/YM 总价模式: 'calc' | 'edit'
+  const [yszjManual, setYszjManual] = useState(null); // YS 手动输入值
 
   // Decode JWT to get current user for zhidan field (使用 base64url 解码，兼容 JWT)
   useEffect(function() {
@@ -262,6 +264,7 @@ export default function OrderEntryPage() {
   // 计算 YS 总计 元/只 = (软片+印工+PS版+铜锌版+电化铝+钢刀+轧钢刀+单价) / 印刷数量 + 贴塑 + UV + 切折
   // 计算 YM 总计 元/只 = (软片+PS版) / 印刷数量 + 单价 + 印工 + 切刀打洞/圆角穿线/整理包扎
   function calcTotal(f, product) {
+    if (priceMode === 'edit') return; // 编辑模式下不自动计算
     var v = f.getFieldsValue();
     var n = function(x){ return Number(x)||0; };
     var shuliang = n(v.shuliang);
@@ -594,10 +597,34 @@ export default function OrderEntryPage() {
                             );
                           })}
                           <tr style={{ background: '#e8f4fd', fontWeight: 600 }}>
-                            <td style={{ padding: '6px 8px', border: '1px solid #d0dce8' }}>总计 元/只</td>
+                            <td style={{ padding: '6px 8px', border: '1px solid #d0dce8' }}>
+                              总计 元/只
+                              <Button
+                                type="text"
+                                size="small"
+                                onClick={function() {
+                                  if (priceMode === 'calc') {
+                                    setPriceMode('edit');
+                                  } else {
+                                    setPriceMode('calc');
+                                    // 切回计算模式时，重新计算总价
+                                    calcTotal(form, 'YS');
+                                  }
+                                }}
+                                style={{ marginLeft: 6, fontSize: 10, height: 20, padding: '0 4px', color: priceMode === 'edit' ? '#e55' : '#2563eb' }}
+                              >{priceMode === 'calc' ? '计算' : '编辑'}</Button>
+                            </td>
                             <td colSpan="2" style={{ padding: '2px 4px', border: '1px solid #d0dce8', textAlign: 'right' }}>
                               <Form.Item name="yszj" style={{ marginBottom: 0 }}>
-                                <Input size="small" type="number" placeholder="自动计算" step="0.0001" style={{ textAlign: 'right', fontWeight: 600 }} disabled />
+                                <Input
+                                  size="small"
+                                  type="number"
+                                  placeholder={priceMode === 'calc' ? '自动计算' : '手动输入'}
+                                  step="0.0001"
+                                  style={{ textAlign: 'right', fontWeight: 600 }}
+                                  disabled={priceMode === 'calc'}
+                                  onChange={function(e) { setYszjManual(e.target.value); }}
+                                />
                               </Form.Item>
                             </td>
                           </tr>
@@ -747,10 +774,33 @@ export default function OrderEntryPage() {
                             );
                           })}
                           <tr style={{ background: '#e8f4fd', fontWeight: 600 }}>
-                            <td style={{ padding: '6px 8px', border: '1px solid #d0dce8' }}>总计 元/只</td>
+                            <td style={{ padding: '6px 8px', border: '1px solid #d0dce8' }}>
+                              总计 元/只
+                              <Button
+                                type="text"
+                                size="small"
+                                onClick={function() {
+                                  if (priceMode === 'calc') {
+                                    setPriceMode('edit');
+                                  } else {
+                                    setPriceMode('calc');
+                                    calcTotal(form, 'YM');
+                                  }
+                                }}
+                                style={{ marginLeft: 6, fontSize: 10, height: 20, padding: '0 4px', color: priceMode === 'edit' ? '#e55' : '#0891b2' }}
+                              >{priceMode === 'calc' ? '计算' : '编辑'}</Button>
+                            </td>
                             <td colSpan="4" style={{ padding: '2px 4px', border: '1px solid #d0dce8', textAlign: 'right' }}>
                               <Form.Item name="yszj" style={{ marginBottom: 0 }}>
-                                <Input size="small" type="number" placeholder="自动计算" step="0.001" style={{ textAlign: 'right', fontWeight: 600 }} disabled />
+                                <Input
+                                  size="small"
+                                  type="number"
+                                  placeholder={priceMode === 'calc' ? '自动计算' : '手动输入'}
+                                  step="0.001"
+                                  style={{ textAlign: 'right', fontWeight: 600 }}
+                                  disabled={priceMode === 'calc'}
+                                  onChange={function(e) { setYszjManual(e.target.value); }}
+                                />
                               </Form.Item>
                             </td>
                           </tr>
