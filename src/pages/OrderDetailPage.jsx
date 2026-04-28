@@ -387,6 +387,7 @@ function ZMOrderDetail({ order, productColor }) {
         <FieldRow label="下单公司" value={order.company} />
         <FieldRow label="发货单位" value={order.fahuodanwei} />
         <FieldRow label="款号" value={order.kuanhao} />
+        <FieldRow label="外发" value={order.waifa ? '是' : '否'} />
       </FieldGrid>
 
       <SectionTitle color={productColor}>生产规格</SectionTitle>
@@ -464,7 +465,6 @@ function ZMOrderDetail({ order, productColor }) {
       )}
 
       <SectionTitle color={productColor}>其他信息</SectionTitle>
-      <FieldRow label="外发" value={order.waifa ? '是' : '否'} />
       <FieldRow2 label="工艺要求" value={order.gyyq} />
       <FieldRow2 label="质检" value={order.zm_zhijian} />
     </div>
