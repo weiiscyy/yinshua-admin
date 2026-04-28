@@ -145,7 +145,7 @@ function YSOrderDetail({ order, productColor }) {
       <FieldGrid>
         <FieldRow label="用料质地" value={order.ylzd} />
         <FieldRow label="成品规格" value={order.cpgg} />
-        <FieldRow label="印刷数量" value={fmtNum(order.shuliang)} unit={order.dhdw} />
+        <FieldRow label="印刷数量" value={fmtNum(order.shuliang)} />
         <FieldRow label="拼数" value={fmtNum(order.pingshu)} />
         <FieldRow label="开料尺寸" value={order.klcc} />
         <FieldRow label="开数" value={fmtNum(order.kaishu)} />
@@ -271,7 +271,7 @@ function YMOrderDetail({ order, productColor }) {
         <FieldRow label="委印单位" value={order.company} />
         <FieldRow label="发货单位" value={order.fahuodanwei} />
         <FieldRow label="印件编号" value={order.yjbhao} />
-        <FieldRow label="印刷数量" value={fmtNum(order.shuliang)} unit={order.dhdw} />
+        <FieldRow label="印刷数量" value={fmtNum(order.shuliang)} />
         <FieldRow label="拼数" value={fmtNum(order.pingshu)} />
         <FieldRow label="成品规格" value={order.cpgg} />
         <FieldRow label="所属车间" value={['', '纸盒', '印刷单', '客户印'][order.sclcClass] || '-'} />
@@ -392,7 +392,7 @@ function ZMOrderDetail({ order, productColor }) {
       <SectionTitle color={productColor}>生产规格</SectionTitle>
       <FieldGrid>
         <FieldRow label="卷送生产班别" value={order.proudbanbie} />
-        <FieldRow label="生产机型" value={order.dhdw} />
+        <FieldRow label="生产机型" value={order.proudnumber} />
         <FieldRow label="基价" value={fmtNum(order.jijia, 4)} />
         <FieldRow label="总干纬" value={fmtNum(order.allcount)} />
         <FieldRow label="纬密" value={order.weidu} />
