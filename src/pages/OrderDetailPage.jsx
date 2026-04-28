@@ -25,12 +25,12 @@ function hasValue(order, fields) {
 }
 
 // ============== 通用组件 ==============
-function FieldRow({ label, value }) {
+function FieldRow({ label, value, unit }) {
   if (value == null || value === '' || value === 0) value = '-';
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8, padding: '3px 0', borderBottom: '1px solid #f0f0f0' }}>
       <Text style={{ fontSize: 12, color: '#666', flexShrink: 0 }}>{label}</Text>
-      <Text style={{ fontSize: 13, color: '#333', fontWeight: 500, textAlign: 'right', wordBreak: 'break-all' }}>{value}</Text>
+      <Text style={{ fontSize: 13, color: '#333', fontWeight: 500, textAlign: 'right', wordBreak: 'break-all' }}>{value}{unit ? <span style={{ color: '#888', fontWeight: 400 }}> {unit}</span> : null}</Text>
     </div>
   );
 }
@@ -145,7 +145,7 @@ function YSOrderDetail({ order, productColor }) {
       <FieldGrid>
         <FieldRow label="用料质地" value={order.ylzd} />
         <FieldRow label="成品规格" value={order.cpgg} />
-        <FieldRow label="印刷数量" value={fmtNum(order.shuliang)} />
+        <FieldRow label="印刷数量" value={fmtNum(order.shuliang)} unit={order.dhdw} />
         <FieldRow label="拼数" value={fmtNum(order.pingshu)} />
         <FieldRow label="开料尺寸" value={order.klcc} />
         <FieldRow label="开数" value={fmtNum(order.kaishu)} />
@@ -271,7 +271,7 @@ function YMOrderDetail({ order, productColor }) {
         <FieldRow label="委印单位" value={order.company} />
         <FieldRow label="发货单位" value={order.fahuodanwei} />
         <FieldRow label="印件编号" value={order.yjbhao} />
-        <FieldRow label="印刷数量" value={fmtNum(order.shuliang)} />
+        <FieldRow label="印刷数量" value={fmtNum(order.shuliang)} unit={order.dhdw} />
         <FieldRow label="拼数" value={fmtNum(order.pingshu)} />
         <FieldRow label="成品规格" value={order.cpgg} />
         <FieldRow label="所属车间" value={['', '纸盒', '印刷单', '客户印'][order.sclcClass] || '-'} />
@@ -381,7 +381,7 @@ function ZMOrderDetail({ order, productColor }) {
         <FieldRow label="交货日期" value={fmtDate(order.overdate)} />
         <FieldRow label="制单" value={order.zhidan} />
         <FieldRow label="花号" value={order.huahao} />
-        <FieldRow label="订货数量" value={fmtNum(order.shuliang)} />
+        <FieldRow label="订货数量" value={fmtNum(order.shuliang)} unit={order.dhdw} />
         <FieldRow label="所需时间" value={fmtDate(order.sxdate)} />
         <FieldRow label="业务员" value={order.ywy} />
         <FieldRow label="下单公司" value={order.company} />
