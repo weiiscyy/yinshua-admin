@@ -148,7 +148,7 @@ export default function OrderEntryPage() {
        'beizhu','beizhuYS','beizhuYM','beizhuZM','beizhu8',
        'danjia','sydazhang','syMoney','yszj',
        'lldate','sclcClass','ylzd','klcc','kaishu','xukaisl','bcsl',
-       'hzl1','hzl2','hzl3','hzl4','hzl5','hzl6','hzl7',
+       'hzl1','hzl2','hzl3','hzl4','hzl5','hzl6','hzl7','hzl8','hzl9','hzl10','hzl11','hzl12','hzl13','hzl14','hzl15','hzl16',
        'huahao','jijia','allcount','weidu','soujianjl','sxdate','zm_zhijian','proudbanbie',
        'jiage','fhdw','fhdate','fhr','cidiehao',
        'UpFile','beizhu1','beizhu2','beizhu3','beizhu4','beizhu5',
@@ -157,6 +157,19 @@ export default function OrderEntryPage() {
        'yss20','ysdw1','ysdw2','ysdw3','ysdw4','ysdw5','ysdw6','ysdw7','ysdw8','ysdw9','ysdw10',
        'ysyl1','ysyl2','ysyl3','ysyl4','ysyl5','ysyl6','ysyl7','ysyl8','ysyl9',
        'ysy20',
+       // ZM 特有字段（buildProgress ZM 返回的）
+       'chenpingcc','kuandu','changdu','huachang','kts',
+       // ZM 色卡明细（qw/ss/bz 各1-12）
+       'qw1','qw2','qw3','qw4','qw5','qw6','qw7','qw8','qw9','qw10','qw11','qw12',
+       'ss1','ss2','ss3','ss4','ss5','ss6','ss7','ss8','ss9','ss10','ss11','ss12',
+       'bz1','bz2','bz3','bz4','bz5','bz6','bz7','bz8','bz9','bz10','bz11','bz12',
+       // ZM 尺码明细（cmh/sl/lieshu 各1-10）
+       'cmh1','cmh2','cmh3','cmh4','cmh5','cmh6','cmh7','cmh8','cmh9','cmh10',
+       'sl1','sl2','sl3','sl4','sl5','sl6','sl7','sl8','sl9','sl10',
+       'lieshu1','lieshu2','lieshu3','lieshu4','lieshu5','lieshu6','lieshu7','lieshu8','lieshu9','lieshu10',
+       // ZM 工序状态
+       'jhkddClass','jhkprint','sccjjs','sccjyl','sccjdn','sccjsc','sccjwc','hzljs','fahuo',
+       'waifa',
       ].forEach(function(k) {
         if (d[k] !== undefined && d[k] !== null) {
           if (k === 'prouddate' || k === 'overdate' || k === 'lldate' || k === 'fhdate' || k === 'sxdate') {
@@ -183,8 +196,9 @@ export default function OrderEntryPage() {
         setStepsMap(ymMap);
       } else if (params.productType === 'ZM') {
         var zmMap = {};
-        Object.keys(STEPS_MAP_ZM).forEach(function(f) { if (d[f] === 1 || d[f] === true) zmMap[f] = true; });
+        for (var i = 1; i <= 16; i++) { if (d['hzl' + i] === 1 || d['hzl' + i] === true) zmMap['hzl' + i] = true; }
         setZmSteps(zmMap);
+        setStepsMap(zmMap);
       } else if (params.productType === 'DS') {
         var dsMap = {};
         Object.keys(STEPS_MAP_DS).forEach(function(f) { if (d[f] === 1 || d[f] === true) dsMap[f] = true; });
@@ -226,6 +240,7 @@ export default function OrderEntryPage() {
       const updated = { ...zmSteps };
       if (updated[field]) { delete updated[field]; } else { updated[field] = true; }
       setZmSteps(updated);
+      setStepsMap(updated);
     } else if (product === 'DS') {
       const updated = { ...dsSteps };
       if (updated[field]) { delete updated[field]; } else { updated[field] = true; }
@@ -290,10 +305,11 @@ export default function OrderEntryPage() {
       } else {
         sclcSteps = Object.keys(stepsMap).map(function(field) {
           if (activeProduct === 'ZM') {
-          var idx = ZM_PROCESS_LIST.indexOf(field);
-          return idx >= 0 ? 'hzl' + (idx + 1) + '-' + field : field;
-        }
-        if (activeProduct === 'YM') {
+            // stepsMap key 格式为 'hzl1'/'hzl2'... 直接提取编号
+            var num = field.replace(/[^0-9]/g, '');
+            return num ? 'hzl' + num : field;
+          }
+          if (activeProduct === 'YM') {
           // stepsMap key 是 hzl1/hzl2...，通过 STEPS_MAP_YMGX 反查索引
           var idx = Object.keys(STEPS_MAP_YMGX).indexOf(field);
           return idx >= 0 ? 'hzl' + (idx + 1) + '-' + STEPS_MAP_YMGX[field] : field;
