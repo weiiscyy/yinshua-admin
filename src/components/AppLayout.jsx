@@ -95,7 +95,10 @@ export default function AppLayout({ children, title, extra }) {
         <div className="sidebar-footer">
           {appVersion && (
             <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', padding: '4px 12px', textAlign: 'center' }}>
-              v{appVersion}
+              <a href="/changelog" target="_blank" rel="noopener noreferrer"
+                style={{ color: 'rgba(255,255,255,0.45)', textDecoration: 'none' }}
+                title="点击查看开发记录"
+              >v{appVersion}</a>
             </div>
           )}
           <div className="sidebar-user">
