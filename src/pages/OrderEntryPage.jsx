@@ -599,22 +599,31 @@ export default function OrderEntryPage() {
                           <tr style={{ background: '#e8f4fd', fontWeight: 600 }}>
                             <td style={{ padding: '6px 8px', border: '1px solid #d0dce8' }}>
                               总计 元/只
+                            </td>
+                            <td style={{ padding: '4px 6px', border: '1px solid #d0dce8' }}>
                               <Button
-                                type="text"
                                 size="small"
                                 onClick={function() {
                                   if (priceMode === 'calc') {
                                     setPriceMode('edit');
                                   } else {
                                     setPriceMode('calc');
-                                    // 切回计算模式时，重新计算总价
                                     calcTotal(form, 'YS');
                                   }
                                 }}
-                                style={{ marginLeft: 6, fontSize: 10, height: 20, padding: '0 4px', color: priceMode === 'edit' ? '#e55' : '#2563eb' }}
+                                style={{
+                                  fontSize: 12,
+                                  fontWeight: 600,
+                                  height: 24,
+                                  borderRadius: 4,
+                                  padding: '0 10px',
+                                  color: priceMode === 'edit' ? '#c0392b' : '#1d5fb5',
+                                  background: priceMode === 'edit' ? '#fdf0f0' : '#eff6ff',
+                                  border: '1px solid ' + (priceMode === 'edit' ? '#e77' : '#93c5fd'),
+                                }}
                               >{priceMode === 'calc' ? '计算' : '编辑'}</Button>
                             </td>
-                            <td colSpan="2" style={{ padding: '2px 4px', border: '1px solid #d0dce8', textAlign: 'right' }}>
+                            <td style={{ padding: '2px 4px', border: '1px solid #d0dce8', textAlign: 'right' }}>
                               <Form.Item name="yszj" style={{ marginBottom: 0 }}>
                                 <Input
                                   size="small"
@@ -776,8 +785,9 @@ export default function OrderEntryPage() {
                           <tr style={{ background: '#e8f4fd', fontWeight: 600 }}>
                             <td style={{ padding: '6px 8px', border: '1px solid #d0dce8' }}>
                               总计 元/只
+                            </td>
+                            <td style={{ padding: '4px 6px', border: '1px solid #d0dce8' }}>
                               <Button
-                                type="text"
                                 size="small"
                                 onClick={function() {
                                   if (priceMode === 'calc') {
@@ -787,7 +797,16 @@ export default function OrderEntryPage() {
                                     calcTotal(form, 'YM');
                                   }
                                 }}
-                                style={{ marginLeft: 6, fontSize: 10, height: 20, padding: '0 4px', color: priceMode === 'edit' ? '#e55' : '#0891b2' }}
+                                style={{
+                                  fontSize: 12,
+                                  fontWeight: 600,
+                                  height: 24,
+                                  borderRadius: 4,
+                                  padding: '0 10px',
+                                  color: priceMode === 'edit' ? '#c0392b' : '#0f766e',
+                                  background: priceMode === 'edit' ? '#fdf0f0' : '#f0fdfa',
+                                  border: '1px solid ' + (priceMode === 'edit' ? '#e77' : '#5eead4'),
+                                }}
                               >{priceMode === 'calc' ? '计算' : '编辑'}</Button>
                             </td>
                             <td colSpan="4" style={{ padding: '2px 4px', border: '1px solid #d0dce8', textAlign: 'right' }}>
