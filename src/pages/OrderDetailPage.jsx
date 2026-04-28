@@ -465,11 +465,8 @@ function ZMOrderDetail({ order, productColor }) {
 
       <SectionTitle color={productColor}>其他信息</SectionTitle>
       <FieldGrid>
-        <FieldRow label="制单人" value={order.zhidan} />
         <FieldRow label="发货日期" value={fmtDate(order.fhdate)} />
-        <FieldRow label="业务员" value={order.ywy} />
         <FieldRow label="发货人" value={order.fhr} />
-        <FieldRow label="发货单位" value={order.fahuodanwei} />
         <FieldRow label="整烫" value={order.zhengli} />
         <FieldRow label="外发" value={order.waifa ? '是' : '否'} />
         <FieldRow label="加工费" value={fmtNum(order.jiagongfei, 4)} />
