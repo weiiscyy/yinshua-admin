@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Form, Input, Select, DatePicker, Button, Card, Tabs, Checkbox, message } from 'antd';
-import { Plus, Pencil } from 'lucide-react';
+import { Form, Input, Select, DatePicker, Button, Card, Tabs, Checkbox, message, Modal, Table } from 'antd';
+import { Plus, Pencil, FileSearch } from 'lucide-react';
+const { RangePicker } = DatePicker;
 import dayjs from 'dayjs';
 import AppLayout from '../components/AppLayout';
 import { adminCreateOrder, adminGetOrder, adminUpdateOrder, adminListUsers } from '../api';
@@ -103,6 +104,11 @@ export default function OrderEntryPage() {
   const [isEdit, setIsEdit] = useState(false);
   const [editDdId, setEditDdId] = useState(null);
   const [editProductType, setEditProductType] = useState(null);
+  const [copyDialogVisible, setCopyDialogVisible] = useState(false); // 复制查询对话框
+  const [copySource, setCopySource] = useState(null); // 源单信息
+  const [copyList, setCopyList] = useState([]); // 查询结果
+  const [copyLoading, setCopyLoading] = useState(false); // 查询加载中
+  const [copyForm] = Form.useForm(); // 查询表单
 
   const navigate = useNavigate();
   const params = useParams();
@@ -125,6 +131,87 @@ export default function OrderEntryPage() {
       form.setFieldValue('prouddate', payload.prouddate || null);
     } catch (e) {
       console.error('[OrderEntry] JWT decode failed:', e);
+    }
+  }, []);
+
+  // 引用复制模式：从 URL 参数 copyFrom 加载源单数据
+  useEffect(function() {
+    var urlParams = new URLSearchParams(window.location.search);
+    var copyFrom = urlParams.get('copyFrom');
+    var copyProductType = urlParams.get('productType');
+    // 仅在新建订单页（非编辑）且有 copyFrom 参数时触发
+    if (!params.productType && !params.ddId && copyFrom && copyProductType && !copySource) {
+      setActiveProduct(copyProductType);
+      var token = localStorage.getItem('token') || '';
+      fetch('/api/admin/orders/' + copyProductType + '/' + copyFrom, {
+        headers: { 'Authorization': 'Bearer ' + token }
+      }).then(function(r) { return r.json(); }).then(function(result) {
+        var d = result && result.data ? result.data : (result || {});
+        if (!d || (result && result.error)) { message.error('加载引用订单数据失败'); return; }
+        var setFields = {};
+        ['ddbh','prouddate','company','fahuodanwei','yjbhao','cpgg','pingshu','shuliang','dhdw',
+         'kuanhao','proudnumber','ywy','zhengli','jiagongfei','klyaoqiu','jyyaoqiu','gyyq',
+         'beizhu','beizhuYS','beizhuYM','beizhuZM','beizhu8',
+         'danjia','sydazhang','syMoney','yszj',
+         'lldate','sclcClass','ylzd','klcc','kaishu','xukaisl','bcsl',
+         'huahao','jijia','allcount','weidu','soujianjl','sxdate','zm_zhijian','proudbanbie',
+         'jiage','fhdw','fhdate','fhr','cidiehao',
+         'UpFile','beizhu1','beizhu2','beizhu3','beizhu4','beizhu5',
+         'jine1','jine2','jine3','jine4','jine5','jine6','jine7','jine8','jine9','jine10',
+         'yssl1','yssl2','yssl3','yssl4','yssl5','yssl6','yssl7','yssl8','yssl9',
+         'yss20','ysdw1','ysdw2','ysdw3','ysdw4','ysdw5','ysdw6','ysdw7','ysdw8','ysdw9','ysdw10',
+         'ysyl1','ysyl2','ysyl3','ysyl4','ysyl5','ysyl6','ysyl7','ysyl8','ysyl9',
+         'ysy20',
+         'chenpingcc','kuandu','changdu','huachang','kts',
+         'qw1','qw2','qw3','qw4','qw5','qw6','qw7','qw8','qw9','qw10','qw11','qw12',
+         'ss1','ss2','ss3','ss4','ss5','ss6','ss7','ss8','ss9','ss10','ss11','ss12',
+         'bz1','bz2','bz3','bz4','bz5','bz6','bz7','bz8','bz9','bz10','bz11','bz12',
+         'cmh1','cmh2','cmh3','cmh4','cmh5','cmh6','cmh7','cmh8','cmh9','cmh10',
+         'sl1','sl2','sl3','sl4','sl5','sl6','sl7','sl8','sl9','sl10',
+         'lieshu1','lieshu2','lieshu3','lieshu4','lieshu5','lieshu6','lieshu7','lieshu8','lieshu9','lieshu10',
+         'jhkddClass','jhkprint','sccjjs','sccjyl','sccjdn','sccjsc','sccjwc','hzljs','fahuo',
+         'waifa',
+         'hzl1','hzl2','hzl3','hzl4','hzl5','hzl6','hzl7','hzl8','hzl9','hzl10','hzl11','hzl12','hzl13','hzl14','hzl15','hzl16',
+        ].forEach(function(k) {
+          if (d[k] !== undefined && d[k] !== null) {
+            if (k === 'prouddate' || k === 'overdate' || k === 'lldate' || k === 'fhdate' || k === 'sxdate') {
+              setFields[k] = d[k] ? dayjs(d[k]) : null;
+            } else {
+              setFields[k] = d[k];
+            }
+          }
+        });
+        delete setFields.ddbh;
+        delete setFields.overdate;
+        delete setFields.addtime;
+        delete setFields.lastupdate;
+        setFields.prouddate = dayjs();
+        setCopySource({ DD_id: copyFrom, product_type: copyProductType });
+        form.setFieldsValue(setFields);
+        if (copyProductType === 'YS') {
+          var ysMap = {};
+          ['hzlA1','hzlA2','hzlA3','hzlA4','hzlA5','hzlA6','hzlB3','hzlB4','hzlB5','hzlB6','hzlB7','hzlB8','hzlB11','hzlB12','hzlB13','hzlB14','hzlB15','hzlC1','hzlC3','hzlC4','hzlC5','hzlC6','hzlC7','hzlC8','hzlC9','hzlC10'].forEach(function(f) { if (d[f] === 1 || d[f] === true) ysMap[f] = true; });
+          setYsSteps(ysMap);
+          setStepsMap(ysMap);
+          Object.keys(ysMap).forEach(function(f) { form.setFieldValue(f, true); });
+        } else if (copyProductType === 'YM') {
+          var ymMap = {};
+          for (var i = 1; i <= 7; i++) { if (d['hzl' + i] === 1 || d['hzl' + i] === true) ymMap['hzl' + i] = true; }
+          setYmSteps(ymMap);
+          setStepsMap(ymMap);
+        } else if (copyProductType === 'ZM') {
+          var zmMap = {};
+          for (var i = 1; i <= 16; i++) { if (d['hzl' + i] === 1 || d['hzl' + i] === true) zmMap['hzl' + i] = true; }
+          setZmSteps(zmMap);
+          setStepsMap(zmMap);
+        }
+        message.success('已引用订单 #' + copyFrom + '，请检查数据后保存');
+        // 清除 URL 参数，避免刷新重复触发
+        window.history.replaceState({}, '', '/orders/new');
+      }).catch(function(err) {
+        console.error('[copyFrom] error:', err);
+        message.error('加载引用订单数据失败');
+      });
     }
   }, []);
 
@@ -212,6 +299,8 @@ export default function OrderEntryPage() {
     });
   }, []);
 
+  // 复制模式：新建订单时不再自动弹出查询对话框（改为侧边栏「查询下单」入口）
+
   // Auto-set prouddate to today
   useEffect(function() {
     if (!form.getFieldValue('prouddate')) {
@@ -248,6 +337,80 @@ export default function OrderEntryPage() {
       if (updated[field]) { delete updated[field]; } else { updated[field] = true; }
       setDsSteps(updated);
     }
+  };
+
+  var handleCopySelect = function(record) {
+    var pt = record.product_type;
+    setCopySource({ DD_id: record.DD_id, product_type: pt });
+    setActiveProduct(pt);
+    setCopyDialogVisible(false);
+    var token = localStorage.getItem('token') || '';
+    fetch('/api/admin/orders/' + pt + '/' + record.DD_id, {
+      headers: { 'Authorization': 'Bearer ' + (token || '') }
+    }).then(function(r) { return r.json(); }).then(function(result) {
+      var d = result && result.data ? result.data : (result || {});
+      if (!d || (result && result.error)) { message.error('加载订单数据失败'); return; }
+      var setFields = {};
+      ['ddbh','prouddate','company','fahuodanwei','yjbhao','cpgg','pingshu','shuliang','dhdw',
+       'kuanhao','proudnumber','ywy','zhengli','jiagongfei','klyaoqiu','jyyaoqiu','gyyq',
+       'beizhu','beizhuYS','beizhuYM','beizhuZM','beizhu8',
+       'danjia','sydazhang','syMoney','yszj',
+       'lldate','sclcClass','ylzd','klcc','kaishu','xukaisl','bcsl',
+       'huahao','jijia','allcount','weidu','soujianjl','sxdate','zm_zhijian','proudbanbie',
+       'jiage','fhdw','fhdate','fhr','cidiehao',
+       'UpFile','beizhu1','beizhu2','beizhu3','beizhu4','beizhu5',
+       'jine1','jine2','jine3','jine4','jine5','jine6','jine7','jine8','jine9','jine10',
+       'yssl1','yssl2','yssl3','yssl4','yssl5','yssl6','yssl7','yssl8','yssl9',
+       'yss20','ysdw1','ysdw2','ysdw3','ysdw4','ysdw5','ysdw6','ysdw7','ysdw8','ysdw9','ysdw10',
+       'ysyl1','ysyl2','ysyl3','ysyl4','ysyl5','ysyl6','ysyl7','ysyl8','ysyl9',
+       'ysy20',
+       'chenpingcc','kuandu','changdu','huachang','kts',
+       'qw1','qw2','qw3','qw4','qw5','qw6','qw7','qw8','qw9','qw10','qw11','qw12',
+       'ss1','ss2','ss3','ss4','ss5','ss6','ss7','ss8','ss9','ss10','ss11','ss12',
+       'bz1','bz2','bz3','bz4','bz5','bz6','bz7','bz8','bz9','bz10','bz11','bz12',
+       'cmh1','cmh2','cmh3','cmh4','cmh5','cmh6','cmh7','cmh8','cmh9','cmh10',
+       'sl1','sl2','sl3','sl4','sl5','sl6','sl7','sl8','sl9','sl10',
+       'lieshu1','lieshu2','lieshu3','lieshu4','lieshu5','lieshu6','lieshu7','lieshu8','lieshu9','lieshu10',
+       'jhkddClass','jhkprint','sccjjs','sccjyl','sccjdn','sccjsc','sccjwc','hzljs','fahuo',
+       'waifa',
+       'hzl1','hzl2','hzl3','hzl4','hzl5','hzl6','hzl7','hzl8','hzl9','hzl10','hzl11','hzl12','hzl13','hzl14','hzl15','hzl16',
+      ].forEach(function(k) {
+        if (d[k] !== undefined && d[k] !== null) {
+          if (k === 'prouddate' || k === 'overdate' || k === 'lldate' || k === 'fhdate' || k === 'sxdate') {
+            setFields[k] = d[k] ? dayjs(d[k]) : null;
+          } else {
+            setFields[k] = d[k];
+          }
+        }
+      });
+      delete setFields.ddbh;
+      delete setFields.overdate;
+      delete setFields.addtime;
+      delete setFields.lastupdate;
+      setFields.prouddate = dayjs();
+      form.setFieldsValue(setFields);
+      if (pt === 'YS') {
+        var ysMap = {};
+        ['hzlA1','hzlA2','hzlA3','hzlA4','hzlA5','hzlA6','hzlB3','hzlB4','hzlB5','hzlB6','hzlB7','hzlB8','hzlB11','hzlB12','hzlB13','hzlB14','hzlB15','hzlC1','hzlC3','hzlC4','hzlC5','hzlC6','hzlC7','hzlC8','hzlC9','hzlC10'].forEach(function(f) { if (d[f] === 1 || d[f] === true) ysMap[f] = true; });
+        setYsSteps(ysMap);
+        setStepsMap(ysMap);
+        Object.keys(ysMap).forEach(function(f) { form.setFieldValue(f, true); });
+      } else if (pt === 'YM') {
+        var ymMap = {};
+        for (var i = 1; i <= 7; i++) { if (d['hzl' + i] === 1 || d['hzl' + i] === true) ymMap['hzl' + i] = true; }
+        setYmSteps(ymMap);
+        setStepsMap(ymMap);
+      } else if (pt === 'ZM') {
+        var zmMap = {};
+        for (var i = 1; i <= 16; i++) { if (d['hzl' + i] === 1 || d['hzl' + i] === true) zmMap['hzl' + i] = true; }
+        setZmSteps(zmMap);
+        setStepsMap(zmMap);
+      }
+      message.success('已引用订单 #' + record.DD_id + '，请检查数据后保存');
+    }).catch(function(err) {
+      console.error('[handleCopySelect] error:', err);
+      message.error('加载订单数据失败');
+    });
   };
 
   useEffect(() => {
@@ -431,6 +594,15 @@ export default function OrderEntryPage() {
 
   return (
     <AppLayout>
+      {copySource && (
+        <div style={{ background: '#fff2f0', border: '1px solid #ffccc7', borderRadius: 4, padding: '10px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <FileSearch size={16} color="#ff4d4f" />
+          <span style={{ color: '#cf1322', fontSize: 13 }}>
+            引用自订单 <strong>#{copySource.DD_id}</strong>（{copySource.product_type}），请修改后保存
+          </span>
+          <Button size="small" onClick={function() { setCopySource(null); }} style={{ marginLeft: 'auto' }}>取消引用</Button>
+        </div>
+      )}
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '16px 16px 60px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <h2 style={{ margin: 0, fontSize: 16 }}>{isEdit ? '编辑订单' : '新建订单'}</h2>
@@ -1107,6 +1279,95 @@ export default function OrderEntryPage() {
           />
         </Form>
       </div>
+      {/* 引用复制订单查询对话框 */}
+      <Modal
+        title="选择引用订单"
+        open={copyDialogVisible}
+        onCancel={function() { setCopyDialogVisible(false); setCopySource(null); }}
+        footer={null}
+        width={800}
+        destroyOnClose
+      >
+        <div style={{ marginBottom: 16, padding: '12px 16px', background: '#f0f6ff', borderRadius: 6, fontSize: 13 }}>
+          <strong>提示：</strong>选择订单后将复制该单数据到表单，保存后生成新订单。原单数据不变。
+        </div>
+        <Form form={copyForm} layout="inline" style={{ marginBottom: 12 }} onFinish={function() {
+          var vals = copyForm.getFieldsValue();
+          var pt = vals.productType || 'YS';
+          var params = { product_type: pt };
+          if (vals.company) params.company = vals.company;
+          if (vals.dateRange && vals.dateRange[0]) params.start_date = vals.dateRange[0].format('YYYY-MM-DD');
+          if (vals.dateRange && vals.dateRange[1]) params.end_date = vals.dateRange[1].format('YYYY-MM-DD');
+          if (vals.yjbhao) params.yjbhao = vals.yjbhao;
+          if (vals.kuanhao) params.kuanhao = vals.kuanhao;
+          if (vals.huahao) params.huahao = vals.huahao;
+          if (vals.proudnumber) params.proudnumber = vals.proudnumber;
+          setCopyLoading(true);
+          var token = localStorage.getItem('token') || '';
+          fetch('/api/order-entry/copy-list?' + new URLSearchParams(params), {
+            headers: { 'Authorization': 'Bearer ' + token }
+          }).then(function(r) { return r.json(); }).then(function(res) {
+            var items = (res.items || []).map(function(item) { return Object.assign({}, item, { product_type: res.product_type }); });
+            setCopyList(items);
+            setCopyLoading(false);
+          }).catch(function() { setCopyLoading(false); });
+        }}>
+          <Form.Item name="productType" label="订单类型" initialValue="YS" style={{ marginBottom: 8 }}>
+            <Select style={{ width: 120 }} onChange={function() { copyForm.resetFields(['yjbhao','kuanhao','huahao','proudnumber']); }}>
+              <Option value="YS">YS 印刷</Option>
+              <Option value="YM">YM 印唛</Option>
+              <Option value="ZM">ZM 纸盒</Option>
+              <Option value="DS">DS 模切</Option>
+            </Select>
+          </Form.Item>
+          <Form.Item name="company" label="公司名称" style={{ marginBottom: 8 }}><Input placeholder="客户名称" style={{ width: 140 }} /></Form.Item>
+          <Form.Item name="dateRange" label="制单日期" style={{ marginBottom: 8 }}><RangePicker /></Form.Item>
+          <Form.Item noStyle shouldUpdate={function(a,b) { return b.productType !== a.productType; }}>
+            {function({getFieldValue}) {
+              var pt = getFieldValue('productType') || 'YS';
+              return React.createElement(React.Fragment, null,
+                (pt === 'YS' || pt === 'YM') && React.createElement(Form.Item, { name: 'yjbhao', label: '印件编号', style: { marginBottom: 8 } },
+                  React.createElement(Input, { placeholder: '印件编号', style: { width: 120 } })
+                ),
+                (pt === 'YS' || pt === 'YM') && React.createElement(Form.Item, { name: 'kuanhao', label: '款号', style: { marginBottom: 8 } },
+                  React.createElement(Input, { placeholder: '款号', style: { width: 120 } })
+                ),
+                pt === 'ZM' && React.createElement(Form.Item, { name: 'huahao', label: '花号', style: { marginBottom: 8 } },
+                  React.createElement(Input, { placeholder: '花号', style: { width: 120 } })
+                ),
+                pt === 'ZM' && React.createElement(Form.Item, { name: 'proudnumber', label: '生产机型', style: { marginBottom: 8 } },
+                  React.createElement(Input, { placeholder: '生产机型', style: { width: 120 } })
+                )
+              );
+            }}
+          </Form.Item>
+          <Form.Item style={{ marginBottom: 8 }}>
+            <Button type="primary" htmlType="submit" loading={copyLoading}>查询</Button>
+            <Button style={{ marginLeft: 8 }} onClick={function() { setCopyDialogVisible(false); setCopySource(null); }}>空白订单</Button>
+          </Form.Item>
+        </Form>
+
+        <Table
+          dataSource={copyList}
+          rowKey="DD_id"
+          size="small"
+          loading={copyLoading}
+          pagination={{ pageSize: 8, size: 'small' }}
+          onRow={function(record) { return { onClick: function() { handleCopySelect(record); }, style: { cursor: 'pointer' } }; }}
+          columns={[
+            { title: '订单号', dataIndex: 'DD_id', width: 80, render: function(v) { return '#' + v; } },
+            { title: '类型', dataIndex: 'product_type', width: 70, render: function(v) { return v; } },
+            { title: '公司名称', dataIndex: 'company', ellipsis: true },
+            { title: '制单日期', dataIndex: 'prouddate', width: 100, render: function(v) { return v ? dayjs(v).format('YYYY-MM-DD') : '-'; } },
+            { title: '印件编号', dataIndex: 'yjbhao', width: 100, render: function(v) { return v || '-'; } },
+            { title: '款号', dataIndex: 'kuanhao', width: 100, render: function(v) { return v || '-'; } },
+            { title: '花号', dataIndex: 'huahao', width: 80, render: function(v) { return v || '-'; } },
+            { title: '生产机型', dataIndex: 'proudnumber', width: 90, render: function(v) { return v || '-'; } },
+            { title: '总价', dataIndex: 'yszj', width: 80, render: function(v) { return v != null ? parseFloat(v).toFixed(4) : '-'; } },
+          ]}
+          style={{ marginTop: 8 }}
+        />
+      </Modal>
     </AppLayout>
   );
 }

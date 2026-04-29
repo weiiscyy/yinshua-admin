@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { key: 'label1', label: '订单管理', section: true },
   { key: '/orders', label: '订单列表', icon: <UnorderedListOutlined /> },
   { key: '/orders/new', label: '新建订单', icon: <PlusSquareOutlined /> },
+  { key: '/query-order', label: '查询下单', icon: <SearchOutlined /> },
   { key: 'divider2', label: '', divider: true },
   { key: '/production', label: '生产报工', icon: <PlayCircleOutlined />, highlight: true },
   { key: '/jhk-edit', label: '车间订单修改', icon: <EditOutlined /> },
@@ -27,6 +28,7 @@ const BOTTOM_TABS = [
   { key: '/', label: '首页', icon: <DashboardOutlined /> },
   { key: '/orders', label: '订单', icon: <UnorderedListOutlined /> },
   { key: '/orders/new', label: '新建', icon: <PlusSquareOutlined /> },
+  { key: '/query-order', label: '查询下单', icon: <SearchOutlined /> },
   { key: '/production', label: '报工', icon: <PlayCircleOutlined /> },
   { key: '/query', label: '查询', icon: <SearchOutlined /> },
 ];
