@@ -227,6 +227,7 @@ async function buildPrintHtml(order, productType) {
   if (o.kuanhao) baseInfoItems.push({ label: '款号', value: o.kuanhao });
   if (o.fahuodanwei) baseInfoItems.push({ label: '发货单位', value: o.fahuodanwei });
   if (o.waifa) baseInfoItems.push({ label: '外发', value: '是' });
+  else if (o.waifa == 0) baseInfoItems.push({ label: '外发', value: '否' });
 
   var baseInfoGrid = '';
   for (var bi = 0; bi < baseInfoItems.length; bi++) {
@@ -302,6 +303,11 @@ export function openFahuoPrint(data) {
 
 // ── 打开订单打印窗口 ─────────────────────────────────────────────────────────
 export async function openOrderPrint(order, productType) {
+  // YS 使用 React 打印页（还原旧系统格式）
+  if (productType === 'YS') {
+    var win = window.open('/print/ys/' + order.DD_id, '_blank', 'width=800,height=700,scrollbars=yes');
+    return;
+  }
   var html = await buildPrintHtml(order, productType);
   var win = window.open('', '_blank', 'width=800,height=600,scrollbars=yes');
   if (win) { win.document.write(html); win.document.close(); }

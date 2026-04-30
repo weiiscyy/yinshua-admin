@@ -135,10 +135,10 @@ function YSOrderDetail({ order, productColor }) {
         <FieldRow label="发货单位" value={order.fahuodanwei} />
         <FieldRow label="款号" value={order.kuanhao} />
         <FieldRow label="印件编号" value={order.yjbhao} />
-        <FieldRow label="品名" value={order.proudnumber} />
+        <FieldRow label="品名" value={order.jiagongfei} />
         <FieldRow label="所属车间" value={['', '纸盒', '印刷单', '客户印'][order.sclcClass] || '-'} />
-        <FieldRow label="业务员" value={order.ywy} />
-        <FieldRow label="外发" value={order.waifa ? '是' : '否'} />
+        <FieldRow label="业务员" value={order.ywy_name || order.ywy} />
+        <FieldRow label="外发" value={order.waifa == 1 ? '是' : '否'} />
       </FieldGrid>
 
       <SectionTitle color={productColor}>用料与规格</SectionTitle>
@@ -276,10 +276,10 @@ function YMOrderDetail({ order, productColor }) {
         <FieldRow label="成品规格" value={order.cpgg} />
         <FieldRow label="所属车间" value={['', '纸盒', '印刷单', '客户印'][order.sclcClass] || '-'} />
         <FieldRow label="用料质地" value={order.ylzd} />
-        <FieldRow label="业务员" value={order.ywy} />
+        <FieldRow label="业务员" value={order.ywy_name || order.ywy} />
         <FieldRow label="款号" value={order.kuanhao} />
-        <FieldRow label="品名" value={order.proudnumber} />
-        <FieldRow label="外发" value={order.waifa ? '是' : '否'} />
+        <FieldRow label="品名" value={order.jiagongfei} />
+        <FieldRow label="外发" value={order.waifa == 1 ? '是' : '否'} />
       </FieldGrid>
 
       {hasAnyPrice && (
@@ -383,11 +383,11 @@ function ZMOrderDetail({ order, productColor }) {
         <FieldRow label="花号" value={order.huahao} />
         <FieldRow label="订货数量" value={fmtNum(order.shuliang)} unit={order.dhdw} />
         <FieldRow label="所需时间" value={fmtDate(order.sxdate)} />
-        <FieldRow label="业务员" value={order.ywy} />
+        <FieldRow label="业务员" value={order.ywy_name || order.ywy} />
         <FieldRow label="下单公司" value={order.company} />
         <FieldRow label="发货单位" value={order.fahuodanwei} />
         <FieldRow label="款号" value={order.kuanhao} />
-        <FieldRow label="外发" value={order.waifa ? '是' : '否'} />
+        <FieldRow label="外发" value={order.waifa == 1 ? '是' : '否'} />
       </FieldGrid>
 
       <SectionTitle color={productColor}>生产规格</SectionTitle>
@@ -489,7 +489,7 @@ function DSOrderDetail({ order, productColor }) {
         <FieldRow label="款号" value={order.kuanhao} />
         <FieldRow label="价格" value={fmtNum(order.jiage, 2)} />
         <FieldRow label="发货" value={order.dhdw} />
-        <FieldRow label="品名" value={order.proudnumber} />
+        <FieldRow label="品名" value={order.jiagongfei} />
       </FieldGrid>
 
       {hasAnyCraft && (
@@ -503,11 +503,11 @@ function DSOrderDetail({ order, productColor }) {
       <FieldGrid>
         <FieldRow label="制单人" value={order.zhidan} />
         <FieldRow label="发货日期" value={fmtDate(order.fhdate)} />
-        <FieldRow label="业务员" value={order.ywy} />
+        <FieldRow label="业务员" value={order.ywy_name || order.ywy} />
         <FieldRow label="发货人" value={order.fhr} />
         <FieldRow label="发货单位" value={order.fahuodanwei} />
         <FieldRow label="整烫" value={order.zhengli} />
-        <FieldRow label="外发" value={order.waifa ? '是' : '否'} />
+        <FieldRow label="外发" value={order.waifa == 1 ? '是' : '否'} />
         <FieldRow label="加工费" value={fmtNum(order.jiagongfei, 4)} />
       </FieldGrid>
       {order.upfile && <div style={{ padding: '4px 0', fontSize: 12, color: '#555' }}>附件：有</div>}

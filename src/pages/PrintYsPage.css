@@ -1,0 +1,322 @@
+/* PrintYsPage.css - 还原旧系统 YS 印刷订单打印格式 */
+@import './PrintPage.css';
+
+/* 页面整体 */
+.ys-print-page {
+  background: #fff;
+  min-height: 100vh;
+}
+
+.ys-toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 16px;
+  background: #f5f5f5;
+  border-bottom: 2px solid #ddd;
+  margin: -20px -20px 0 -20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.ys-print-content {
+  padding: 20px 30px;
+  max-width: 720px;
+  margin: 0 auto;
+  font-family: '黑体', 'SimHei', sans-serif;
+  font-size: 13px;
+  color: #000;
+}
+
+/* ===== 标题区 ===== */
+.ys-top {
+  margin-bottom: 4px;
+}
+
+.ys-title-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ys-company-title {
+  font-size: 22px;
+  font-weight: bold;
+  text-align: center;
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+}
+
+.ys-order-title {
+  font-size: 13px;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+/* ===== 基本信息区 ===== */
+.ys-info {
+  margin-bottom: 6px;
+}
+
+.ys-info-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ys-info-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0;
+  margin: 0 0 3px 0;
+  padding: 0;
+  line-height: 24px;
+}
+
+.ys-label {
+  font-weight: normal;
+  white-space: nowrap;
+  padding: 0 2px;
+  font-size: 13px;
+}
+
+.ys-input {
+  border: none;
+  border-bottom: 1px solid #000;
+  background: transparent;
+  font-size: 13px;
+  font-family: inherit;
+  color: #000;
+  padding: 1px 3px;
+  height: 20px;
+  line-height: 20px;
+  outline: none;
+  box-shadow: none;
+  min-width: 30px;
+}
+
+.ys-input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* input 宽度设置 */
+.ys-input-long  { width: 200px !important; }
+.ys-input-long2 { width: 220px !important; }
+.ys-input-short { width: 70px !important; }
+.ys-input-shorter { width: 50px !important; }
+.ys-input-shortest { width: 40px !important; }
+
+/* ===== 中间行：价格表 + 要求表 + 备注 ===== */
+.ys-mid-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 6px;
+  align-items: flex-start;
+}
+
+/* 价格小表 */
+.ys-price-table-wrap {
+  flex: 0 0 auto;
+}
+
+.ys-price-table {
+  border-collapse: collapse;
+  border: 1px solid #000;
+  width: 230px;
+}
+
+.ys-price-table td {
+  border: 1px solid #000;
+  padding: 4px 6px;
+  font-size: 12px;
+  text-align: center;
+  height: 28px;
+  vertical-align: middle;
+}
+
+.ys-price-th {
+  background: #f0f0f0;
+  font-weight: bold;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* 要求表 */
+.ys-req-table-wrap {
+  flex: 1;
+}
+
+.ys-req-table {
+  border-collapse: collapse;
+  border: 1px solid #000;
+  width: 100%;
+  height: 95px;
+}
+
+.ys-req-table td {
+  border: 1px solid #000;
+  padding: 3px 6px;
+  font-size: 12px;
+  vertical-align: top;
+  height: 28px;
+}
+
+.ys-req-th {
+  width: 70px;
+  background: #f0f0f0;
+  text-align: center;
+  font-weight: bold;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.ys-req-content {
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+/* 备注 */
+.ys-remark-wrap {
+  flex: 0 0 auto;
+  width: 160px;
+}
+
+.ys-remark-table {
+  border-collapse: collapse;
+  border: 1px solid #000;
+  width: 160px;
+  height: 95px;
+}
+
+.ys-remark-table td {
+  border: 1px solid #000;
+  padding: 3px 6px;
+  font-size: 12px;
+  vertical-align: top;
+}
+
+.ys-remark-content {
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  min-height: 60px;
+  display: block;
+}
+
+/* ===== 印刷明细标题 ===== */
+.ys-detail-title {
+  margin-bottom: 0;
+}
+
+.ys-detail-title-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #000;
+}
+
+.ys-detail-title-text {
+  text-align: center;
+  font-size: 15px;
+  font-weight: bold;
+  letter-spacing: 4px;
+  padding: 4px;
+}
+
+/* ===== 印刷明细表 ===== */
+.ys-detail-table-wrap {
+  margin-bottom: 6px;
+}
+
+.ys-detail-table {
+  border-collapse: collapse;
+  border: 1px solid #000;
+  width: 100%;
+}
+
+.ys-detail-table td {
+  border: 1px solid #000;
+  padding: 4px 6px;
+  font-size: 12px;
+  text-align: center;
+  height: 26px;
+  vertical-align: middle;
+}
+
+.ys-detail-th {
+  background: #f0f0f0;
+  font-weight: bold;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.ys-detail-row-label {
+  font-size: 12px;
+  text-align: center !important;
+}
+
+.ys-detail-total-label {
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+.ys-detail-total-value {
+  font-weight: bold;
+}
+
+/* ===== 底部信息 ===== */
+.ys-bottom {
+  margin-top: 4px;
+}
+
+.ys-bottom-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* ===== 打印媒体查询 ===== */
+@media print {
+  .ys-toolbar {
+    display: none !important;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: #fff;
+  }
+
+  .ys-print-page {
+    padding: 0;
+    margin: 0;
+    background: #fff;
+  }
+
+  .ys-print-content {
+    padding: 12mm 15mm;
+    max-width: 100%;
+  }
+
+  .ys-input {
+    border-bottom: 1px solid #000;
+  }
+
+  /* 避免分页 */
+  .ys-info,
+  .ys-mid-row,
+  .ys-detail-title,
+  .ys-detail-table-wrap,
+  .ys-bottom {
+    page-break-inside: avoid;
+  }
+
+  .ys-detail-table {
+    page-break-inside: avoid;
+  }
+
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+}

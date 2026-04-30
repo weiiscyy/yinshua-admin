@@ -16,6 +16,7 @@ import ProductionPage from './pages/ProductionPage';
 import JhkEditPage from './pages/JhkEditPage';
 import QueryOrderPage from './pages/QueryOrderPage';
 import UserManagePage from './pages/UserManagePage';
+import PrintYsPage from './pages/PrintYsPage';
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem('token');
@@ -53,6 +54,8 @@ export default function App() {
             <Route path="/jhk-edit" element={<ProtectedRoute><JhkEditPage /></ProtectedRoute>} />
             <Route path="/query-order" element={<ProtectedRoute><QueryOrderPage /></ProtectedRoute>} />
             <Route path="/users" element={<ProtectedRoute><UserManagePage /></ProtectedRoute>} />
+            <Route path="/print/ys/:ddId" element={<PrintYsPage />} />
+            <Route path="/print/ys" element={<PrintYsPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </RouterInit>

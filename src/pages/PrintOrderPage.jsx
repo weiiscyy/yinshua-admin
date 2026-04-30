@@ -85,7 +85,7 @@ export default function PrintOrderPage({ productType, ddId }) {
             {o.yjbhao ? <div><span className="label">料号/花号：</span><span className="value">{o.yjbhao}</span></div> : null}
             {o.kuanhao ? <div><span className="label">款号：</span><span className="value">{o.kuanhao}</span></div> : null}
             {o.fahuodanwei ? <div><span className="label">发货单位：</span><span className="value">{o.fahuodanwei}</span></div> : null}
-            {o.waifa ? <div><span className="label">外发：</span><span className="value">是</span></div> : null}
+            {o.waifa == 1 ? <div><span className="label">外发：</span><span className="value">是</span></div> : <div><span className="label">外发：</span><span className="value">否</span></div>}
           </div>
         </div>
 

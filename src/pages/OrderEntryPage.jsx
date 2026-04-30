@@ -641,7 +641,7 @@ export default function OrderEntryPage() {
                         <Form.Item label="发货单位" name="fahuodanwei" style={{ marginBottom: 4 }}><Input placeholder="发货单位" /></Form.Item>
                         <Form.Item label="款号" name="kuanhao" style={{ marginBottom: 4 }}><Input placeholder="款号" /></Form.Item>
                         <Form.Item label={<LabelWithStar required>印件编号</LabelWithStar>} name="yjbhao" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="印件编号" /></Form.Item>
-                        <Form.Item label="品名" name="proudnumber" style={{ marginBottom: 4 }}><Input placeholder="品名" /></Form.Item>
+                        <Form.Item label="品名" name="jiagongfei" style={{ marginBottom: 4 }}><Input placeholder="品名" /></Form.Item>
                         <Form.Item label={<LabelWithStar required>所属车间</LabelWithStar>} name="sclcClass" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}>
                           <Select placeholder="请选择" allowClear>
                             <Option value={1}>纸盒</Option>
@@ -865,7 +865,8 @@ export default function OrderEntryPage() {
                         </Form.Item>
                         <Form.Item label="款号" name="kuanhao" style={{ marginBottom: 4 }}><Input placeholder="款号" /></Form.Item>
                         <Form.Item label="加工费" name="jiagongfei" style={{ marginBottom: 4 }}><Input placeholder="加工费" type="number" step="0.01" /></Form.Item>
-                        <Form.Item label="品名" name="proudnumber" style={{ marginBottom: 4 }}><Input placeholder="品名" /></Form.Item>
+                        <Form.Item label="机印型号" name="proudnumber" style={{ marginBottom: 4 }}><Input placeholder="机印型号" /></Form.Item>
+                        <Form.Item label="品名" name="jiagongfei" style={{ marginBottom: 4 }}><Input placeholder="品名" /></Form.Item>
                         <Form.Item label="外发" name="waifa" valuePropName="checked" style={{ marginBottom: 4 }}><Checkbox /></Form.Item>
                       </div>
                     </div>
