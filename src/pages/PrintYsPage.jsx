@@ -1,9 +1,8 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Spin, Button } from 'antd';
 import { PrinterOutlined } from '@ant-design/icons';
 import { useParams } from 'react-router-dom';
 import { adminGetOrder } from '../api';
-import JsBarcode from 'jsbarcode';
 import dayjs from 'dayjs';
 import './PrintYsPage.css';
 
@@ -26,21 +25,6 @@ export default function PrintYsPage() {
       return () => clearTimeout(timer);
     }
   }, [loading, order]);
-
-  // 生成 CODE128 条形码
-  useEffect(() => {
-    if (!order || !order.ddbh) return;
-    try {
-      JsBarcode('#barcode-' + order.ddbh, String(order.ddbh), {
-        format: 'CODE128',
-        width: 2,
-        height: 50,
-        displayValue: true,
-        fontSize: 12,
-        margin: 0,
-      });
-    } catch (e) { console.error('barcode error', e); }
-  }, [order]);
 
   if (loading) {
     return (
@@ -87,15 +71,10 @@ export default function PrintYsPage() {
       <div className="ys-print-content">
         {/* 标题区 */}
         <div className="ys-top">
-          <table className="ys-title-table" cellSpacing="0" cellPadding="0" style={{width:'100%'}}>
+          <table className="ys-title-table" cellSpacing="0" cellPadding="0">
             <tr>
-              <td valign="top">
+              <td align="center" valign="top">
                 <div className="ys-company-title">嘉兴亚欣商标印务有限公司</div>
-                <div className="ys-order-title">印刷订单明细单</div>
-                <div className="ys-order-title" style={{fontSize:'14px',marginTop:'4px'}}>订单编号：{o.ddbh || ''}</div>
-              </td>
-              <td align="right" valign="top" style={{paddingTop:'4px'}}>
-                <svg id={"barcode-" + o.ddbh} />
               </td>
             </tr>
           </table>
@@ -286,6 +265,10 @@ export default function PrintYsPage() {
           <table className="ys-bottom-table" cellSpacing="0" cellPadding="0">
             <tr>
               <td>
+                <p className="ys-info-line">
+                  <span className="ys-label">订单编号：</span>
+                  <input className="ys-input" type="text" value={o.ddbh || ''} readOnly />
+                </p>
                 <p className="ys-info-line">
                   <span className="ys-label">客户联系人：</span>
                   <input className="ys-input" type="text" value={o.ywy_name || ''} readOnly />
