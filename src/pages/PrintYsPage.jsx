@@ -282,10 +282,6 @@ export default function PrintYsPage() {
             <tr>
               <td>
                 <p className="ys-info-line">
-                  <span className="ys-label">订单编号：</span>
-                  <input className="ys-input" type="text" value={o.ddbh || ''} readOnly />
-                </p>
-                <p className="ys-info-line">
                   <span className="ys-label">客户联系人：</span>
                   <input className="ys-input" type="text" value={o.ywy_name || ''} readOnly />
                   <span className="ys-label">制　单：</span>
