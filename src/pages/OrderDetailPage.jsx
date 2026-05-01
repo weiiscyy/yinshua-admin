@@ -106,8 +106,7 @@ const YSS_ANALYSIS = [
 ];
 
 function yssAnalysisRowHasValue(order, item) {
-  const v1 = order[item.sl]; const v2 = order[item.je];
-  return (v1 != null && v1 !== '') || (v2 != null && v2 !== '');
+  return true; // 所有行都显示，空值显示-
 }
 
 function YSOrderDetail({ order, productColor }) {

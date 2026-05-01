@@ -5,7 +5,7 @@ import { Plus, Pencil, FileSearch } from 'lucide-react';
 const { RangePicker } = DatePicker;
 import dayjs from 'dayjs';
 import AppLayout from '../components/AppLayout';
-import { adminCreateOrder, adminGetOrder, adminUpdateOrder, adminListUsers } from '../api';
+import api, { adminCreateOrder, adminGetOrder, adminUpdateOrder, adminListUsers } from '../api';
 
 const { Option } = Select;
 
@@ -142,10 +142,7 @@ export default function OrderEntryPage() {
     // 仅在新建订单页（非编辑）且有 copyFrom 参数时触发
     if (!params.productType && !params.ddId && copyFrom && copyProductType && !copySource) {
       setActiveProduct(copyProductType);
-      var token = localStorage.getItem('token') || '';
-      fetch('/api/admin/orders/' + copyProductType + '/' + copyFrom, {
-        headers: { 'Authorization': 'Bearer ' + token }
-      }).then(function(r) { return r.json(); }).then(function(result) {
+      api.get('/api/admin/orders/' + copyProductType + '/' + copyFrom).then(function(result) {
         var d = result && result.data ? result.data : (result || {});
         if (!d || (result && result.error)) { message.error('加载引用订单数据失败'); return; }
         var setFields = {};
@@ -223,11 +220,7 @@ export default function OrderEntryPage() {
     setEditProductType(params.productType);
     setActiveProduct(params.productType);
 
-    var token = localStorage.getItem('token');
-    fetch('/api/admin/orders/' + params.productType.toUpperCase() + '/' + params.ddId, {
-      headers: { 'Authorization': 'Bearer ' + (token || '') }
-    }).then(function(r) { return r.json(); })
-    .then(function(result) {
+    api.get('/api/admin/orders/' + params.productType.toUpperCase() + '/' + params.ddId).then(function(result) {
       var d = result && result.data ? result.data : (result || {});
       if (!d || (result && result.error)) { message.error('加载订单数据失败'); return; }
       // 填充表单字段
@@ -344,10 +337,7 @@ export default function OrderEntryPage() {
     setCopySource({ DD_id: record.DD_id, product_type: pt });
     setActiveProduct(pt);
     setCopyDialogVisible(false);
-    var token = localStorage.getItem('token') || '';
-    fetch('/api/admin/orders/' + pt + '/' + record.DD_id, {
-      headers: { 'Authorization': 'Bearer ' + (token || '') }
-    }).then(function(r) { return r.json(); }).then(function(result) {
+    api.get('/api/admin/orders/' + pt + '/' + record.DD_id).then(function(result) {
       var d = result && result.data ? result.data : (result || {});
       if (!d || (result && result.error)) { message.error('加载订单数据失败'); return; }
       var setFields = {};
@@ -530,30 +520,16 @@ export default function OrderEntryPage() {
         danjia: values.jijia || values.danjia || null,
       });
 
-      var token = localStorage.getItem('token');
-
       // 编辑模式：调用 PATCH 更新接口
       if (isEdit) {
-        var token = localStorage.getItem('token') || '';
-        console.log('[OrderEntry] PATCH token:', token.substring(0, 20) + '...');
-        console.log('[OrderEntry] PATCH body:', JSON.stringify(data).substring(0, 200));
-        fetch('/api/admin/orders/' + activeProduct + '/' + editDdId, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token,
-          },
-          body: JSON.stringify(data),
-        }).then(function(r) { return r.text().then(function(text) { console.log('[OrderEntry] PATCH response status:', r.status, 'body:', text.substring(0, 300)); return { ok: r.ok, status: r.status, data: text }; }); })
-        .then(function(result) {
-          try { result.data = JSON.parse(result.data); } catch(e) {}
-          if (result.data.success) {
+        adminUpdateOrder(activeProduct, editDdId, data).then(function(result) {
+          if (result.success) {
             message.success('修改成功');
             setTimeout(function() {
               navigate('/orders/' + activeProduct + '/' + editDdId);
             }, 1200);
           } else {
-            message.error(result.data.message || result.data.error || '修改失败');
+            message.error(result.message || result.error || '修改失败');
           }
         }).catch(function(err) {
           console.error('[OrderEntry] update error:', err);
@@ -563,22 +539,14 @@ export default function OrderEntryPage() {
       }
 
       // 新建模式
-      fetch('/api/order-entry', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + (token || ''),
-        },
-        body: JSON.stringify(data),
-      }).then(function(r) { return r.json().then(function(json) { return { ok: r.ok, status: r.status, data: json }; }); })
-      .then(function(result) {
-        if (result.data.success) {
-          message.success('创建成功，单号：' + result.data.ddbh);
+      adminCreateOrder(data).then(function(result) {
+        if (result.success) {
+          message.success('创建成功，单号：' + result.ddbh);
           setTimeout(function() {
-            navigate('/orders/' + activeProduct + '/' + result.data.DD_id);
+            navigate('/orders/' + activeProduct + '/' + result.DD_id);
           }, 1200);
         } else {
-          message.error(result.data.message || result.data.error || '创建失败');
+          message.error(result.message || result.error || '创建失败');
         }
       }).catch(function(err) {
         console.error('[OrderEntry] error:', err);
@@ -1304,10 +1272,7 @@ export default function OrderEntryPage() {
           if (vals.huahao) params.huahao = vals.huahao;
           if (vals.proudnumber) params.proudnumber = vals.proudnumber;
           setCopyLoading(true);
-          var token = localStorage.getItem('token') || '';
-          fetch('/api/order-entry/copy-list?' + new URLSearchParams(params), {
-            headers: { 'Authorization': 'Bearer ' + token }
-          }).then(function(r) { return r.json(); }).then(function(res) {
+          api.get('/api/order-entry/copy-list', { params: params }).then(function(res) {
             var items = (res.items || []).map(function(item) { return Object.assign({}, item, { product_type: res.product_type }); });
             setCopyList(items);
             setCopyLoading(false);
