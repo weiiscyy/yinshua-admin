@@ -1,6 +1,6 @@
 {
-  "version": "26050116-b035516",
-  "hash": "b035516",
-  "msg": "chore: 更新版本号",
-  "time": "2026-05-01T08:18:18.392Z"
+  "version": "26050116-1d8edde",
+  "hash": "1d8edde",
+  "msg": "fix(PrintYsPage): 删除印机型号/发料日期/订单编号标题行；@page margin:0压缩页眉页脚区域",
+  "time": "2026-05-01T08:32:35.811Z"
 }
