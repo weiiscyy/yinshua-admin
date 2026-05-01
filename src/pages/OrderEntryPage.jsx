@@ -862,14 +862,14 @@ export default function OrderEntryPage() {
                     <div style={{ marginBottom: 16 }}>
                       <div style={{ fontSize: 13, fontWeight: 600, color: '#2b6cb0', marginBottom: 8 }}>| 后整理工艺</div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-                        {[ // 后整理工艺 - YM
+                        {[ // 后整理工艺 - YM（标签顺序与旧系统 YMinput_Add.asp L313-347 一致）
                           { label: '烘色牢度', value: 'hzl1' },
                           { label: '切割', value: 'hzl2' },
                           { label: '超声波切割', value: 'hzl3' },
-                          { label: '三角折', value: 'hzl7' },
                           { label: '手工切折', value: 'hzl4' },
                           { label: '手工对折', value: 'hzl5' },
                           { label: '其它', value: 'hzl6' },
+                          { label: '三角折', value: 'hzl7' },
                         ].map(function(opt) {
                           return React.createElement(Form.Item, { key: opt.value, name: opt.value, valuePropName: 'checked', style: { marginBottom: 4 } },
                             React.createElement(Checkbox, { onChange: function() { handleStepToggle('YM', opt.value); } }, opt.label)

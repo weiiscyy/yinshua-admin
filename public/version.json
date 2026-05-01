@@ -1,6 +1,6 @@
 {
-  "version": "26050119-903fab8",
-  "hash": "903fab8",
-  "msg": "fix(OrderEntryPage): 修复所有fetch('/api/')相对路径问题，改用api实例(axios)调用；fix(OrderDetailPage): 印件分析明细空值字段显示字段名(显示-而非隐藏行)",
-  "time": "2026-05-01T11:25:31.218Z"
+  "version": "26050120-aa25e81",
+  "hash": "aa25e81",
+  "msg": "fix: adminCreateOrder调用正确API路径 /api/order-entry；fix: OrderDetailPage印件分析显示全部行(yssAnalysisRowHasValue=true)并加入UV行；fix: OrderEntryPage YS印件分析标签改为旧系统名称(贴塑双(单)面/切刀打洞等)；fix: PrintYsPage印件分析10行标签全部改为旧系统名称(软片/印工/PS版/铜锌版/电化铝/钢刀/轧钢刀/贴塑双(单)面/UV/切刀打洞/圆角穿线/整理包扎)；fix: api.js adminCreateOrder从/api/admin/orders改为/api/order-entry",
+  "time": "2026-05-01T12:46:02.991Z"
 }
