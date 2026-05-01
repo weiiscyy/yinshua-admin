@@ -34,9 +34,28 @@
   margin-bottom: 4px;
 }
 
-.ys-title-table {
-  width: 100%;
-  border-collapse: collapse;
+.ys-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  position: relative;
+}
+
+.ys-barcode {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.ys-title-center {
+  text-align: center;
+}
+
+.ys-order-type-title {
+  font-size: 15px;
+  font-weight: bold;
+  letter-spacing: 4px;
+  text-align: center;
 }
 
 .ys-company-title {

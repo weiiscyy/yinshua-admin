@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Spin, Button } from 'antd';
 import { PrinterOutlined } from '@ant-design/icons';
 import { useParams } from 'react-router-dom';
 import { adminGetOrder } from '../api';
+import JsBarcode from 'jsbarcode';
 import dayjs from 'dayjs';
 import './PrintYsPage.css';
 
@@ -18,6 +19,21 @@ export default function PrintYsPage() {
       setLoading(false);
     }).catch(() => { setLoading(false); });
   }, [ddId]);
+
+  // 生成 CODE128 条形码
+  useEffect(() => {
+    if (!order || !order.ddbh) return;
+    try {
+      JsBarcode('#barcode-' + order.ddbh, String(order.ddbh), {
+        format: 'CODE128',
+        width: 2,
+        height: 50,
+        displayValue: true,
+        fontSize: 12,
+        margin: 0,
+      });
+    } catch (e) { console.error('barcode error', e); }
+  }, [order]);
 
   useEffect(() => {
     if (!loading && order) {
@@ -71,13 +87,13 @@ export default function PrintYsPage() {
       <div className="ys-print-content">
         {/* 标题区 */}
         <div className="ys-top">
-          <table className="ys-title-table" cellSpacing="0" cellPadding="0">
-            <tr>
-              <td align="center" valign="top">
-                <div className="ys-company-title">嘉兴亚欣商标印务有限公司</div>
-              </td>
-            </tr>
-          </table>
+          <div className="ys-title-row">
+            <svg className="ys-barcode" id={"barcode-" + o.ddbh} />
+            <div className="ys-title-center">
+              <div className="ys-company-title">嘉兴亚欣商标印务有限公司</div>
+              <div className="ys-order-type-title">订货生产单(吊牌、丝印)</div>
+            </div>
+          </div>
         </div>
 
         {/* 基本信息区 */}
@@ -190,7 +206,7 @@ export default function PrintYsPage() {
         <div className="ys-detail-title">
           <table className="ys-detail-title-table" cellSpacing="0" cellPadding="0">
             <tr>
-              <td align="center" className="ys-detail-title-text">印　刷　明　细　清　单</td>
+              <td align="center" className="ys-detail-title-text">印　件　总　价　分　析</td>
             </tr>
           </table>
         </div>
@@ -199,7 +215,7 @@ export default function PrintYsPage() {
         <div className="ys-detail-table-wrap">
           <table className="ys-detail-table" cellSpacing="0" cellPadding="0">
             <tr>
-              <td align="center" className="ys-detail-th">色　序</td>
+              <td align="center" className="ys-detail-th">类　别</td>
               <td align="center" className="ys-detail-th">数　量</td>
               <td align="center" className="ys-detail-th" colSpan="2">金　　额</td>
             </tr>
