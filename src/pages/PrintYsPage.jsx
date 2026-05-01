@@ -220,12 +220,12 @@ export default function PrintYsPage() {
               <td align="center" className="ys-detail-th" colSpan="2">金　　额</td>
             </tr>
             <tr>
-              <td align="center" className="ys-detail-row-label">色1</td>
+              <td align="center" className="ys-detail-row-label">软片</td>
               <td align="center">{fmtMoney(o.yssl1, 0)}</td>
               <td align="center" colSpan="2">{fmtMoney(o.jine1, 3)}</td>
             </tr>
             <tr>
-              <td align="center" className="ys-detail-row-label">印刷</td>
+              <td align="center" className="ys-detail-row-label">印工</td>
               <td align="center">{fmtMoney(o.yssl2, 0)}</td>
               <td align="center" colSpan="2">{fmtMoney(o.jine2, 3)}</td>
             </tr>
@@ -235,37 +235,37 @@ export default function PrintYsPage() {
               <td align="center" colSpan="2">{fmtMoney(o.jine3, 3)}</td>
             </tr>
             <tr>
-              <td align="center" className="ys-detail-row-label">覆膜开胶</td>
+              <td align="center" className="ys-detail-row-label">铜锌版</td>
               <td align="center">{fmtMoney(o.yssl4, 0)}</td>
               <td align="center" colSpan="2">{fmtMoney(o.jine4, 3)}</td>
             </tr>
             <tr>
-              <td align="center" className="ys-detail-row-label">覆薄膜</td>
+              <td align="center" className="ys-detail-row-label">电化铝</td>
               <td align="center">{fmtMoney(o.yssl5, 0)}</td>
               <td align="center" colSpan="2">{fmtMoney(o.jine5, 3)}</td>
             </tr>
             <tr>
-              <td align="center" className="ys-detail-row-label">覆opp</td>
+              <td align="center" className="ys-detail-row-label">钢刀</td>
               <td align="center">{fmtMoney(o.yssl6, 0)}</td>
               <td align="center" colSpan="2">{fmtMoney(o.jine6, 3)}</td>
             </tr>
             <tr>
-              <td align="center" className="ys-detail-row-label">覆pe袋</td>
+              <td align="center" className="ys-detail-row-label">轧钢刀</td>
               <td align="center">{fmtMoney(o.yssl7, 0)}</td>
               <td align="center" colSpan="2">{fmtMoney(o.jine7, 3)}</td>
             </tr>
             <tr>
-              <td align="center" className="ys-detail-row-label">中　缝　双　面　印刷</td>
+              <td align="center" className="ys-detail-row-label">贴塑双(单)面</td>
               <td align="center">{fmtMoney(o.yssl8, 0)}</td>
               <td align="center" colSpan="2">{fmtMoney(o.jine8, 3)}</td>
             </tr>
             <tr>
-              <td align="center" className="ys-detail-row-label" style={{ fontSize: 11 }}>UV</td>
+              <td align="center" className="ys-detail-row-label">UV</td>
               <td align="center">{fmtMoney(o.yss20, 0)}</td>
               <td align="center" colSpan="2">{fmtMoney(o.jine10, 3)}</td>
             </tr>
             <tr>
-              <td align="center" className="ys-detail-row-label">中空圆孔带内托垫片等</td>
+              <td align="center" className="ys-detail-row-label">切刀打洞/圆角穿线/整理包扎</td>
               <td align="center">{fmtMoney(o.yssl9, 0)}</td>
               <td align="center" colSpan="2">{fmtMoney(o.jine9, 3)}</td>
             </tr>

@@ -68,7 +68,7 @@ export const adminUpdateOrder = (productType, ddId, fields) =>
   api.patch(`/api/admin/orders/${productType.toUpperCase()}/${ddId}`, fields);
 
 export const adminCreateOrder = (data) =>
-  api.post('/api/admin/orders', data);
+  api.post('/api/order-entry', data);
 
 export const adminGetOverview = () =>
   api.get('/api/admin/orders/stats/overview');

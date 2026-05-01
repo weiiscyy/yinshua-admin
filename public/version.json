@@ -1,6 +1,6 @@
 {
-  "version": "26050118-ba0d022",
-  "hash": "ba0d022",
-  "msg": "fix(PrintYsPage): 标题区公司名居中+条码右置；公司名下加'订货生产单(吊牌、丝印)'；'印刷明细清单'改'印件总价分析'；'色序'改'类别'",
-  "time": "2026-05-01T10:43:39.922Z"
+  "version": "26050119-903fab8",
+  "hash": "903fab8",
+  "msg": "fix(OrderEntryPage): 修复所有fetch('/api/')相对路径问题，改用api实例(axios)调用；fix(OrderDetailPage): 印件分析明细空值字段显示字段名(显示-而非隐藏行)",
+  "time": "2026-05-01T11:25:31.218Z"
 }

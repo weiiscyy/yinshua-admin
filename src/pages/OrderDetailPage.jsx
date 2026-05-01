@@ -102,6 +102,7 @@ const YSS_ANALYSIS = [
   { label: '钢刀', sl: 'yssl6', je: 'jine6' },
   { label: '轧钢刀', sl: 'yssl7', je: 'jine7' },
   { label: '贴塑双(单)面', sl: 'yssl8', je: 'jine8' },
+  { label: 'UV', sl: 'yss20', je: 'jine10' },
   { label: '切刀打洞/圆角穿线/整理包扎', sl: 'yssl9', je: 'jine9' },
 ];
 
