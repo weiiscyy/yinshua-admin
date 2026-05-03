@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Button, Tag, Typography, message, Spin, Tooltip, Popconfirm } from 'antd';
-import { ArrowLeftOutlined, CheckOutlined, UndoOutlined, PrinterOutlined, EditOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, CheckOutlined, UndoOutlined, PrinterOutlined, EditOutlined, BugOutlined } from '@ant-design/icons';
 import { openOrderPrint } from '../utils/print';
 import { useNavigate, useParams } from 'react-router-dom';
 import { adminGetOrder, adminUpdateStep } from '../api';
@@ -245,6 +245,7 @@ const YM_ANALYSIS = [
   { label: '钢刀', sl: 'yssl6', je: 'jine6' },
   { label: '轧钢刀', sl: 'yssl7', je: 'jine7' },
   { label: '贴塑双(单)面', sl: 'yssl8', je: 'jine8' },
+  { label: 'UV', sl: 'yss20', je: 'jine10' },
   { label: '切刀打洞/圆角穿线/整理包扎', sl: 'yssl9', je: 'jine9' },
 ];
 
@@ -577,6 +578,15 @@ export default function OrderDetailPage() {
         <Button icon={<PrinterOutlined />} onClick={() => openOrderPrint(order, productType)} style={{ borderRadius: 8 }}>
           打印订单
         </Button>
+        {(productType === 'YS' || productType === 'YM' || productType === 'ZM') && (
+          <Tooltip title="DEV测试版打印（不影响正式版）">
+            <Button icon={<BugOutlined />} onClick={() => {
+              window.open('/print-dev/' + productType.toLowerCase() + '/' + ddId, '_blank', 'width=800,height=700,scrollbars=yes');
+            }} style={{ borderRadius: 8, background: '#fff3cd', borderColor: '#ffc107', color: '#856404' }}>
+              调试打印
+            </Button>
+          </Tooltip>
+        )}
         {(!order.jhkprint || !order.jhkprintTime) && (
           <Button icon={<EditOutlined />} onClick={() => navigate('/orders/edit/' + productType + '/' + ddId)} style={{ borderRadius: 8 }}>
             编辑订单

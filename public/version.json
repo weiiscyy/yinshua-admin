@@ -1,6 +1,6 @@
 {
-  "version": "26050120-34527a0",
-  "hash": "34527a0",
-  "msg": "fix: YM前端工序标签顺序/hzl4-7与旧系统一致；后端YM INSERT新增yss20字段；后端新增YM zhengli UPDATE逻辑",
-  "time": "2026-05-01T12:59:50.819Z"
+  "version": "26050316-a2616c1",
+  "hash": "a2616c1",
+  "msg": "fix: PrintYsPage删除底部订单编号一行（订单编号不要显示）",
+  "time": "2026-05-03T08:38:54.914Z"
 }

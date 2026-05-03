@@ -190,8 +190,8 @@ async function buildPrintHtml(order, productType) {
   var PRODUCT_LABELS = { YS: '印刷', YM: '印刷面', ZM: '纸盒', DS: '模切' };
   var ptLabel = PRODUCT_LABELS[productType] || productType;
 
-  // 扫码报工 URL（使用当前页面 origin，方便部署）
-  var baseUrl = window.location.origin + '/production/report';
+  // 扫码报工 URL（使用当前页面 origin，指向 /production 页面）
+  var baseUrl = window.location.origin + '/production';
 
   // 生成未完成工序的二维码
   var qrUrls = {};

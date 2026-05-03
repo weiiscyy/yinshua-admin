@@ -901,6 +901,7 @@ export default function OrderEntryPage() {
                             { label: '钢刀', sl: 'yssl6', yl: 'ysyl6', je: 'jine6' },
                             { label: '轧钢刀', sl: 'yssl7', yl: 'ysyl7', je: 'jine7' },
                             { label: '贴塑双(单)面', sl: 'yssl8', yl: 'ysyl8', je: 'jine8' },
+                            { label: 'UV', sl: 'yss20', yl: 'ysy20', dw: 'ysdw10', je: 'jine10' },
                             { label: '切刀打洞/圆角穿线/整理包扎', sl: 'yssl9', yl: 'ysyl9', je: 'jine9' },
                           ].map(function(item) {
                             return React.createElement('tr', { key: item.label },
@@ -910,7 +911,13 @@ export default function OrderEntryPage() {
                                   React.createElement(Input, { size: 'small', type: 'number', placeholder: '-', style: { textAlign: 'right' } })
                                 )
                               ),
-                              React.createElement('td', { style: { padding: '4px 8px', border: '1px solid #d0dce8', textAlign: 'center', fontSize: 11, color: '#666' } }, '米/只'),
+                              React.createElement('td', { style: { padding: '4px 8px', border: '1px solid #d0dce8', textAlign: 'center', fontSize: 11, color: '#666' } },
+                                item.dw
+                                  ? React.createElement(Form.Item, { name: item.dw, style: { marginBottom: 0 } },
+                                      React.createElement(Input, { size: 'small', style: { textAlign: 'center' } })
+                                    )
+                                  : '米/只'
+                              ),
                               React.createElement('td', { style: { padding: '2px 4px', border: '1px solid #d0dce8' } },
                                 React.createElement(Form.Item, { name: item.yl, style: { marginBottom: 0 } },
                                   React.createElement(Input, { size: 'small', type: 'number', placeholder: '-', style: { textAlign: 'right' } })

@@ -15,4 +15,24 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+              return 'vendor-react';
+            }
+            if (id.includes('antd') || id.includes('@ant-design/icons')) {
+              return 'vendor-antd';
+            }
+            if (id.includes('xlsx')) {
+              return 'vendor-xlsx';
+            }
+            return 'vendor-misc';
+          }
+        },
+      },
+    },
+  },
 })
