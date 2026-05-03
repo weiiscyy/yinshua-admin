@@ -7,6 +7,11 @@ import JsBarcode from 'jsbarcode';
 import dayjs from 'dayjs';
 import './PrintYsPageDev.css';
 
+const ZM_GX_LABELS = [
+  '切折', '三角折', '对折', '切割', '超声波', '热切粘衬', '包边', '卷装',
+  '留样', '热切', '划口', '充棉', '打汽眼', '踩线', '烫钻', '盒装',
+];
+
 export default function PrintZmPageDev() {
   const { ddId } = useParams();
   const [order, setOrder] = useState(null);
@@ -80,8 +85,8 @@ export default function PrintZmPageDev() {
             <div className="ys-doc-title">订货生产单（纸盒）</div>
             <div className="ys-title-meta">
               <span className="ys-meta-pair">
-                <span className="ys-mlabel">印件编号</span>
-                <span className="ys-mvalue">{o.yjbhao || '—'}</span>
+                <span className="ys-mlabel">花号</span>
+                <span className="ys-mvalue">{o.huahao || '—'}</span>
               </span>
               <span className="ys-meta-pair">
                 <span className="ys-mlabel">下单公司</span>
@@ -107,52 +112,55 @@ export default function PrintZmPageDev() {
             <span className="ys-cell-value">{o.kuanhao || '—'}</span>
           </div>
           <div className="ys-base-cell">
-            <span className="ys-cell-label">品名</span>
-            <span className="ys-cell-value">{o.pingshu || '—'}</span>
+            <span className="ys-cell-label">生产机号</span>
+            <span className="ys-cell-value">{o.proudnumber || '—'}</span>
           </div>
           <div className="ys-base-cell">
             <span className="ys-cell-label">发货单位</span>
             <span className="ys-cell-value">{o.fahuodanwei || '—'}</span>
           </div>
           <div className="ys-base-cell">
-            <span className="ys-cell-label">单位</span>
-            <span className="ys-cell-value">{o.dhdw || '—'}</span>
+            <span className="ys-cell-label">卷送生产班别</span>
+            <span className="ys-cell-value">{o.proudbanbie || '—'}</span>
           </div>
           <div className="ys-base-cell">
-            <span className="ys-cell-label">印刷数量</span>
-            <span className="ys-cell-value ys-cell-strong">{o.shuliang != null ? Number(o.shuliang).toLocaleString() : '—'}</span>
+            <span className="ys-cell-label">印刷数量/单位</span>
+            <span className="ys-cell-value ys-cell-strong">{o.shuliang != null ? Number(o.shuliang).toLocaleString() : '—'}{o.dhdw ? `/${o.dhdw}` : ''}</span>
           </div>
           <div className="ys-base-cell">
-            <span className="ys-cell-label">产品规格</span>
-            <span className="ys-cell-value">{o.cpgg || '—'}</span>
+            <span className="ys-cell-label">基价</span>
+            <span className="ys-cell-value">{o.jijia != null ? fmtMoney(o.jijia, 4) : '—'}</span>
           </div>
           <div className="ys-base-cell">
-            <span className="ys-cell-label">花号</span>
-            <span className="ys-cell-value">{o.huahao || '—'}</span>
+            <span className="ys-cell-label">加工费</span>
+            <span className="ys-cell-value">{o.jiagongfei != null ? fmtMoney(o.jiagongfei, 4) : '—'}</span>
           </div>
         </div>
 
-        {/* === 价格 + 要求说明 2列 === */}
-        <div className="ys-2col-row">
-          {/* 价格小表 */}
-          <div className="ys-price-panel">
-            <div className="ys-panel-hd">价格汇总</div>
-            <table className="ys-price-tbl">
-              <tbody>
-                <tr><td>实用大张</td><td className="ys-tbl-num">{fmtMoney(o.sydazhang, 0)}</td></tr>
-                <tr><td>单价（元/张）</td><td className="ys-tbl-num">{fmtMoney(o.danjia, 3)}</td></tr>
-                <tr><td>金额（元）</td><td className="ys-tbl-num">{fmtMoney(o.syMoney, 3)}</td></tr>
-              </tbody>
-            </table>
-          </div>
+        {/* === 8字段独立表格 === */}
+        <table className="ys-specs-tbl">
+          <tbody>
+            <tr>
+              <td><span className="ys-cell-label">总千纬</span><span className="ys-cell-value">{o.allcount || '—'}</span></td>
+              <td><span className="ys-cell-label">纬密</span><span className="ys-cell-value">{o.weidu || '—'}</span></td>
+              <td><span className="ys-cell-label">宽度</span><span className="ys-cell-value">{o.kuandu || '—'}</span></td>
+              <td><span className="ys-cell-label">开条数</span><span className="ys-cell-value">{o.kts || '—'}</span></td>
+            </tr>
+            <tr>
+              <td><span className="ys-cell-label">总长</span><span className="ys-cell-value">{o.changdu || '—'}</span></td>
+              <td><span className="ys-cell-label">花长</span><span className="ys-cell-value">{o.huachang || '—'}</span></td>
+              <td><span className="ys-cell-label">成品尺寸</span><span className="ys-cell-value">{o.chenpingcc || '—'}</span></td>
+              <td><span className="ys-cell-label">首检记录</span><span className="ys-cell-value">{o.soujianjl || '—'}</span></td>
+            </tr>
+          </tbody>
+        </table>
 
-          {/* 要求说明 + 备注 */}
-          <div className="ys-req-panel">
-            <div className="ys-panel-hd">要求说明</div>
-            <div className="ys-req-row"><span className="ys-cell-label">工艺要求</span><span className="ys-req-val">{o.gyyq || '—'}</span></div>
-            <div className="ys-req-row"><span className="ys-cell-label">纸盒规格</span><span className="ys-req-val">{o.chenpingcc || '—'}</span></div>
-            <div className="ys-req-row"><span className="ys-cell-label">备注</span><span className="ys-req-val">{o.beizhuZM || '—'}</span></div>
-          </div>
+        {/* === 要求说明 === */}
+        <div className="ys-req-panel" style={{ width: '100%', border: '1px solid #000' }}>
+          <div className="ys-panel-hd">要求说明</div>
+          <div className="ys-req-row"><span className="ys-cell-label">工艺要求</span><span className="ys-req-val">{o.gyyq || '—'}</span></div>
+          <div className="ys-req-row"><span className="ys-cell-label">整理工序</span><span className="ys-req-val">{ZM_GX_LABELS.map((lbl, i) => o[`hzl${i+1}`] ? lbl : null).filter(Boolean).join(' / ') || '—'}</span></div>
+          <div className="ys-req-row"><span className="ys-cell-label">质检</span><span className="ys-req-val">{o.zm_zhijian || '—'}</span></div>
         </div>
 
         {/* === 纸盒尺寸（2列：左内容，右空白） === */}
