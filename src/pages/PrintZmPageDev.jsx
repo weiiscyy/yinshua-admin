@@ -53,18 +53,12 @@ export default function PrintZmPageDev() {
   const o = order;
   const waifaPrint = o.waifa === 1 ? '是' : '否';
 
-  const detailRows = [
-    { label: '软片', qty: o.yssl1, amt: o.jine1 },
-    { label: '印工', qty: o.yssl2, amt: o.jine2 },
-    { label: 'PS版', qty: o.yssl3, amt: o.jine3 },
-    { label: '铜锌版', qty: o.yssl4, amt: o.jine4 },
-    { label: '电化铝', qty: o.yssl5, amt: o.jine5 },
-    { label: '钢刀', qty: o.yssl6, amt: o.jine6 },
-    { label: '轧钢刀', qty: o.yssl7, amt: o.jine7 },
-    { label: '贴塑双(单)面', qty: o.yssl8, amt: o.jine8 },
-    { label: 'UV', qty: o.yss20, amt: o.jine10 },
-    { label: '切刀打洞/圆角穿线/整理包扎', qty: o.yssl9, amt: o.jine9 },
-  ];
+  // 尺码明细：收集有值的列
+  const sizeCols = Array.from({ length: 10 }, (_, i) => i + 1)
+    .filter(i => o[`cmh${i}`] || o[`sl${i}`] || o[`lieshu${i}`]);
+
+  // 尺码表行标签（数量/列数）
+  const sizeRowLabels = ['数量', '列数'];
 
   return (
     <div className="ys-dev-page">
@@ -163,54 +157,66 @@ export default function PrintZmPageDev() {
           <div className="ys-req-row"><span className="ys-cell-label">质检</span><span className="ys-req-val">{o.zm_zhijian || '—'}</span></div>
         </div>
 
-        {/* === 纸盒尺寸（2列：左内容，右空白） === */}
-        {(o.kuandu || o.changdu || o.huachang || o.weidu || o.allcount) && (
-          <div className="ys-gongyi-block">
-            <div className="ys-gy-left">
-              <div className="ys-panel-hd">纸盒规格</div>
-              <div className="ys-gy-row">
-                {o.kuandu && <span className="ys-gy-group"><b>宽度：</b>{o.kuandu}</span>}
-                {o.changdu && <span className="ys-gy-group"><b>长度：</b>{o.changdu}</span>}
-                {o.huachang && <span className="ys-gy-group"><b>花长：</b>{o.huachang}</span>}
-                {o.weidu && <span className="ys-gy-group"><b>纬度：</b>{o.weidu}</span>}
-                {o.allcount && <span className="ys-gy-group"><b>总数量：</b>{o.allcount}</span>}
-              </div>
-            </div>
-            <div className="ys-gy-right" />
-          </div>
-        )}
-
-        {/* === 价格明细（2列：左内容，右空白） === */}
-        <div className="ys-detail-block">
-          <div className="ys-detail-left">
-            <div className="ys-panel-hd">印件总价分析</div>
-            <table className="ys-detail-tbl">
+        {/* === 色卡明细：2列布局，左列放1-12行，右列留白 === */}
+        <div className="ys-req-panel" style={{ width: '100%', border: '1px solid #000', marginTop: 8 }}>
+          <div className="ys-panel-hd">色卡明细</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0 }}>
+            {/* 左列：1-12 */}
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, borderRight: '1px solid #e2e8f0' }}>
               <thead>
                 <tr>
-                  <th className="ys-th-left">类　别</th>
-                  <th className="ys-th-right">数　量</th>
-                  <th className="ys-th-right">金　额</th>
+                  <th style={{ padding: '3px 6px', background: '#f5f5f5', color: '#000', border: '1px solid #000', textAlign: 'center', width: '10%' }}>#</th>
+                  <th style={{ padding: '3px 6px', background: '#f5f5f5', color: '#000', border: '1px solid #000', textAlign: 'left', width: '30%' }}>千纬(QW)</th>
+                  <th style={{ padding: '3px 6px', background: '#f5f5f5', color: '#000', border: '1px solid #000', textAlign: 'left', width: '30%' }}>色纱(SS)</th>
+                  <th style={{ padding: '3px 6px', background: '#f5f5f5', color: '#000', border: '1px solid #000', textAlign: 'left' }}>备注(BZ)</th>
                 </tr>
               </thead>
               <tbody>
-                {detailRows.map((r, i) => (
-                  <tr key={i} className={i % 2 === 1 ? 'ys-row-alt' : ''}>
-                    <td>{r.label}</td>
-                    <td className="ys-td-right">{fmtMoney(r.qty, 0)}</td>
-                    <td className="ys-td-right">{fmtMoney(r.amt, 3)}</td>
+                {[1,2,3,4,5,6,7,8,9,10,11,12].map(i => (
+                  <tr key={i}>
+                    <td style={{ padding: '2px 4px', textAlign: 'center', color: '#666', border: '1px solid #000', background: '#f5f5f5', fontSize: 11 }}>{i}</td>
+                    <td style={{ padding: '2px 4px', border: '1px solid #000', fontSize: 12 }}>{o[`qw${i}`] || '-'}</td>
+                    <td style={{ padding: '2px 4px', border: '1px solid #000', fontSize: 12 }}>{o[`ss${i}`] || '-'}</td>
+                    <td style={{ padding: '2px 4px', border: '1px solid #000', fontSize: 12, color: '#666' }}>{o[`bz${i}`] || '-'}</td>
                   </tr>
                 ))}
               </tbody>
-              <tfoot>
+            </table>
+            {/* 右列：空白 */}
+            <div style={{ minHeight: 350 }} />
+          </div>
+        </div>
+
+        {/* === 尺码明细 === */}
+        {sizeCols.length > 0 && (
+          <div className="ys-req-panel" style={{ width: '100%', border: '1px solid #000', marginTop: 8 }}>
+            <div className="ys-panel-hd">尺码明细</div>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+              <thead>
                 <tr>
-                  <td colSpan="2" className="ys-tfoot-left">总　计　元/只</td>
-                  <td className="ys-tfoot-right">{fmtMoney(o.yszj, 3)}</td>
+                  <th style={{ padding: '3px 4px', background: '#f5f5f5', color: '#000', border: '1px solid #000', textAlign: 'center', minWidth: 60 }}>尺码号</th>
+                  {sizeCols.map(i => (
+                    <th key={i} style={{ padding: '3px 4px', background: '#f5f5f5', color: '#000', border: '1px solid #000', textAlign: 'center', fontSize: 11 }}>{o[`cmh${i}`] || '-'}</th>
+                  ))}
                 </tr>
-              </tfoot>
+              </thead>
+              <tbody>
+                {['sl', 'lieshu'].map((field, idx) => (
+                  <tr key={field}>
+                    <td style={{ padding: '2px 4px', background: '#f5f5f5', color: '#000', border: '1px solid #000', textAlign: 'center', fontSize: 10 }}>
+                      {sizeRowLabels[idx]}
+                    </td>
+                    {sizeCols.map(i => (
+                      <td key={i} style={{ padding: '2px 4px', border: '1px solid #000', textAlign: 'center', fontSize: 12 }}>
+                        {o[`${field}${i}`] || '-'}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
             </table>
           </div>
-          <div className="ys-detail-right" />
-        </div>
+        )}
 
         {/* === 底部信息 === */}
         <div className="ys-footer">
@@ -246,3 +252,4 @@ function fmtMoney(val, decimals) {
   if (isNaN(n)) return '';
   return n.toLocaleString('zh-CN', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 }
+
