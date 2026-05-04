@@ -580,12 +580,12 @@ export default function OrderEntryPage() {
         <Form form={form} layout="vertical" labelAlign="right" onValuesChange={function() { calcTotal(form, activeProduct); }}>
           <Tabs
             activeKey={activeProduct}
-            onChange={isEdit ? () => {} : setActiveProduct}
+            onChange={isEdit || copySource ? () => {} : setActiveProduct}
             items={[
               {
                 key: 'YS',
                 label: '📄 印刷(YS)',
-                disabled: isEdit,
+                disabled: isEdit || copySource,
                 children: (
                   <div>
                     {/* 基本信息 */}
@@ -792,7 +792,7 @@ export default function OrderEntryPage() {
               {
                                 key: 'YM',
                 label: '📄 印刷面(YM)',
-                disabled: isEdit,
+                disabled: isEdit || copySource,
                 children: (
                   <div>
                     {/* 基本信息 - 按老系统顺序 */}
@@ -992,7 +992,7 @@ export default function OrderEntryPage() {
               {
                                 key: 'ZM',
                 label: '📦 纸盒(ZM)',
-                disabled: isEdit,
+                disabled: isEdit || copySource,
                 children: (
                   <div>
                     {/* 基本信息 */}
@@ -1194,7 +1194,7 @@ export default function OrderEntryPage() {
               {
                                 key: 'DS',
                 label: '🃏 模切(DS)',
-                disabled: isEdit,
+                disabled: isEdit || copySource,
                 children: (
                   <div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0 12px', marginBottom: 12 }}>
