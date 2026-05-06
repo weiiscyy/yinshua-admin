@@ -1,6 +1,7 @@
 // 打印工具 - 生成打印页面 HTML，在新窗口中打开并打印
 import dayjs from 'dayjs';
 import QRCode from 'qrcode';
+import { PRODUCT_LABELS } from './productColors';
 
 const COMPANY_NAME = '嘉兴亚欣商标印务有限公司';
 
@@ -187,7 +188,6 @@ function printFahuoHtml(data) {
 // ── 生成订单打印 HTML（异步，含二维码）──────────────────────────────────────
 async function buildPrintHtml(order, productType) {
   var o = order;
-  var PRODUCT_LABELS = { YS: '印刷', YM: '印刷面', ZM: '纸盒', DS: '模切' };
   var ptLabel = PRODUCT_LABELS[productType] || productType;
 
   // 扫码报工 URL（使用当前页面 origin，指向 /production 页面）

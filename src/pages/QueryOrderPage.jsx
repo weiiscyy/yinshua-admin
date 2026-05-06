@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Card, Input, DatePicker, Button, Select, Row, Col, Space, message } from 'antd';
+import { PRODUCT_LABELS } from '../utils/productColors';
 import AppLayout from '../components/AppLayout';
 import dayjs from 'dayjs';
 
@@ -76,10 +77,10 @@ export default function QueryOrderPage() {
         <Row gutter={[12, 12]} align="middle">
           <Col>
             <Select value={productType} onChange={function(v) { setProductType(v); setYjbhao(''); setKuanhao(''); setHuahao(''); setProudnumber(''); }} style={{ width: 110 }}>
-              <Option value="YS">YS 印刷</Option>
-              <Option value="YM">YM 印唛</Option>
-              <Option value="ZM">ZM 纸盒</Option>
-              <Option value="DS">DS 模切</Option>
+              <Option value="YS">YS {PRODUCT_LABELS.YS}</Option>
+              <Option value="YM">YM {PRODUCT_LABELS.YM}</Option>
+              <Option value="ZM">ZM {PRODUCT_LABELS.ZM}</Option>
+              <Option value="DS">DS {PRODUCT_LABELS.DS}</Option>
             </Select>
           </Col>
           <Col>

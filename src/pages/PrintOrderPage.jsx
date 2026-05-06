@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Spin, Button } from 'antd';
 import { PrinterOutlined } from '@ant-design/icons';
 import { adminGetOrder } from '../api';
+import { PRODUCT_LABELS } from '../utils/productColors';
 import dayjs from 'dayjs';
 import './PrintPage.css';
 
-const PRODUCT_LABELS = { YS: '印刷', YM: '印刷面', ZM: '纸盒', DS: '模切' };
 const COMPANY_NAME = '嘉兴亚欣商标印务有限公司';
 
 export default function PrintOrderPage({ productType, ddId }) {

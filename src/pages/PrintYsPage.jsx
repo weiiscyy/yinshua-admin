@@ -91,7 +91,7 @@ export default function PrintYsPage() {
             <svg className="ys-barcode" id={"barcode-" + o.ddbh} />
             <div className="ys-title-center">
               <div className="ys-company-title">嘉兴亚欣商标印务有限公司</div>
-              <div className="ys-order-type-title">订货生产单(吊牌、丝印)</div>
+              <div className="ys-order-type-title">订货生产单（印刷）</div>
             </div>
           </div>
         </div>

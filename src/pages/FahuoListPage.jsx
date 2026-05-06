@@ -10,12 +10,11 @@ import {
 import dayjs from 'dayjs';
 import { fahuoList, fahuoGet, fahuoCreate, fahuoUpdate, fahuoDelete, fahuoGetPending, fahuoCancelOrder, adminListUsers } from '../api';
 import { openFahuoPrint } from '../utils/print';
+import { PRODUCT_LABELS } from '../utils/productColors';
 import AppLayout from '../components/AppLayout';
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
-
-const PRODUCT_LABELS = { YS: '印刷', YM: '印刷面', ZM: '纸盒', DS: '模切' };
 
 // 手工录入初始值
 function initManualForm() {
@@ -139,10 +138,10 @@ function PendingOrderModal({ open, onClose, onSelect, formSelectedOrders, loadin
           style={{ width: 120 }}
           options={[
             { label: '全部', value: '' },
-            { label: '印刷', value: 'YS' },
-            { label: '印刷面', value: 'YM' },
-            { label: '纸盒', value: 'ZM' },
-            { label: '模切', value: 'DS' },
+            { label: PRODUCT_LABELS.YS, value: 'YS' },
+            { label: PRODUCT_LABELS.YM, value: 'YM' },
+            { label: PRODUCT_LABELS.ZM, value: 'ZM' },
+            { label: PRODUCT_LABELS.DS, value: 'DS' },
           ]}
         />
         <Button type="primary" icon={<SearchOutlined />} onClick={onSearch}>搜索</Button>

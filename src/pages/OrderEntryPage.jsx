@@ -5,7 +5,8 @@ import { Plus, Pencil, FileSearch } from 'lucide-react';
 const { RangePicker } = DatePicker;
 import dayjs from 'dayjs';
 import AppLayout from '../components/AppLayout';
-import api, { adminCreateOrder, adminGetOrder, adminUpdateOrder, adminListUsers } from '../api';
+import api, { adminCreateOrder, adminGetOrder, adminUpdateOrder, salespersonsList } from '../api';
+import { PRODUCT_LABELS } from '../utils/productColors';
 
 const { Option } = Select;
 
@@ -116,6 +117,8 @@ export default function OrderEntryPage() {
   const [ysSteps, setYsSteps] = useState({});
   const [priceMode, setPriceMode] = useState('calc'); // YS/YM 总价模式: 'calc' | 'edit'
   const [yszjManual, setYszjManual] = useState(null); // YS 手动输入值
+  const [formRerenderKey, setFormRerenderKey] = useState(0); // 工艺按钮刷新 key
+  const [selectedState, setSelectedState] = useState({}); // { hzlA1: true, hzl1: false, ... } 直接控制按钮 type
 
   // Decode JWT to get current user for zhidan field (使用 base64url 解码，兼容 JWT)
   useEffect(function() {
@@ -169,6 +172,10 @@ export default function OrderEntryPage() {
          'jhkddClass','jhkprint','sccjjs','sccjyl','sccjdn','sccjsc','sccjwc','hzljs','fahuo',
          'waifa',
          'hzl1','hzl2','hzl3','hzl4','hzl5','hzl6','hzl7','hzl8','hzl9','hzl10','hzl11','hzl12','hzl13','hzl14','hzl15','hzl16',
+         // YS 工艺字段（来自 YSGX 表）
+         'hzlA1','hzlA2','hzlA3','hzlA4','hzlA5','hzlA6',
+         'hzlB3','hzlB4','hzlB5','hzlB6','hzlB7','hzlB8','hzlB11','hzlB12','hzlB13','hzlB14','hzlB15',
+         'hzlC1','hzlC3','hzlC4',
         ].forEach(function(k) {
           if (d[k] !== undefined && d[k] !== null) {
             if (k === 'prouddate' || k === 'overdate' || k === 'lldate' || k === 'fhdate' || k === 'sxdate') {
@@ -191,16 +198,19 @@ export default function OrderEntryPage() {
           setYsSteps(ysMap);
           setStepsMap(ysMap);
           Object.keys(ysMap).forEach(function(f) { form.setFieldValue(f, true); });
+          setSelectedState(function(prev) { var n = Object.assign({}, prev); Object.keys(ysMap).forEach(function(f){ n[f] = ysMap[f]; }); return n; });
         } else if (copyProductType === 'YM') {
           var ymMap = {};
           for (var i = 1; i <= 7; i++) { if (d['hzl' + i] === 1 || d['hzl' + i] === true) ymMap['hzl' + i] = true; }
           setYmSteps(ymMap);
           setStepsMap(ymMap);
+          setSelectedState(function(prev) { var n = Object.assign({}, prev); Object.keys(ymMap).forEach(function(f){ n[f] = ymMap[f]; }); return n; });
         } else if (copyProductType === 'ZM') {
           var zmMap = {};
           for (var i = 1; i <= 16; i++) { if (d['hzl' + i] === 1 || d['hzl' + i] === true) zmMap['hzl' + i] = true; }
           setZmSteps(zmMap);
           setStepsMap(zmMap);
+          setSelectedState(function(prev) { var n = Object.assign({}, prev); Object.keys(zmMap).forEach(function(f){ n[f] = zmMap[f]; }); return n; });
         }
         message.success('已引用订单 #' + copyFrom + '，请检查数据后保存');
         // 清除 URL 参数，避免刷新重复触发
@@ -231,6 +241,10 @@ export default function OrderEntryPage() {
        'danjia','sydazhang','syMoney','yszj',
        'lldate','sclcClass','ylzd','klcc','kaishu','xukaisl','bcsl',
        'hzl1','hzl2','hzl3','hzl4','hzl5','hzl6','hzl7','hzl8','hzl9','hzl10','hzl11','hzl12','hzl13','hzl14','hzl15','hzl16',
+       // YS 工艺字段（来自 YSGX 表）
+       'hzlA1','hzlA2','hzlA3','hzlA4','hzlA5','hzlA6',
+       'hzlB3','hzlB4','hzlB5','hzlB6','hzlB7','hzlB8','hzlB11','hzlB12','hzlB13','hzlB14','hzlB15',
+       'hzlC1','hzlC3','hzlC4',
        'huahao','jijia','allcount','weidu','soujianjl','sxdate','zm_zhijian','proudbanbie',
        'jiage','fhdw','fhdate','fhr','cidiehao',
        'UpFile','beizhu1','beizhu2','beizhu3','beizhu4','beizhu5',
@@ -271,20 +285,25 @@ export default function OrderEntryPage() {
         setStepsMap(ysMap);
         // 同步到 form，让 Checkbox 默认显示勾选
         Object.keys(ysMap).forEach(function(f) { form.setFieldValue(f, true); });
+        // 同步 selectedState，让按钮显示蓝色
+        setSelectedState(function(prev) { var n = Object.assign({}, prev); Object.keys(ysMap).forEach(function(f){ n[f] = ysMap[f]; }); return n; });
       } else if (params.productType === 'YM') {
         var ymMap = {};
         for (var i = 1; i <= 7; i++) { if (d['hzl' + i] === 1 || d['hzl' + i] === true) ymMap['hzl' + i] = true; }
         setYmSteps(ymMap);
         setStepsMap(ymMap);
+        setSelectedState(function(prev) { var n = Object.assign({}, prev); Object.keys(ymMap).forEach(function(f){ n[f] = ymMap[f]; }); return n; });
       } else if (params.productType === 'ZM') {
         var zmMap = {};
         for (var i = 1; i <= 16; i++) { if (d['hzl' + i] === 1 || d['hzl' + i] === true) zmMap['hzl' + i] = true; }
         setZmSteps(zmMap);
         setStepsMap(zmMap);
+        setSelectedState(function(prev) { var n = Object.assign({}, prev); Object.keys(zmMap).forEach(function(f){ n[f] = zmMap[f]; }); return n; });
       } else if (params.productType === 'DS') {
         var dsMap = {};
         Object.keys(STEPS_MAP_DS).forEach(function(f) { if (d[f] === 1 || d[f] === true) dsMap[f] = true; });
         setDsSteps(dsMap);
+        setSelectedState(function(prev) { var n = Object.assign({}, prev); Object.keys(dsMap).forEach(function(f){ n[f] = dsMap[f]; }); return n; });
       }
     }).catch(function(err) {
       console.error('[OrderEntry] load order error:', err);
@@ -364,6 +383,10 @@ export default function OrderEntryPage() {
        'jhkddClass','jhkprint','sccjjs','sccjyl','sccjdn','sccjsc','sccjwc','hzljs','fahuo',
        'waifa',
        'hzl1','hzl2','hzl3','hzl4','hzl5','hzl6','hzl7','hzl8','hzl9','hzl10','hzl11','hzl12','hzl13','hzl14','hzl15','hzl16',
+       // YS 工艺字段（来自 YSGX 表）
+       'hzlA1','hzlA2','hzlA3','hzlA4','hzlA5','hzlA6',
+       'hzlB3','hzlB4','hzlB5','hzlB6','hzlB7','hzlB8','hzlB11','hzlB12','hzlB13','hzlB14','hzlB15',
+       'hzlC1','hzlC3','hzlC4',
       ].forEach(function(k) {
         if (d[k] !== undefined && d[k] !== null) {
           if (k === 'prouddate' || k === 'overdate' || k === 'lldate' || k === 'fhdate' || k === 'sxdate') {
@@ -385,16 +408,19 @@ export default function OrderEntryPage() {
         setYsSteps(ysMap);
         setStepsMap(ysMap);
         Object.keys(ysMap).forEach(function(f) { form.setFieldValue(f, true); });
+        setSelectedState(function(prev) { var n = Object.assign({}, prev); Object.keys(ysMap).forEach(function(f){ n[f] = ysMap[f]; }); return n; });
       } else if (pt === 'YM') {
         var ymMap = {};
         for (var i = 1; i <= 7; i++) { if (d['hzl' + i] === 1 || d['hzl' + i] === true) ymMap['hzl' + i] = true; }
         setYmSteps(ymMap);
         setStepsMap(ymMap);
+        setSelectedState(function(prev) { var n = Object.assign({}, prev); Object.keys(ymMap).forEach(function(f){ n[f] = ymMap[f]; }); return n; });
       } else if (pt === 'ZM') {
         var zmMap = {};
         for (var i = 1; i <= 16; i++) { if (d['hzl' + i] === 1 || d['hzl' + i] === true) zmMap['hzl' + i] = true; }
         setZmSteps(zmMap);
         setStepsMap(zmMap);
+        setSelectedState(function(prev) { var n = Object.assign({}, prev); Object.keys(zmMap).forEach(function(f){ n[f] = zmMap[f]; }); return n; });
       }
       message.success('已引用订单 #' + record.DD_id + '，请检查数据后保存');
     }).catch(function(err) {
@@ -404,7 +430,7 @@ export default function OrderEntryPage() {
   };
 
   useEffect(() => {
-    adminListUsers().then(u => { if (u) setUsers(u); }).catch(() => {});
+    salespersonsList().then(u => { if (u) setUsers(Array.isArray(u) ? u : []); }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -573,14 +599,31 @@ export default function OrderEntryPage() {
       )}
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '16px 16px 60px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <h2 style={{ margin: 0, fontSize: 16 }}>{isEdit ? '编辑订单' : '新建订单'}</h2>
+          {isEdit && <h2 style={{ margin: 0, fontSize: 16 }}>编辑订单</h2>}
           <Button type="primary" icon={isEdit ? <Pencil size={15} /> : <Plus size={15} />} onClick={handleCreate} style={{ display: 'flex', alignItems: 'center', borderRadius: 6 }}>{isEdit ? '保存修改' : '提交订单'}</Button>
         </div>
 
-        <Form form={form} layout="vertical" labelAlign="right" onValuesChange={function() { calcTotal(form, activeProduct); }}>
+        <Form form={form} layout="vertical" labelAlign="right" onValuesChange={function(_, allValues) { calcTotal(form, activeProduct); var hzlFields = ['hzlA1','hzlA2','hzlA3','hzlA4','hzlA5','hzlA6','hzlC3','hzlB3','hzlB4','hzlB5','hzlB6','hzlB7','hzlB8','hzlB11','hzlB12','hzlB13','hzlB14','hzlB15','hzlC1','hzlC4','hzl1','hzl2','hzl3','hzl4','hzl5','hzl6','hzl7','hzl8','hzl9','hzl10','hzl11','hzl12','hzl13','hzl14','hzl15','hzl16']; if (hzlFields.some(function(f){return f in allValues;})) { setFormRerenderKey(function(k){return k+1;}); var s = {}; hzlFields.forEach(function(f){ if(f in allValues) s[f] = allValues[f]; }); setSelectedState(function(prev){ var n=Object.assign({},prev); Object.keys(s).forEach(function(k){n[k]=s[k];}); return n; }); } }}>
           <Tabs
             activeKey={activeProduct}
-            onChange={isEdit || copySource ? () => {} : setActiveProduct}
+            onChange={isEdit || copySource ? () => {} : function(pt) {
+              // 切换产品线前清除各产品线的工艺字段，避免残留选中状态
+              form.setFieldsValue({
+                // YS hzlA/B/C
+                hzlA1: false, hzlA2: false, hzlA3: false, hzlA4: false, hzlA5: false, hzlA6: false, hzlC3: false,
+                hzlB3: false, hzlB4: false, hzlB5: false, hzlB6: false, hzlB7: false, hzlB8: false,
+                hzlB11: false, hzlB12: false, hzlB13: false, hzlB14: false, hzlB15: false,
+                hzlC1: false, hzlC4: false,
+                // YM hzl1-7
+                hzl1: false, hzl2: false, hzl3: false, hzl4: false, hzl5: false, hzl6: false, hzl7: false,
+                // ZM hzl1-16
+                hzl1: false, hzl2: false, hzl3: false, hzl4: false, hzl5: false, hzl6: false,
+                hzl7: false, hzl8: false, hzl9: false, hzl10: false, hzl11: false, hzl12: false,
+                hzl13: false, hzl14: false, hzl15: false, hzl16: false,
+              });
+              setActiveProduct(pt);
+              setSelectedState({});
+            }}
             items={[
               {
                 key: 'YS',
@@ -610,7 +653,7 @@ export default function OrderEntryPage() {
                         <Form.Item label="款号" name="kuanhao" style={{ marginBottom: 4 }}><Input placeholder="款号" /></Form.Item>
                         <Form.Item label={<LabelWithStar required>印件编号</LabelWithStar>} name="yjbhao" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="印件编号" /></Form.Item>
                         <Form.Item label="品名" name="jiagongfei" style={{ marginBottom: 4 }}><Input placeholder="品名" /></Form.Item>
-                        <Form.Item label={<LabelWithStar required>所属车间</LabelWithStar>} name="sclcClass" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}>
+                        <Form.Item label="所属车间" name="sclcClass" style={{ marginBottom: 4 }}>
                           <Select placeholder="请选择" allowClear>
                             <Option value={1}>纸盒</Option>
                             <Option value={2}>印刷单</Option>
@@ -619,7 +662,7 @@ export default function OrderEntryPage() {
                         </Form.Item>
                         <Form.Item label="业务员" name="ywy" style={{ marginBottom: 4 }}>
                           <Select placeholder="选择业务员" allowClear>
-                            {users.map(u => <Option key={u.UserID || u.userId} value={u.UserID || u.userId}>{u.UserName || u.username}</Option>)}
+                            {users.map(u => <Option key={u.id} value={u.id}>{u.name}</Option>)}
                           </Select>
                         </Form.Item>
                         <Form.Item label="外发" name="waifa" valuePropName="checked" style={{ marginBottom: 4 }}><Checkbox /></Form.Item>
@@ -669,8 +712,14 @@ export default function OrderEntryPage() {
                           <div style={{ fontSize: 12, color: '#718096', marginBottom: 4 }}>贴膜</div>
                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                             {TIEMO_OPTIONS.map(opt => (
-                              <Form.Item key={opt.value} name={opt.value} valuePropName="checked" style={{ marginBottom: 4 }}>
-                                <Checkbox>{opt.label}</Checkbox>
+                              <Form.Item key={opt.value} name={opt.value} valuePropName="checked" style={{ marginBottom: 0 }}>
+                                <Button
+                                  key={opt.value + '-' + formRerenderKey}
+                                  size="small"
+                                  type={selectedState[opt.value] ? 'primary' : 'default'}
+                                  onClick={() => { setSelectedState(prev => ({ ...prev, [opt.value]: !prev[opt.value] })); form.setFieldValue(opt.value, !form.getFieldValue(opt.value)); }}
+                                  style={{ marginRight: 4, marginBottom: 4 }}
+                                >{opt.label}</Button>
                               </Form.Item>
                             ))}
                           </div>
@@ -679,8 +728,14 @@ export default function OrderEntryPage() {
                           <div style={{ fontSize: 12, color: '#718096', marginBottom: 4 }}>常规工艺</div>
                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                             {CHANGGUI_OPTIONS.map(opt => (
-                              <Form.Item key={opt.value} name={opt.value} valuePropName="checked" style={{ marginBottom: 4 }}>
-                                <Checkbox>{opt.label}</Checkbox>
+                              <Form.Item key={opt.value} name={opt.value} valuePropName="checked" style={{ marginBottom: 0 }}>
+                                <Button
+                                  key={opt.value + '-' + formRerenderKey}
+                                  size="small"
+                                  type={selectedState[opt.value] ? 'primary' : 'default'}
+                                  onClick={() => { setSelectedState(prev => ({ ...prev, [opt.value]: !prev[opt.value] })); form.setFieldValue(opt.value, !form.getFieldValue(opt.value)); }}
+                                  style={{ marginRight: 4, marginBottom: 4 }}
+                                >{opt.label}</Button>
                               </Form.Item>
                             ))}
                           </div>
@@ -689,8 +744,14 @@ export default function OrderEntryPage() {
                           <div style={{ fontSize: 12, color: '#718096', marginBottom: 4 }}>特殊工艺</div>
                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                             {TESHU_OPTIONS.map(opt => (
-                              <Form.Item key={opt.value} name={opt.value} valuePropName="checked" style={{ marginBottom: 4 }}>
-                                <Checkbox>{opt.label}</Checkbox>
+                              <Form.Item key={opt.value} name={opt.value} valuePropName="checked" style={{ marginBottom: 0 }}>
+                                <Button
+                                  key={opt.value + '-' + formRerenderKey}
+                                  size="small"
+                                  type={selectedState[opt.value] ? 'primary' : 'default'}
+                                  onClick={() => { setSelectedState(prev => ({ ...prev, [opt.value]: !prev[opt.value] })); form.setFieldValue(opt.value, !form.getFieldValue(opt.value)); }}
+                                  style={{ marginRight: 4, marginBottom: 4 }}
+                                >{opt.label}</Button>
                               </Form.Item>
                             ))}
                           </div>
@@ -791,7 +852,7 @@ export default function OrderEntryPage() {
               },
               {
                                 key: 'YM',
-                label: '📄 印刷面(YM)',
+                label: '📄 印唛(YM)',
                 disabled: isEdit || copySource,
                 children: (
                   <div>
@@ -828,7 +889,7 @@ export default function OrderEntryPage() {
                         <Form.Item label={<LabelWithStar required>用料质地</LabelWithStar>} name="ylzd" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="如128G双铜" /></Form.Item>
                         <Form.Item label="业务员" name="ywy" style={{ marginBottom: 4 }}>
                           <Select placeholder="选择业务员" allowClear>
-                            {users.map(u => <Option key={u.UserID || u.userId} value={u.UserID || u.userId}>{u.UserName || u.username}</Option>)}
+                            {users.map(u => <Option key={u.id} value={u.id}>{u.name}</Option>)}
                           </Select>
                         </Form.Item>
                         <Form.Item label="款号" name="kuanhao" style={{ marginBottom: 4 }}><Input placeholder="款号" /></Form.Item>
@@ -871,8 +932,19 @@ export default function OrderEntryPage() {
                           { label: '其它', value: 'hzl6' },
                           { label: '三角折', value: 'hzl7' },
                         ].map(function(opt) {
-                          return React.createElement(Form.Item, { key: opt.value, name: opt.value, valuePropName: 'checked', style: { marginBottom: 4 } },
-                            React.createElement(Checkbox, { onChange: function() { handleStepToggle('YM', opt.value); } }, opt.label)
+                          var btnKey = opt.value + '-' + formRerenderKey;
+                          return React.createElement(Form.Item, {
+                            key: opt.value,
+                            name: opt.value,
+                            valuePropName: 'checked',
+                            style: { marginBottom: 0 }
+                          },
+                            React.createElement(Button, {
+                              key: btnKey,
+                              size: 'small',
+                              type: selectedState[opt.value] ? 'primary' : 'default',
+                              onClick: function() { setSelectedState(function(prev) { var n = Object.assign({}, prev); n[opt.value] = !prev[opt.value]; return n; }); form.setFieldValue(opt.value, !form.getFieldValue(opt.value)); }
+                            }, opt.label)
                           );
                         })}
                       </div>
@@ -991,7 +1063,7 @@ export default function OrderEntryPage() {
               },
               {
                                 key: 'ZM',
-                label: '📦 纸盒(ZM)',
+                label: '📦 织唛(ZM)',
                 disabled: isEdit || copySource,
                 children: (
                   <div>
@@ -1029,7 +1101,7 @@ export default function OrderEntryPage() {
                         <Form.Item label="所需时间" name="sxdate" style={{ marginBottom: 4 }}><Input placeholder="所需时间" /></Form.Item>
                         <Form.Item label="业务员" name="ywy" style={{ marginBottom: 4 }}>
                           <Select placeholder="选择业务员" allowClear>
-                            {users.map(u => <Option key={u.UserID || u.userId} value={u.UserID || u.userId}>{u.UserName || u.username}</Option>)}
+                            {users.map(u => <Option key={u.id} value={u.id}>{u.name}</Option>)}
                           </Select>
                         </Form.Item>
                         <Form.Item label="下单公司" name="company" style={{ marginBottom: 4 }}><Input placeholder="下单公司" /></Form.Item>
@@ -1168,8 +1240,19 @@ export default function OrderEntryPage() {
                           { label: '烫钻', value: 'hzl15' },
                           { label: '盒装', value: 'hzl16' },
                         ].map(function(opt) {
-                          return React.createElement(Form.Item, { key: opt.value, name: opt.value, valuePropName: 'checked', style: { marginBottom: 4 } },
-                            React.createElement(Checkbox, null, opt.label)
+                          var btnKey = opt.value + '-' + formRerenderKey;
+                          return React.createElement(Form.Item, {
+                            key: opt.value,
+                            name: opt.value,
+                            valuePropName: 'checked',
+                            style: { marginBottom: 0 }
+                          },
+                            React.createElement(Button, {
+                              key: btnKey,
+                              size: 'small',
+                              type: selectedState[opt.value] ? 'primary' : 'default',
+                              onClick: function() { setSelectedState(function(prev) { var n = Object.assign({}, prev); n[opt.value] = !prev[opt.value]; return n; }); form.setFieldValue(opt.value, !form.getFieldValue(opt.value)); }
+                            }, opt.label)
                           );
                         })}
                       </div>
@@ -1193,7 +1276,7 @@ export default function OrderEntryPage() {
               },
               {
                                 key: 'DS',
-                label: '🃏 模切(DS)',
+                label: '🃏 滴塑(DS)',
                 disabled: isEdit || copySource,
                 children: (
                   <div>
@@ -1235,7 +1318,7 @@ export default function OrderEntryPage() {
                       <Form.Item label="发货日期" name="fhdate" style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
                       <Form.Item label={<LabelWithStar required>业务员</LabelWithStar>} name="ywy" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}>
                         <Select placeholder="选择业务员" allowClear>
-                          {users.map(function(u) { return React.createElement(Option, { key: u.UserID || u.userId, value: u.UserID || u.userId }, u.UserName || u.username); })}
+                          {users.map(function(u) { return React.createElement(Option, { key: u.id, value: u.id }, u.name); })}
                         </Select>
                       </Form.Item>
                       <Form.Item label="发货人" name="fhr" style={{ marginBottom: 4 }}><Input placeholder="发货人" /></Form.Item>
@@ -1287,10 +1370,10 @@ export default function OrderEntryPage() {
         }}>
           <Form.Item name="productType" label="订单类型" initialValue="YS" style={{ marginBottom: 8 }}>
             <Select style={{ width: 120 }} onChange={function() { copyForm.resetFields(['yjbhao','kuanhao','huahao','proudnumber']); }}>
-              <Option value="YS">YS 印刷</Option>
-              <Option value="YM">YM 印唛</Option>
-              <Option value="ZM">ZM 纸盒</Option>
-              <Option value="DS">DS 模切</Option>
+              <Option value="YS">YS {PRODUCT_LABELS.YS}</Option>
+              <Option value="YM">YM {PRODUCT_LABELS.YM}</Option>
+              <Option value="ZM">ZM {PRODUCT_LABELS.ZM}</Option>
+              <Option value="DS">DS {PRODUCT_LABELS.DS}</Option>
             </Select>
           </Form.Item>
           <Form.Item name="company" label="公司名称" style={{ marginBottom: 8 }}><Input placeholder="客户名称" style={{ width: 140 }} /></Form.Item>

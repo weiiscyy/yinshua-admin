@@ -76,7 +76,7 @@ export default function PrintZmPageDev() {
         <div className="ys-title-row">
           <div className="ys-title-left">
             <div className="ys-company">嘉兴亚欣商标印务有限公司</div>
-            <div className="ys-doc-title">订货生产单（纸盒）</div>
+            <div className="ys-doc-title">订货生产单（织唛）</div>
             <div className="ys-title-meta">
               <span className="ys-meta-pair">
                 <span className="ys-mlabel">花号</span>

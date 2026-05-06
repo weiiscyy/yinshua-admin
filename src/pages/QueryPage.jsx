@@ -5,16 +5,16 @@ import dayjs from 'dayjs';
 import * as XLSX from 'xlsx';
 import { queryOrders, exportOrders } from '../api';
 import AppLayout from '../components/AppLayout';
-import { PRODUCT_COLORS_CSS, PRODUCT_COLORS_ANTD } from '../utils/productColors';
+import { PRODUCT_COLORS_CSS, PRODUCT_COLORS_ANTD, PRODUCT_LABELS } from '../utils/productColors';
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
 
 const PRODUCT_OPTIONS = [
-  { label: '印刷(吊牌)', value: 'YS' },
-  { label: '印刷面(印唛)', value: 'YM' },
-  { label: '纸盒(织唛)', value: 'ZM' },
-  { label: '模切(丝网印)', value: 'DS' },
+  { label: PRODUCT_LABELS.YS + '(吊牌)', value: 'YS' },
+  { label: PRODUCT_LABELS.YM + '(印唛)', value: 'YM' },
+  { label: PRODUCT_LABELS.ZM + '(织唛)', value: 'ZM' },
+  { label: PRODUCT_LABELS.DS + '(丝网印)', value: 'DS' },
 ];
 
 const WAIFA_OPTIONS = [
