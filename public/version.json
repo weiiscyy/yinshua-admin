@@ -1,6 +1,6 @@
 {
-  "version": "26050623-0d60a56",
-  "hash": "0d60a56",
-  "msg": "fix: OrderEntryPage工艺按钮selectedState同步（编辑订单回显修复）",
-  "time": "2026-05-06T15:38:29.547Z"
+  "version": "26050915-2ec80e8",
+  "hash": "2ec80e8",
+  "msg": "fix: sync version.json time",
+  "time": "2026-05-09T07:35:56.138Z"
 }

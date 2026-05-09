@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import {
   DashboardOutlined, UnorderedListOutlined, PlusSquareOutlined,
   SearchOutlined, SendOutlined, BarChartOutlined, LogoutOutlined,
-  AreaChartOutlined, PlayCircleOutlined, EditOutlined, ShopOutlined, UserOutlined
+  AreaChartOutlined, PlayCircleOutlined, EditOutlined, ShopOutlined, UserOutlined, SettingOutlined
 } from '@ant-design/icons';
 
 const NAV_ITEMS = [
@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { key: '/query-order', label: '查询下单', icon: <SearchOutlined /> },
   { key: 'divider2', label: '', divider: true },
   { key: '/production', label: '生产报工', icon: <PlayCircleOutlined />, highlight: true },
+  { key: '/process', label: '工序管理', icon: <SettingOutlined /> },
   { key: '/jhk-edit', label: '车间订单修改', icon: <EditOutlined /> },
   { key: 'divider3', label: '', divider: true },
   { key: '/users', label: '用户管理', icon: <UserOutlined /> },

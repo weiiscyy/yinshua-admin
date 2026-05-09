@@ -116,7 +116,10 @@ export const getStatsOverview = () => api.get('/api/stats/overview');
 export const getStatsStatusDist = () => api.get('/api/stats/status_dist');
 export const getStatsYwy = () => api.get('/api/stats/ywy_stats');
 
-// 生产报工
+// 工序管理
+export const processList = (params) => api.get('/api/process/orders', { params });
+export const processAdvance = (data) => api.post('/api/process/advance', data);
+export const processBatchAdvance = (data) => api.post('/api/process/batch-advance', data);
 export const getProductionOrders = (params) => api.get('/api/production/orders', { params });
 export const getProductionOrder = (ddId, productType) => api.get(`/api/production/order/${ddId}?product_type=${productType}`);
 export const submitReport = (data) => api.post('/api/production/report', data);

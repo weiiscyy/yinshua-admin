@@ -13,6 +13,7 @@ import FahuoListPage from './pages/FahuoListPage';
 import StatsPage from './pages/StatsPage';
 import BaseDataPage from './pages/BaseDataPage';
 import ProductionPage from './pages/ProductionPage';
+import ProcessPage from './pages/ProcessPage';
 import JhkEditPage from './pages/JhkEditPage';
 import QueryOrderPage from './pages/QueryOrderPage';
 import UserManagePage from './pages/UserManagePage';
@@ -54,6 +55,7 @@ export default function App() {
             <Route path="/stats" element={<ProtectedRoute><StatsPage /></ProtectedRoute>} />
             <Route path="/base-data" element={<ProtectedRoute><BaseDataPage /></ProtectedRoute>} />
             <Route path="/production" element={<ProtectedRoute><ProductionPage /></ProtectedRoute>} />
+            <Route path="/process" element={<ProtectedRoute><ProcessPage /></ProtectedRoute>} />
             <Route path="/jhk-edit" element={<ProtectedRoute><JhkEditPage /></ProtectedRoute>} />
             <Route path="/query-order" element={<ProtectedRoute><QueryOrderPage /></ProtectedRoute>} />
             <Route path="/users" element={<ProtectedRoute><UserManagePage /></ProtectedRoute>} />
