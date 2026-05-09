@@ -1,6 +1,6 @@
 {
-  "version": "26050915-2ec80e8",
-  "hash": "2ec80e8",
-  "msg": "fix: sync version.json time",
-  "time": "2026-05-09T07:35:56.138Z"
+  "version": "26050920-0d8e204",
+  "hash": "0d8e204",
+  "msg": "fix: ProcessPage Segmented产品线切换 + BZ过滤SQL化 + 去除FahuoOrder N+1查询",
+  "time": "2026-05-09T12:04:00.000Z"
 }
