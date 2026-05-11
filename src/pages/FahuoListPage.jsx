@@ -78,6 +78,13 @@ function PendingOrderModal({ open, onClose, onSelect, formSelectedOrders, loadin
       filter: null,
     },
     {
+      title: '花号',
+      dataIndex: 'huahao',
+      width: 100,
+      ellipsis: true,
+      filter: null,
+    },
+    {
       title: '订单数量',
       dataIndex: 'shuliang',
       width: 80,
@@ -122,12 +129,41 @@ function PendingOrderModal({ open, onClose, onSelect, formSelectedOrders, loadin
       destroyOnClose
       styles={{ body: { padding: '12px' } }}
     >
-      <Space wrap style={{ marginBottom: 12 }}>
+      <Space wrap direction="vertical" style={{ marginBottom: 12 }}>
+        <Space wrap>
         <Input
           placeholder="客户名称"
           value={searchProps.company}
           onChange={e => onSearchChange('company', e.target.value)}
-          style={{ width: 160 }}
+          style={{ width: 140 }}
+          allowClear
+        />
+        <Input
+          placeholder="订单号"
+          value={searchProps.ddbh}
+          onChange={e => onSearchChange('ddbh', e.target.value)}
+          style={{ width: 120 }}
+          allowClear
+        />
+        <Input
+          placeholder="花号/印件编号"
+          value={searchProps.proudnumber}
+          onChange={e => onSearchChange('proudnumber', e.target.value)}
+          style={{ width: 140 }}
+          allowClear
+        />
+        <DatePicker
+          placeholder="开始日期"
+          value={searchProps.start_date ? dayjs(searchProps.start_date) : null}
+          onChange={(d, ds) => onSearchChange('start_date', ds || '')}
+          style={{ width: 120 }}
+          allowClear
+        />
+        <DatePicker
+          placeholder="结束日期"
+          value={searchProps.end_date ? dayjs(searchProps.end_date) : null}
+          onChange={(d, ds) => onSearchChange('end_date', ds || '')}
+          style={{ width: 120 }}
           allowClear
         />
         <Select
@@ -135,7 +171,7 @@ function PendingOrderModal({ open, onClose, onSelect, formSelectedOrders, loadin
           value={searchProps.product_type || undefined}
           onChange={v => onSearchChange('product_type', v || '')}
           allowClear
-          style={{ width: 120 }}
+          style={{ width: 100 }}
           options={[
             { label: '全部', value: '' },
             { label: PRODUCT_LABELS.YS, value: 'YS' },
@@ -145,6 +181,7 @@ function PendingOrderModal({ open, onClose, onSelect, formSelectedOrders, loadin
           ]}
         />
         <Button type="primary" icon={<SearchOutlined />} onClick={onSearch}>搜索</Button>
+        </Space>
         <span style={{ color: '#888', fontSize: 12 }}>
           共 {orders.length} 条待发货订单
         </span>
@@ -208,7 +245,7 @@ export default function FahuoListPage() {
   const [pendingVisible, setPendingVisible] = useState(false);
   const [pendingOrders, setPendingOrders] = useState([]);
   const [pendingLoading, setPendingLoading] = useState(false);
-  const [pendingSearch, setPendingSearch] = useState({ company: '', product_type: '' });
+  const [pendingSearch, setPendingSearch] = useState({ company: '', product_type: '', ddbh: '', proudnumber: '', start_date: '', end_date: '' });
 
   const fetchUsers = async () => {
     try {
@@ -426,7 +463,7 @@ export default function FahuoListPage() {
   const openPendingModal = async () => {
     setPendingVisible(true);
     setPendingLoading(true);
-    setPendingSearch({ company: '', product_type: '' });
+    setPendingSearch({ company: '', product_type: '', ddbh: '', proudnumber: '', start_date: '', end_date: '' });
     try {
       const res = await fahuoGetPending({ page_size: 300 });
       setPendingOrders(Array.isArray(res?.items) ? res.items : []);
@@ -444,6 +481,10 @@ export default function FahuoListPage() {
       const params = { page_size: 300 };
       if (pendingSearch.company) params.company = pendingSearch.company;
       if (pendingSearch.product_type) params.product_type = pendingSearch.product_type;
+      if (pendingSearch.ddbh) params.ddbh = pendingSearch.ddbh;
+      if (pendingSearch.proudnumber) params.proudnumber = pendingSearch.proudnumber;
+      if (pendingSearch.start_date) params.start_date = pendingSearch.start_date;
+      if (pendingSearch.end_date) params.end_date = pendingSearch.end_date;
       const res = await fahuoGetPending(params);
       setPendingOrders(Array.isArray(res?.items) ? res.items : []);
     } catch {
