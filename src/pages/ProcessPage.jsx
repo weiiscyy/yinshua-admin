@@ -10,6 +10,7 @@ import {
 import dayjs from 'dayjs';
 import AppLayout from '../components/AppLayout';
 import { processList, processAdvance, processBatchAdvance } from '../api';
+import { PRODUCT_LABELS } from '../utils/productColors';
 
 const { Title } = Typography;
 
@@ -225,9 +226,9 @@ export default function ProcessPage() {
     },
     {
       title: '产品',
-      dataIndex: 'product_name',
+      dataIndex: 'product_type',
       width: 80,
-      render: pt => <Tag>{pt}</Tag>,
+      render: pt => <Tag>{PRODUCT_LABELS[pt] || pt}</Tag>,
     },
     {
       title: '接单',

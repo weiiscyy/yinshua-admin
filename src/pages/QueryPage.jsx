@@ -11,10 +11,10 @@ const { Title } = Typography;
 const { RangePicker } = DatePicker;
 
 const PRODUCT_OPTIONS = [
-  { label: PRODUCT_LABELS.YS + '(吊牌)', value: 'YS' },
-  { label: PRODUCT_LABELS.YM + '(印唛)', value: 'YM' },
-  { label: PRODUCT_LABELS.ZM + '(织唛)', value: 'ZM' },
-  { label: PRODUCT_LABELS.DS + '(丝网印)', value: 'DS' },
+  { label: PRODUCT_LABELS.YS, value: 'YS' },
+  { label: PRODUCT_LABELS.YM, value: 'YM' },
+  { label: PRODUCT_LABELS.ZM, value: 'ZM' },
+  { label: PRODUCT_LABELS.DS, value: 'DS' },
 ];
 
 const WAIFA_OPTIONS = [

@@ -18,8 +18,23 @@ export default function QueryOrderPage() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const PAGE_SIZE = 20;
+
+  const handlePageChange = function(p) {
+    setPage(p);
+    setData([]);
+    doSearchAtPage(p);
+  };
 
   const doSearch = function() {
+    setPage(1);
+    setData([]);
+    doSearchAtPage(1);
+  };
+
+  const doSearchAtPage = function(p) {
     var params = { product_type: productType };
     if (company) params.company = company;
     if (dateRange && dateRange[0]) params.start_date = dateRange[0].format('YYYY-MM-DD');
@@ -32,6 +47,8 @@ export default function QueryOrderPage() {
       if (huahao) params.huahao = huahao;
       if (proudnumber) params.proudnumber = proudnumber;
     }
+    params.page = p;
+    params.page_size = PAGE_SIZE;
     setLoading(true);
     var token = localStorage.getItem('token') || '';
     fetch('/api/order-entry/copy-list?' + new URLSearchParams(params), {
@@ -41,6 +58,7 @@ export default function QueryOrderPage() {
         return Object.assign({}, item, { product_type: res.product_type });
       });
       setData(items);
+      setTotal(res.total || 0);
       setSearched(true);
       setLoading(false);
     }).catch(function() { setLoading(false); });
@@ -130,7 +148,7 @@ export default function QueryOrderPage() {
           rowKey="DD_id"
           size="small"
           loading={loading}
-          pagination={{ pageSize: 10, size: 'small' }}
+          pagination={{ current: page, total, pageSize: PAGE_SIZE, size: 'small', onChange: handlePageChange }}
           onRow={handleRowClick}
           columns={[
             { title: '订单号', dataIndex: 'DD_id', width: 80, render: function(v) { return '#' + v; } },

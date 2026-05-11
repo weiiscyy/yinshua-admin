@@ -308,17 +308,21 @@ export default function FahuoListPage() {
     if (!form.company) { message.error('收货单位不能为空'); return; }
     setSaving(true);
     try {
+      // 后端期望 pingming1/2/3... 格式
       const payload = {
         company: form.company,
         kdgs: form.kdgs,
         kdhao: form.kdhao,
         ywy: form.ywy,
-        pingming: form.items.map(i => i.pingming),
-        khao: form.items.map(i => i.khao),
-        dnbh: form.items.map(i => i.dnbh),
-        shuliang: form.items.map(i => i.shuliang),
-        beizhu: form.items.map(i => i.beizhu),
       };
+      for (let i = 0; i < 9; i++) {
+        const item = form.items[i] || {};
+        payload['pingming' + (i + 1)] = item.pingming || '';
+        payload['khao' + (i + 1)] = item.khao || '';
+        payload['dnbh' + (i + 1)] = item.dnbh || '';
+        payload['shuliang' + (i + 1)] = item.shuliang || '';
+        payload['beizhu' + (i + 1)] = item.beizhu || '';
+      }
       if (editId) {
         await fahuoUpdate(editId, payload);
         message.success('修改成功');

@@ -1,6 +1,6 @@
 {
-  "version": "26050920-0d8e204",
-  "hash": "0d8e204",
-  "msg": "fix: ProcessPage Segmented产品线切换 + BZ过滤SQL化 + 去除FahuoOrder N+1查询",
-  "time": "2026-05-09T12:04:00.000Z"
+  "version": "26050920-eb77a81",
+  "hash": "eb77a81",
+  "msg": "chore: bump version to 26050920-0d8e204",
+  "time": "2026-05-09T12:25:52.001Z"
 }
