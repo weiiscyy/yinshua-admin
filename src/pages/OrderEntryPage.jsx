@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Form, Input, Select, DatePicker, Button, Card, Tabs, Checkbox, message } from 'antd';
-import { Plus } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Form, Input, Select, DatePicker, Button, Card, Tabs, Checkbox, message, Modal, Table } from 'antd';
+import { Plus, Pencil, FileSearch } from 'lucide-react';
+const { RangePicker } = DatePicker;
 import dayjs from 'dayjs';
 import AppLayout from '../components/AppLayout';
-import { adminListUsers } from '../api';
+import api, { adminCreateOrder, adminGetOrder, adminUpdateOrder, salespersonsList } from '../api';
+import { PRODUCT_LABELS } from '../utils/productColors';
 
 const { Option } = Select;
 
@@ -13,44 +15,57 @@ const LabelWithStar = ({ children, required }) => (
 );
 
 // 贴膜选项
+// 贴膜选项 (hzlA1-6 + hzlC3外加工上光)
+// 来源: 旧系统 YSinput_Add.asp
 const TIEMO_OPTIONS = [
-  { label: '光膜', value: 'tmG' },
-  { label: '哑膜', value: 'tmM' },
-  { label: '单面', value: 'tmD' },
-  { label: '双面', value: 'tmS' },
-  { label: '镀铝', value: 'tmDH' },
-  { label: '其他', value: 'tmQT' },
+  { label: '单面光膜', value: 'hzlA1' },
+  { label: '单面亚膜', value: 'hzlA2' },
+  { label: '双面光膜', value: 'hzlA3' },
+  { label: '双面亚膜', value: 'hzlA4' },
+  { label: '单面专用膜', value: 'hzlA5' },
+  { label: '双面专用膜', value: 'hzlA6' },
+  { label: '外加工上光', value: 'hzlC3' },
 ];
 
-// 常规工艺选项
+// 常规工艺选项 (hzlB3-8/11-15)
+// 来源: 旧系统 YSinput_Add.asp
 const CHANGGUI_OPTIONS = [
-  { label: '烫金', value: 'cgJG' },
-  { label: '压痕', value: 'cgYG' },
-  { label: '模切', value: 'cgMK' },
-  { label: '糊盒', value: 'cgHK' },
-  { label: '穿线', value: 'cgCX' },
-  { label: '敲钉', value: 'cgQND' },
-  { label: '激光', value: 'cgJG2' },
-  { label: '其他', value: 'cgOT' },
+  { label: '烫金', value: 'hzlB3' },
+  { label: '压钢刀', value: 'hzlB4' },
+  { label: '穿线', value: 'hzlB5' },
+  { label: '糊纸粘合', value: 'hzlB6' },
+  { label: '打汽眼', value: 'hzlB7' },
+  { label: '凹凸', value: 'hzlB8' },
+  { label: '激光切割', value: 'hzlB11' },
+  { label: '穿别针', value: 'hzlB12' },
+  { label: '路线', value: 'hzlB13' },
+  { label: '敲柳钉', value: 'hzlB14' },
+  { label: '包边', value: 'hzlB15' },
 ];
 
-// 特殊工艺选项
+// 特殊工艺选项 (hzlC1/4-10)
+// 来源: 旧系统 YSinput_Add.asp
 const TESHU_OPTIONS = [
-  { label: '局部丝印', value: 'tsJS' },
-  { label: '绣花', value: 'tsWX' },
-  { label: '烫钻', value: 'tsZS' },
-  { label: '胶印上光', value: 'tsJY' },
-  { label: '其他', value: 'tsOT' },
+  { label: '局部丝网印', value: 'hzlC1' },
+  { label: '绣花', value: 'hzlC4' },
+  { label: '烫钻', value: 'hzlC5' },
+  { label: '胶印上光', value: 'hzlC6' },
+  { label: '粘备用袋', value: 'hzlC7' },
+  { label: '揉皱', value: 'hzlC8' },
+  { label: '敲毛边', value: 'hzlC9' },
+  { label: '其它', value: 'hzlC10' },
 ];
 
+// STEPS_MAP_YSS 仅用于详情页显示标签，key与YSGX表列名一致
 const STEPS_MAP_YSS = {
-  hzlA1: '贴膜', hzlA2: '折页', hzlA3: '压线', hzlA4: 'UV',
-  hzlA5: '烫金', hzlA6: '凹凸',
-  hzlB3: '模切', hzlB4: '糊盒', hzlB5: '钉箱', hzlB6: '打包',
-  hzlB7: '复膜', hzlB8: '折页', hzlB9: '压痕', hzlB10: '打孔',
-  hzlB11: '激光', hzlB12: '切成品', hzlB13: '表面整饰', hzlB14: '局部UV', hzlB15: '其他',
-  hzlC1: '磨光', hzlC3: '过油磨光', hzlC4: '烫金', hzlC5: '凹凸',
-  hzlC6: '压纹', hzlC7: 'UV', hzlC8: '植绒', hzlC9: '复膜', hzlC10: '模切',
+  hzlA1: '单面光膜', hzlA2: '单面亚膜', hzlA3: '双面光膜',
+  hzlA4: '双面亚膜', hzlA5: '单面专用膜', hzlA6: '双面专用膜',
+  hzlB3: '烫金', hzlB4: '压钢刀', hzlB5: '穿线', hzlB6: '糊纸粘合',
+  hzlB7: '打汽眼', hzlB8: '凹凸', hzlB11: '激光切割',
+  hzlB12: '穿别针', hzlB13: '路线', hzlB14: '敲柳钉', hzlB15: '包边',
+  hzlC1: '局部丝网印', hzlC3: '外加工上光', hzlC4: '绣花',
+  hzlC5: '烫钻', hzlC6: '胶印上光', hzlC7: '粘备用袋',
+  hzlC8: '揉皱', hzlC9: '敲毛边', hzlC10: '其它',
 };
 
 const STEPS_MAP_YMGX = {
@@ -58,7 +73,19 @@ const STEPS_MAP_YMGX = {
   hzl6: '贴膜', hzl7: '打包',
 };
 
-const YM_PROCESS_LIST = ['晒版', '显影', '烘版', '拼版', '擦版', '贴膜', '打包'];
+const STEPS_MAP_ZM = {
+  jhkddClass: '接单', jhkprint: '打印/晒版', sccjjs: '车间接收',
+  sccjyl: '预领料', sccjdn: '电脑制版', sccjsc: '生产', sccjwc: '完成',
+  hzljs: '质检', fahuo: '发货',
+};
+
+const STEPS_MAP_DS = {
+  jhkddClass: '接单', jhkprint: '打印/晒版', sccjjs: '车间接收',
+  sccjyl: '预领料', sccjdn: '电脑制版', sccjsc: '生产', sccjwc: '完成',
+  hzljs: '质检', fahuo: '发货',
+};
+
+const YM_PROCESS_LIST = ['烘色牢度', '切割', '超声波切割', '三角折', '手工切折', '手工对折', '其它'];
 
 const ZM_PROCESS_LIST = ['开料', '印刷', '裱纸', '模切', '冲孔', '钉粘', '打包'];
 const ZM_PROCESS_FIELDS = ['hzl1','hzl2','hzl3','hzl4','hzl5','hzl6','hzl7'];
@@ -71,27 +98,220 @@ const YSS_PROCESS_FIELDS = Object.keys(STEPS_MAP_YSS);
 
 export default function OrderEntryPage() {
   const [form] = Form.useForm();
-  const navigate = useNavigate();
   const [activeProduct, setActiveProduct] = useState('YS');
   const [stepsMap, setStepsMap] = useState({});
   const [users, setUsers] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+  const [isEdit, setIsEdit] = useState(false);
+  const [editDdId, setEditDdId] = useState(null);
+  const [editProductType, setEditProductType] = useState(null);
+  const [copyDialogVisible, setCopyDialogVisible] = useState(false); // 复制查询对话框
+  const [copySource, setCopySource] = useState(null); // 源单信息
+  const [copyList, setCopyList] = useState([]); // 查询结果
+  const [copyLoading, setCopyLoading] = useState(false); // 查询加载中
+  const [copyForm] = Form.useForm(); // 查询表单
+
+  const navigate = useNavigate();
+  const params = useParams();
 
   const [ysSteps, setYsSteps] = useState({});
+  const [priceMode, setPriceMode] = useState('calc'); // YS/YM 总价模式: 'calc' | 'edit'
+  const [yszjManual, setYszjManual] = useState(null); // YS 手动输入值
+  const [formRerenderKey, setFormRerenderKey] = useState(0); // 工艺按钮刷新 key
+  const [selectedState, setSelectedState] = useState({}); // { hzlA1: true, hzl1: false, ... } 直接控制按钮 type
 
-  // Decode JWT to get current user for zhidan field
+  // Decode JWT to get current user for zhidan field (使用 base64url 解码，兼容 JWT)
   useEffect(function() {
     try {
       var token = localStorage.getItem('token');
       if (!token) return;
       var parts = token.split('.');
       if (parts.length !== 3) return;
-      var payload = JSON.parse(atob(parts[1]));
+      // 标准 base64url 解码（JWT 使用 URL-safe base64）
+      var payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
       setCurrentUser(payload);
       form.setFieldValue('zhidan', payload.username || payload.UserName || '');
       form.setFieldValue('prouddate', payload.prouddate || null);
-    } catch (e) {}
+    } catch (e) {
+      console.error('[OrderEntry] JWT decode failed:', e);
+    }
   }, []);
+
+  // 引用复制模式：从 URL 参数 copyFrom 加载源单数据
+  useEffect(function() {
+    var urlParams = new URLSearchParams(window.location.search);
+    var copyFrom = urlParams.get('copyFrom');
+    var copyProductType = urlParams.get('productType');
+    // 仅在新建订单页（非编辑）且有 copyFrom 参数时触发
+    if (!params.productType && !params.ddId && copyFrom && copyProductType && !copySource) {
+      setActiveProduct(copyProductType);
+      api.get('/api/admin/orders/' + copyProductType + '/' + copyFrom).then(function(result) {
+        var d = result && result.data ? result.data : (result || {});
+        if (!d || (result && result.error)) { message.error('加载引用订单数据失败'); return; }
+        var setFields = {};
+        ['ddbh','prouddate','company','fahuodanwei','yjbhao','cpgg','pingshu','shuliang','dhdw',
+         'kuanhao','proudnumber','ywy','zhengli','jiagongfei','klyaoqiu','jyyaoqiu','gyyq',
+         'beizhu','beizhuYS','beizhuYM','beizhuZM','beizhu8',
+         'danjia','sydazhang','syMoney','yszj',
+         'lldate','sclcClass','ylzd','klcc','kaishu','xukaisl','bcsl',
+         'huahao','jijia','allcount','weidu','soujianjl','sxdate','zm_zhijian','proudbanbie',
+         'jiage','fhdw','fhdate','fhr','cidiehao',
+         'UpFile','beizhu1','beizhu2','beizhu3','beizhu4','beizhu5',
+         'jine1','jine2','jine3','jine4','jine5','jine6','jine7','jine8','jine9','jine10',
+         'yssl1','yssl2','yssl3','yssl4','yssl5','yssl6','yssl7','yssl8','yssl9',
+         'yss20','ysdw1','ysdw2','ysdw3','ysdw4','ysdw5','ysdw6','ysdw7','ysdw8','ysdw9','ysdw10',
+         'ysyl1','ysyl2','ysyl3','ysyl4','ysyl5','ysyl6','ysyl7','ysyl8','ysyl9',
+         'ysy20',
+         'chenpingcc','kuandu','changdu','huachang','kts',
+         'qw1','qw2','qw3','qw4','qw5','qw6','qw7','qw8','qw9','qw10','qw11','qw12',
+         'ss1','ss2','ss3','ss4','ss5','ss6','ss7','ss8','ss9','ss10','ss11','ss12',
+         'bz1','bz2','bz3','bz4','bz5','bz6','bz7','bz8','bz9','bz10','bz11','bz12',
+         'cmh1','cmh2','cmh3','cmh4','cmh5','cmh6','cmh7','cmh8','cmh9','cmh10',
+         'sl1','sl2','sl3','sl4','sl5','sl6','sl7','sl8','sl9','sl10',
+         'lieshu1','lieshu2','lieshu3','lieshu4','lieshu5','lieshu6','lieshu7','lieshu8','lieshu9','lieshu10',
+         'jhkddClass','jhkprint','sccjjs','sccjyl','sccjdn','sccjsc','sccjwc','hzljs','fahuo',
+         'waifa',
+         'hzl1','hzl2','hzl3','hzl4','hzl5','hzl6','hzl7','hzl8','hzl9','hzl10','hzl11','hzl12','hzl13','hzl14','hzl15','hzl16',
+         // YS 工艺字段（来自 YSGX 表）
+         'hzlA1','hzlA2','hzlA3','hzlA4','hzlA5','hzlA6',
+         'hzlB3','hzlB4','hzlB5','hzlB6','hzlB7','hzlB8','hzlB11','hzlB12','hzlB13','hzlB14','hzlB15',
+         'hzlC1','hzlC3','hzlC4',
+        ].forEach(function(k) {
+          if (d[k] !== undefined && d[k] !== null) {
+            if (k === 'prouddate' || k === 'overdate' || k === 'lldate' || k === 'fhdate' || k === 'sxdate') {
+              setFields[k] = d[k] ? dayjs(d[k]) : null;
+            } else {
+              setFields[k] = d[k];
+            }
+          }
+        });
+        delete setFields.ddbh;
+        delete setFields.overdate;
+        delete setFields.addtime;
+        delete setFields.lastupdate;
+        setFields.prouddate = dayjs();
+        setCopySource({ DD_id: copyFrom, product_type: copyProductType });
+        form.setFieldsValue(setFields);
+        if (copyProductType === 'YS') {
+          var ysMap = {};
+          ['hzlA1','hzlA2','hzlA3','hzlA4','hzlA5','hzlA6','hzlB3','hzlB4','hzlB5','hzlB6','hzlB7','hzlB8','hzlB11','hzlB12','hzlB13','hzlB14','hzlB15','hzlC1','hzlC3','hzlC4','hzlC5','hzlC6','hzlC7','hzlC8','hzlC9','hzlC10'].forEach(function(f) { if (d[f] === 1 || d[f] === true) ysMap[f] = true; });
+          setYsSteps(ysMap);
+          setStepsMap(ysMap);
+          Object.keys(ysMap).forEach(function(f) { form.setFieldValue(f, true); });
+          setSelectedState(function(prev) { var n = Object.assign({}, prev); Object.keys(ysMap).forEach(function(f){ n[f] = ysMap[f]; }); return n; });
+        } else if (copyProductType === 'YM') {
+          var ymMap = {};
+          for (var i = 1; i <= 7; i++) { if (d['hzl' + i] === 1 || d['hzl' + i] === true) ymMap['hzl' + i] = true; }
+          setYmSteps(ymMap);
+          setStepsMap(ymMap);
+          setSelectedState(function(prev) { var n = Object.assign({}, prev); Object.keys(ymMap).forEach(function(f){ n[f] = ymMap[f]; }); return n; });
+        } else if (copyProductType === 'ZM') {
+          var zmMap = {};
+          for (var i = 1; i <= 16; i++) { if (d['hzl' + i] === 1 || d['hzl' + i] === true) zmMap['hzl' + i] = true; }
+          setZmSteps(zmMap);
+          setStepsMap(zmMap);
+          setSelectedState(function(prev) { var n = Object.assign({}, prev); Object.keys(zmMap).forEach(function(f){ n[f] = zmMap[f]; }); return n; });
+        }
+        message.success('已引用订单 #' + copyFrom + '，请检查数据后保存');
+        // 清除 URL 参数，避免刷新重复触发
+        window.history.replaceState({}, '', '/orders/new');
+      }).catch(function(err) {
+        console.error('[copyFrom] error:', err);
+        message.error('加载引用订单数据失败');
+      });
+    }
+  }, []);
+
+  // 编辑模式：从 URL 参数判断，加载订单数据
+  useEffect(function() {
+    if (!params.productType || !params.ddId) return;
+    setIsEdit(true);
+    setEditDdId(params.ddId);
+    setEditProductType(params.productType);
+    setActiveProduct(params.productType);
+
+    api.get('/api/admin/orders/' + params.productType.toUpperCase() + '/' + params.ddId).then(function(result) {
+      var d = result && result.data ? result.data : (result || {});
+      if (!d || (result && result.error)) { message.error('加载订单数据失败'); return; }
+      // 填充表单字段
+      var setFields = {};
+      ['ddbh','prouddate','overdate','company','fahuodanwei','yjbhao','cpgg','pingshu','shuliang','dhdw',
+       'kuanhao','proudnumber','ywy','zhengli','jiagongfei','klyaoqiu','jyyaoqiu','gyyq',
+       'beizhu','beizhuYS','beizhuYM','beizhuZM','beizhu8',
+       'danjia','sydazhang','syMoney','yszj',
+       'lldate','sclcClass','ylzd','klcc','kaishu','xukaisl','bcsl',
+       'hzl1','hzl2','hzl3','hzl4','hzl5','hzl6','hzl7','hzl8','hzl9','hzl10','hzl11','hzl12','hzl13','hzl14','hzl15','hzl16',
+       // YS 工艺字段（来自 YSGX 表）
+       'hzlA1','hzlA2','hzlA3','hzlA4','hzlA5','hzlA6',
+       'hzlB3','hzlB4','hzlB5','hzlB6','hzlB7','hzlB8','hzlB11','hzlB12','hzlB13','hzlB14','hzlB15',
+       'hzlC1','hzlC3','hzlC4',
+       'huahao','jijia','allcount','weidu','soujianjl','sxdate','zm_zhijian','proudbanbie',
+       'jiage','fhdw','fhdate','fhr','cidiehao',
+       'UpFile','beizhu1','beizhu2','beizhu3','beizhu4','beizhu5',
+       'jine1','jine2','jine3','jine4','jine5','jine6','jine7','jine8','jine9','jine10',
+       'yssl1','yssl2','yssl3','yssl4','yssl5','yssl6','yssl7','yssl8','yssl9',
+       'yss20','ysdw1','ysdw2','ysdw3','ysdw4','ysdw5','ysdw6','ysdw7','ysdw8','ysdw9','ysdw10',
+       'ysyl1','ysyl2','ysyl3','ysyl4','ysyl5','ysyl6','ysyl7','ysyl8','ysyl9',
+       'ysy20',
+       // ZM 特有字段（buildProgress ZM 返回的）
+       'chenpingcc','kuandu','changdu','huachang','kts',
+       // ZM 色卡明细（qw/ss/bz 各1-12）
+       'qw1','qw2','qw3','qw4','qw5','qw6','qw7','qw8','qw9','qw10','qw11','qw12',
+       'ss1','ss2','ss3','ss4','ss5','ss6','ss7','ss8','ss9','ss10','ss11','ss12',
+       'bz1','bz2','bz3','bz4','bz5','bz6','bz7','bz8','bz9','bz10','bz11','bz12',
+       // ZM 尺码明细（cmh/sl/lieshu 各1-10）
+       'cmh1','cmh2','cmh3','cmh4','cmh5','cmh6','cmh7','cmh8','cmh9','cmh10',
+       'sl1','sl2','sl3','sl4','sl5','sl6','sl7','sl8','sl9','sl10',
+       'lieshu1','lieshu2','lieshu3','lieshu4','lieshu5','lieshu6','lieshu7','lieshu8','lieshu9','lieshu10',
+       // ZM 工序状态
+       'jhkddClass','jhkprint','sccjjs','sccjyl','sccjdn','sccjsc','sccjwc','hzljs','fahuo',
+       'waifa',
+      ].forEach(function(k) {
+        if (d[k] !== undefined && d[k] !== null) {
+          if (k === 'prouddate' || k === 'overdate' || k === 'lldate' || k === 'fhdate' || k === 'sxdate') {
+            setFields[k] = d[k] ? dayjs(d[k]) : null;
+          } else {
+            setFields[k] = d[k];
+          }
+        }
+      });
+      form.setFieldsValue(setFields);
+
+      // 恢复工序勾选状态
+      if (params.productType === 'YS') {
+        var ysMap = {};
+        YSS_PROCESS_FIELDS.forEach(function(f) { if (d[f] === 1 || d[f] === true) ysMap[f] = true; });
+        setYsSteps(ysMap);
+        setStepsMap(ysMap);
+        // 同步到 form，让 Checkbox 默认显示勾选
+        Object.keys(ysMap).forEach(function(f) { form.setFieldValue(f, true); });
+        // 同步 selectedState，让按钮显示蓝色
+        setSelectedState(function(prev) { var n = Object.assign({}, prev); Object.keys(ysMap).forEach(function(f){ n[f] = ysMap[f]; }); return n; });
+      } else if (params.productType === 'YM') {
+        var ymMap = {};
+        for (var i = 1; i <= 7; i++) { if (d['hzl' + i] === 1 || d['hzl' + i] === true) ymMap['hzl' + i] = true; }
+        setYmSteps(ymMap);
+        setStepsMap(ymMap);
+        setSelectedState(function(prev) { var n = Object.assign({}, prev); Object.keys(ymMap).forEach(function(f){ n[f] = ymMap[f]; }); return n; });
+      } else if (params.productType === 'ZM') {
+        var zmMap = {};
+        for (var i = 1; i <= 16; i++) { if (d['hzl' + i] === 1 || d['hzl' + i] === true) zmMap['hzl' + i] = true; }
+        setZmSteps(zmMap);
+        setStepsMap(zmMap);
+        setSelectedState(function(prev) { var n = Object.assign({}, prev); Object.keys(zmMap).forEach(function(f){ n[f] = zmMap[f]; }); return n; });
+      } else if (params.productType === 'DS') {
+        var dsMap = {};
+        Object.keys(STEPS_MAP_DS).forEach(function(f) { if (d[f] === 1 || d[f] === true) dsMap[f] = true; });
+        setDsSteps(dsMap);
+        setSelectedState(function(prev) { var n = Object.assign({}, prev); Object.keys(dsMap).forEach(function(f){ n[f] = dsMap[f]; }); return n; });
+      }
+    }).catch(function(err) {
+      console.error('[OrderEntry] load order error:', err);
+      message.error('加载订单数据失败');
+    });
+  }, []);
+
+  // 复制模式：新建订单时不再自动弹出查询对话框（改为侧边栏「查询下单」入口）
 
   // Auto-set prouddate to today
   useEffect(function() {
@@ -118,10 +338,12 @@ export default function OrderEntryPage() {
       const updated = { ...ymSteps };
       if (updated[field]) { delete updated[field]; } else { updated[field] = true; }
       setYmSteps(updated);
+      setStepsMap(updated);
     } else if (product === 'ZM') {
       const updated = { ...zmSteps };
       if (updated[field]) { delete updated[field]; } else { updated[field] = true; }
       setZmSteps(updated);
+      setStepsMap(updated);
     } else if (product === 'DS') {
       const updated = { ...dsSteps };
       if (updated[field]) { delete updated[field]; } else { updated[field] = true; }
@@ -129,21 +351,119 @@ export default function OrderEntryPage() {
     }
   };
 
+  var handleCopySelect = function(record) {
+    var pt = record.product_type;
+    setCopySource({ DD_id: record.DD_id, product_type: pt });
+    setActiveProduct(pt);
+    setCopyDialogVisible(false);
+    api.get('/api/admin/orders/' + pt + '/' + record.DD_id).then(function(result) {
+      var d = result && result.data ? result.data : (result || {});
+      if (!d || (result && result.error)) { message.error('加载订单数据失败'); return; }
+      var setFields = {};
+      ['ddbh','prouddate','company','fahuodanwei','yjbhao','cpgg','pingshu','shuliang','dhdw',
+       'kuanhao','proudnumber','ywy','zhengli','jiagongfei','klyaoqiu','jyyaoqiu','gyyq',
+       'beizhu','beizhuYS','beizhuYM','beizhuZM','beizhu8',
+       'danjia','sydazhang','syMoney','yszj',
+       'lldate','sclcClass','ylzd','klcc','kaishu','xukaisl','bcsl',
+       'huahao','jijia','allcount','weidu','soujianjl','sxdate','zm_zhijian','proudbanbie',
+       'jiage','fhdw','fhdate','fhr','cidiehao',
+       'UpFile','beizhu1','beizhu2','beizhu3','beizhu4','beizhu5',
+       'jine1','jine2','jine3','jine4','jine5','jine6','jine7','jine8','jine9','jine10',
+       'yssl1','yssl2','yssl3','yssl4','yssl5','yssl6','yssl7','yssl8','yssl9',
+       'yss20','ysdw1','ysdw2','ysdw3','ysdw4','ysdw5','ysdw6','ysdw7','ysdw8','ysdw9','ysdw10',
+       'ysyl1','ysyl2','ysyl3','ysyl4','ysyl5','ysyl6','ysyl7','ysyl8','ysyl9',
+       'ysy20',
+       'chenpingcc','kuandu','changdu','huachang','kts',
+       'qw1','qw2','qw3','qw4','qw5','qw6','qw7','qw8','qw9','qw10','qw11','qw12',
+       'ss1','ss2','ss3','ss4','ss5','ss6','ss7','ss8','ss9','ss10','ss11','ss12',
+       'bz1','bz2','bz3','bz4','bz5','bz6','bz7','bz8','bz9','bz10','bz11','bz12',
+       'cmh1','cmh2','cmh3','cmh4','cmh5','cmh6','cmh7','cmh8','cmh9','cmh10',
+       'sl1','sl2','sl3','sl4','sl5','sl6','sl7','sl8','sl9','sl10',
+       'lieshu1','lieshu2','lieshu3','lieshu4','lieshu5','lieshu6','lieshu7','lieshu8','lieshu9','lieshu10',
+       'jhkddClass','jhkprint','sccjjs','sccjyl','sccjdn','sccjsc','sccjwc','hzljs','fahuo',
+       'waifa',
+       'hzl1','hzl2','hzl3','hzl4','hzl5','hzl6','hzl7','hzl8','hzl9','hzl10','hzl11','hzl12','hzl13','hzl14','hzl15','hzl16',
+       // YS 工艺字段（来自 YSGX 表）
+       'hzlA1','hzlA2','hzlA3','hzlA4','hzlA5','hzlA6',
+       'hzlB3','hzlB4','hzlB5','hzlB6','hzlB7','hzlB8','hzlB11','hzlB12','hzlB13','hzlB14','hzlB15',
+       'hzlC1','hzlC3','hzlC4',
+      ].forEach(function(k) {
+        if (d[k] !== undefined && d[k] !== null) {
+          if (k === 'prouddate' || k === 'overdate' || k === 'lldate' || k === 'fhdate' || k === 'sxdate') {
+            setFields[k] = d[k] ? dayjs(d[k]) : null;
+          } else {
+            setFields[k] = d[k];
+          }
+        }
+      });
+      delete setFields.ddbh;
+      delete setFields.overdate;
+      delete setFields.addtime;
+      delete setFields.lastupdate;
+      setFields.prouddate = dayjs();
+      form.setFieldsValue(setFields);
+      if (pt === 'YS') {
+        var ysMap = {};
+        ['hzlA1','hzlA2','hzlA3','hzlA4','hzlA5','hzlA6','hzlB3','hzlB4','hzlB5','hzlB6','hzlB7','hzlB8','hzlB11','hzlB12','hzlB13','hzlB14','hzlB15','hzlC1','hzlC3','hzlC4','hzlC5','hzlC6','hzlC7','hzlC8','hzlC9','hzlC10'].forEach(function(f) { if (d[f] === 1 || d[f] === true) ysMap[f] = true; });
+        setYsSteps(ysMap);
+        setStepsMap(ysMap);
+        Object.keys(ysMap).forEach(function(f) { form.setFieldValue(f, true); });
+        setSelectedState(function(prev) { var n = Object.assign({}, prev); Object.keys(ysMap).forEach(function(f){ n[f] = ysMap[f]; }); return n; });
+      } else if (pt === 'YM') {
+        var ymMap = {};
+        for (var i = 1; i <= 7; i++) { if (d['hzl' + i] === 1 || d['hzl' + i] === true) ymMap['hzl' + i] = true; }
+        setYmSteps(ymMap);
+        setStepsMap(ymMap);
+        setSelectedState(function(prev) { var n = Object.assign({}, prev); Object.keys(ymMap).forEach(function(f){ n[f] = ymMap[f]; }); return n; });
+      } else if (pt === 'ZM') {
+        var zmMap = {};
+        for (var i = 1; i <= 16; i++) { if (d['hzl' + i] === 1 || d['hzl' + i] === true) zmMap['hzl' + i] = true; }
+        setZmSteps(zmMap);
+        setStepsMap(zmMap);
+        setSelectedState(function(prev) { var n = Object.assign({}, prev); Object.keys(zmMap).forEach(function(f){ n[f] = zmMap[f]; }); return n; });
+      }
+      message.success('已引用订单 #' + record.DD_id + '，请检查数据后保存');
+    }).catch(function(err) {
+      console.error('[handleCopySelect] error:', err);
+      message.error('加载订单数据失败');
+    });
+  };
+
   useEffect(() => {
-    adminListUsers().then(u => { if (u) setUsers(u); }).catch(() => {});
+    salespersonsList().then(u => { if (u) setUsers(Array.isArray(u) ? u : []); }).catch(() => {});
   }, []);
 
   useEffect(() => {
-    if (activeProduct === 'YS') setStepsMap(ysSteps);
-    else if (activeProduct === 'YM') setStepsMap(ymSteps);
+    if (activeProduct === 'YS') { setStepsMap(ysSteps); calcTotal(form, 'YS'); }
+    else if (activeProduct === 'YM') { setStepsMap(ymSteps); calcTotal(form, 'YM'); }
     else if (activeProduct === 'ZM') setStepsMap(zmSteps);
     else if (activeProduct === 'DS') setStepsMap(dsSteps);
-  }, [activeProduct, ymSteps, zmSteps, dsSteps]);
+  }, [activeProduct, ysSteps, ymSteps, zmSteps, dsSteps]);
+
+  // 计算 YS 总计 元/只 = (软片+印工+PS版+铜锌版+电化铝+钢刀+轧钢刀+单价) / 印刷数量 + 贴塑 + UV + 切折
+  // 计算 YM 总计 元/只 = (软片+PS版) / 印刷数量 + 单价 + 印工 + 切刀打洞/圆角穿线/整理包扎
+  function calcTotal(f, product) {
+    if (priceMode === 'edit') return; // 编辑模式下不自动计算
+    var v = f.getFieldsValue();
+    var n = function(x){ return Number(x)||0; };
+    var shuliang = n(v.shuliang);
+    if (product === 'YS') {
+      var part1 = n(v.jine1) + n(v.jine2) + n(v.jine3) + n(v.jine4) + n(v.jine5) + n(v.jine6) + n(v.jine7) + n(v.danjia);
+      var part2 = n(v.jine8) + n(v.jine10) + n(v.jine9);
+      var total = shuliang ? part1 / shuliang + part2 : 0;
+      if (!isNaN(total) && isFinite(total)) f.setFieldsValue({ yszj: Math.round(total * 1000) / 1000 });
+    } else if (product === 'YM') {
+      var total = shuliang ? (n(v.jine1) + n(v.jine3)) / shuliang + n(v.danjia) + n(v.jine2) + n(v.jine9) : 0;
+      if (!isNaN(total) && isFinite(total)) f.setFieldsValue({ yszj: Math.round(total * 1000) / 1000 });
+    }
+  }
 
   function handleCreate() {
     var requiredFields = ['ddbh', 'prouddate'];
-    if (activeProduct === 'YS' || activeProduct === 'YM') {
-      requiredFields = requiredFields.concat(['company', 'ylzd', 'cpgg', 'shuliang', 'yjbhao', 'sclcClass']);
+    if (activeProduct === 'YS') {
+      requiredFields = requiredFields.concat(['company', 'ylzd', 'cpgg', 'shuliang', 'yjbhao']);
+    } else if (activeProduct === 'YM') {
+      requiredFields = requiredFields.concat(['company', 'ylzd', 'cpgg', 'shuliang', 'yjbhao']);
     } else if (activeProduct === 'ZM') {
       requiredFields = requiredFields.concat(['huahao', 'proudnumber', 'shuliang']);
     } else if (activeProduct === 'DS') {
@@ -154,26 +474,45 @@ export default function OrderEntryPage() {
       var values = form.getFieldsValue();
       console.log('[OrderEntry] product_type:', activeProduct, 'company:', values.company, 'overdate:', values.overdate);
 
-      var sclcSteps = Object.keys(stepsMap).map(function(field) {
-        if (activeProduct === 'YS') return field;
-        if (activeProduct === 'ZM') {
-          var idx = ZM_PROCESS_LIST.indexOf(field);
-          return idx >= 0 ? 'hzl' + (idx + 1) + '-' + field : field;
-        }
-        if (activeProduct === 'YM') {
-          var idx = YM_PROCESS_LIST.indexOf(field);
-          return idx >= 0 ? 'hzl' + (idx + 1) + '-' + field : field;
+      // YS 工艺配置：直接从 form 取 hzl* 字段值，忽略 stepsMap（stepsMap 在 YS 没有 onChange 同步）
+      var sclcSteps = [];
+      if (activeProduct === 'YS') {
+        var ysHzlFields = ['hzlA1','hzlA2','hzlA3','hzlA4','hzlA5','hzlA6',
+          'hzlB3','hzlB4','hzlB5','hzlB6','hzlB7','hzlB8',
+          'hzlB11','hzlB12','hzlB13','hzlB14','hzlB15',
+          'hzlC1','hzlC3','hzlC4','hzlC6','hzlC7','hzlC8','hzlC9','hzlC10'];
+        ysHzlFields.forEach(function(f) {
+          if (values[f] === 1 || values[f] === true) sclcSteps.push(f);
+        });
+      } else {
+        sclcSteps = Object.keys(stepsMap).map(function(field) {
+          if (activeProduct === 'ZM') {
+            // stepsMap key 格式为 'hzl1'/'hzl2'... 直接提取编号
+            var num = field.replace(/[^0-9]/g, '');
+            return num ? 'hzl' + num : field;
+          }
+          if (activeProduct === 'YM') {
+          // stepsMap key 是 hzl1/hzl2...，通过 STEPS_MAP_YMGX 反查索引
+          var idx = Object.keys(STEPS_MAP_YMGX).indexOf(field);
+          return idx >= 0 ? 'hzl' + (idx + 1) + '-' + STEPS_MAP_YMGX[field] : field;
         }
         if (activeProduct === 'DS') {
           var idx = DS_PROCESS_LIST.indexOf(field);
           return idx >= 0 ? 'hzl' + (idx + 1) + '-' + field : field;
         }
         return field;
-      });
+        });
+      }
 
+      // dayjs: { $y:2026, $M:3, $D:28, format:f }
+      // Luxon: { $L:obj, $u:undefined, $d:Date, $y:2026, $M:3, c:[...], isLuxon:true }
       var fmtDate = function(v) {
-        if (!v) return null;
+        if (!v || v === 'undefined' || v === 'null') return null;
+        // dayjs: isDayjsObject:true, 有 $y/$M/$D, format 是 fn
+        if (v && v.isDayjsObject === true && typeof v.format === 'function') return v.format('YYYY-MM-DD');
+        // 其他有 format 的对象（兜底）
         if (typeof v.format === 'function') return v.format('YYYY-MM-DD');
+        // 已是字符串或原始值，直接返回
         return v;
       };
 
@@ -183,6 +522,9 @@ export default function OrderEntryPage() {
         'cgJG','cgYG','cgMK','cgHK','cgCX','cgQND','cgJG2','cgOT',
         'tsJS','tsWX','tsZS','tsJY','tsOT',
         'hzl1','hzl2','hzl3','hzl4','hzl5','hzl6','hzl7','hzl8','hzl9','hzl10','hzl11','hzl12','hzl13','hzl14','hzl15','hzl16',
+        'hzlA1','hzlA2','hzlA3','hzlA4','hzlA5','hzlA6',
+        'hzlB3','hzlB4','hzlB5','hzlB6','hzlB7','hzlB8','hzlB11','hzlB12','hzlB13','hzlB14','hzlB15',
+        'hzlC1','hzlC3','hzlC4','hzlC6','hzlC7','hzlC8','hzlC9','hzlC10',
         'waifa'
       ];
       checkboxFields.forEach(function(f) {
@@ -204,23 +546,33 @@ export default function OrderEntryPage() {
         danjia: values.jijia || values.danjia || null,
       });
 
-      var token = localStorage.getItem('token');
-      fetch('/api/order-entry', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + (token || ''),
-        },
-        body: JSON.stringify(data),
-      }).then(function(r) { return r.json().then(function(json) { return { ok: r.ok, status: r.status, data: json }; }); })
-      .then(function(result) {
-        if (result.data.success) {
-          message.success('创建成功，单号：' + result.data.ddbh);
+      // 编辑模式：调用 PATCH 更新接口
+      if (isEdit) {
+        adminUpdateOrder(activeProduct, editDdId, data).then(function(result) {
+          if (result.success) {
+            message.success('修改成功');
+            setTimeout(function() {
+              navigate('/orders/' + activeProduct + '/' + editDdId);
+            }, 1200);
+          } else {
+            message.error(result.message || result.error || '修改失败');
+          }
+        }).catch(function(err) {
+          console.error('[OrderEntry] update error:', err);
+          message.error('修改失败');
+        });
+        return;
+      }
+
+      // 新建模式
+      adminCreateOrder(data).then(function(result) {
+        if (result.success) {
+          message.success('创建成功，单号：' + result.ddbh);
           setTimeout(function() {
-            navigate('/orders/' + activeProduct + '/' + result.data.DD_id);
+            navigate('/orders/' + activeProduct + '/' + result.DD_id);
           }, 1200);
         } else {
-          message.error(result.data.message || result.data.error || '创建失败');
+          message.error(result.message || result.error || '创建失败');
         }
       }).catch(function(err) {
         console.error('[OrderEntry] error:', err);
@@ -228,7 +580,7 @@ export default function OrderEntryPage() {
         if (err.errorFields) errMsg = '请检查：' + err.errorFields.map(function(f) { return f.name; }).join(', ');
         message.error(errMsg);
       });
-    }).catch(function(err) {
+  }).catch(function(err) {
       var errMsg = err.errorFields ? '请检查必填字段：' + err.errorFields.map(function(f) { return f.name; }).join(', ') : (err.message || '验证失败');
       message.error(errMsg);
     });
@@ -236,20 +588,47 @@ export default function OrderEntryPage() {
 
   return (
     <AppLayout>
+      {copySource && (
+        <div style={{ background: '#fff2f0', border: '1px solid #ffccc7', borderRadius: 4, padding: '10px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <FileSearch size={16} color="#ff4d4f" />
+          <span style={{ color: '#cf1322', fontSize: 13 }}>
+            引用自订单 <strong>#{copySource.DD_id}</strong>（{copySource.product_type}），请修改后保存
+          </span>
+          <Button size="small" onClick={function() { setCopySource(null); }} style={{ marginLeft: 'auto' }}>取消引用</Button>
+        </div>
+      )}
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '16px 16px 60px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <h2 style={{ margin: 0, fontSize: 16 }}>新建订单</h2>
-          <Button type="primary" icon={<Plus size={15} />} onClick={handleCreate} style={{ display: 'flex', alignItems: 'center', borderRadius: 6 }}>提交订单</Button>
+          {isEdit && <h2 style={{ margin: 0, fontSize: 16 }}>编辑订单</h2>}
+          <Button type="primary" icon={isEdit ? <Pencil size={15} /> : <Plus size={15} />} onClick={handleCreate} style={{ display: 'flex', alignItems: 'center', borderRadius: 6 }}>{isEdit ? '保存修改' : '提交订单'}</Button>
         </div>
 
-        <Form form={form} layout="vertical" labelAlign="right">
+        <Form form={form} layout="vertical" labelAlign="right" onValuesChange={function(_, allValues) { calcTotal(form, activeProduct); var hzlFields = ['hzlA1','hzlA2','hzlA3','hzlA4','hzlA5','hzlA6','hzlC3','hzlB3','hzlB4','hzlB5','hzlB6','hzlB7','hzlB8','hzlB11','hzlB12','hzlB13','hzlB14','hzlB15','hzlC1','hzlC4','hzl1','hzl2','hzl3','hzl4','hzl5','hzl6','hzl7','hzl8','hzl9','hzl10','hzl11','hzl12','hzl13','hzl14','hzl15','hzl16']; if (hzlFields.some(function(f){return f in allValues;})) { setFormRerenderKey(function(k){return k+1;}); var s = {}; hzlFields.forEach(function(f){ if(f in allValues) s[f] = allValues[f]; }); setSelectedState(function(prev){ var n=Object.assign({},prev); Object.keys(s).forEach(function(k){n[k]=s[k];}); return n; }); } }}>
           <Tabs
             activeKey={activeProduct}
-            onChange={setActiveProduct}
+            onChange={isEdit || copySource ? () => {} : function(pt) {
+              // 切换产品线前清除各产品线的工艺字段，避免残留选中状态
+              form.setFieldsValue({
+                // YS hzlA/B/C
+                hzlA1: false, hzlA2: false, hzlA3: false, hzlA4: false, hzlA5: false, hzlA6: false, hzlC3: false,
+                hzlB3: false, hzlB4: false, hzlB5: false, hzlB6: false, hzlB7: false, hzlB8: false,
+                hzlB11: false, hzlB12: false, hzlB13: false, hzlB14: false, hzlB15: false,
+                hzlC1: false, hzlC4: false,
+                // YM hzl1-7
+                hzl1: false, hzl2: false, hzl3: false, hzl4: false, hzl5: false, hzl6: false, hzl7: false,
+                // ZM hzl1-16
+                hzl1: false, hzl2: false, hzl3: false, hzl4: false, hzl5: false, hzl6: false,
+                hzl7: false, hzl8: false, hzl9: false, hzl10: false, hzl11: false, hzl12: false,
+                hzl13: false, hzl14: false, hzl15: false, hzl16: false,
+              });
+              setActiveProduct(pt);
+              setSelectedState({});
+            }}
             items={[
               {
                 key: 'YS',
                 label: '📄 印刷(YS)',
+                disabled: isEdit || copySource,
                 children: (
                   <div>
                     {/* 基本信息 */}
@@ -258,14 +637,23 @@ export default function OrderEntryPage() {
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0 12px' }}>
                         <Form.Item label="订单编号" name="ddbh" style={{ marginBottom: 4 }}><Input disabled /></Form.Item>
                         <Form.Item label="生成日期" name="prouddate" style={{ marginBottom: 4 }}><DatePicker disabled style={{ width: '100%' }} /></Form.Item>
-                        <Form.Item label="交货日期" name="overdate" style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
+                        <Form.Item label="交货日期" name="overdate" rules={[{ validator: function(_, value) {
+                          if (!value) return Promise.resolve();
+                          var pd = form.getFieldValue('prouddate');
+                          if (pd && value && value.isBefore) {
+                            if (value.isBefore(pd, 'day') || value.isSame(pd, 'day')) {
+                              return Promise.reject('交货日期不能早于生成日期');
+                            }
+                          }
+                          return Promise.resolve();
+                        } }]} style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
                         <Form.Item label="制单" name="zhidan" style={{ marginBottom: 4 }}><Input disabled /></Form.Item>
                         <Form.Item label={<LabelWithStar required>委印单位</LabelWithStar>} name="company" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="客户公司名称" /></Form.Item>
                         <Form.Item label="发货单位" name="fahuodanwei" style={{ marginBottom: 4 }}><Input placeholder="发货单位" /></Form.Item>
                         <Form.Item label="款号" name="kuanhao" style={{ marginBottom: 4 }}><Input placeholder="款号" /></Form.Item>
                         <Form.Item label={<LabelWithStar required>印件编号</LabelWithStar>} name="yjbhao" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="印件编号" /></Form.Item>
-                        <Form.Item label="品名" name="proudnumber" style={{ marginBottom: 4 }}><Input placeholder="品名" /></Form.Item>
-                        <Form.Item label={<LabelWithStar required>所属车间</LabelWithStar>} name="sclcClass" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}>
+                        <Form.Item label="品名" name="jiagongfei" style={{ marginBottom: 4 }}><Input placeholder="品名" /></Form.Item>
+                        <Form.Item label="所属车间" name="sclcClass" style={{ marginBottom: 4 }}>
                           <Select placeholder="请选择" allowClear>
                             <Option value={1}>纸盒</Option>
                             <Option value={2}>印刷单</Option>
@@ -274,7 +662,7 @@ export default function OrderEntryPage() {
                         </Form.Item>
                         <Form.Item label="业务员" name="ywy" style={{ marginBottom: 4 }}>
                           <Select placeholder="选择业务员" allowClear>
-                            {users.map(u => <Option key={u.UserID || u.userId} value={u.UserID || u.userId}>{u.UserName || u.username}</Option>)}
+                            {users.map(u => <Option key={u.id} value={u.id}>{u.name}</Option>)}
                           </Select>
                         </Form.Item>
                         <Form.Item label="外发" name="waifa" valuePropName="checked" style={{ marginBottom: 4 }}><Checkbox /></Form.Item>
@@ -301,9 +689,9 @@ export default function OrderEntryPage() {
                       <div style={{ fontSize: 13, fontWeight: 600, color: '#2b6cb0', marginBottom: 8 }}>| 纸张用量及价格</div>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0 12px' }}>
                         <Form.Item label="实印大张" name="sydazhang" style={{ marginBottom: 4 }}><Input placeholder="实印大张" type="number" /></Form.Item>
-                        <Form.Item label="单价(元/张)" name="danjia" style={{ marginBottom: 4 }}><Input placeholder="单价" type="number" step="0.01" /></Form.Item>
-                        <Form.Item label="实印金额" name="syMoney" style={{ marginBottom: 4 }}><Input placeholder="实印金额" type="number" step="0.01" /></Form.Item>
-                        <Form.Item label="订单总价" name="yszj" style={{ marginBottom: 4 }}><Input placeholder="订单总价" type="number" step="0.01" /></Form.Item>
+                        <Form.Item label="单价(元/张)" name="danjia" style={{ marginBottom: 4 }}><Input placeholder="单价" type="number" step="0.0001" /></Form.Item>
+                        <Form.Item label="实印金额" name="syMoney" style={{ marginBottom: 4 }}><Input placeholder="实印金额" type="number" step="0.0001" /></Form.Item>
+                        <Form.Item label="订单总价" name="yszj" style={{ marginBottom: 4 }}><Input placeholder="订单总价" type="number" step="0.0001" /></Form.Item>
                       </div>
                     </div>
 
@@ -324,8 +712,14 @@ export default function OrderEntryPage() {
                           <div style={{ fontSize: 12, color: '#718096', marginBottom: 4 }}>贴膜</div>
                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                             {TIEMO_OPTIONS.map(opt => (
-                              <Form.Item key={opt.value} name={opt.value} valuePropName="checked" style={{ marginBottom: 4 }}>
-                                <Checkbox>{opt.label}</Checkbox>
+                              <Form.Item key={opt.value} name={opt.value} valuePropName="checked" style={{ marginBottom: 0 }}>
+                                <Button
+                                  key={opt.value + '-' + formRerenderKey}
+                                  size="small"
+                                  type={selectedState[opt.value] ? 'primary' : 'default'}
+                                  onClick={() => { setSelectedState(prev => ({ ...prev, [opt.value]: !prev[opt.value] })); form.setFieldValue(opt.value, !form.getFieldValue(opt.value)); }}
+                                  style={{ marginRight: 4, marginBottom: 4 }}
+                                >{opt.label}</Button>
                               </Form.Item>
                             ))}
                           </div>
@@ -334,8 +728,14 @@ export default function OrderEntryPage() {
                           <div style={{ fontSize: 12, color: '#718096', marginBottom: 4 }}>常规工艺</div>
                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                             {CHANGGUI_OPTIONS.map(opt => (
-                              <Form.Item key={opt.value} name={opt.value} valuePropName="checked" style={{ marginBottom: 4 }}>
-                                <Checkbox>{opt.label}</Checkbox>
+                              <Form.Item key={opt.value} name={opt.value} valuePropName="checked" style={{ marginBottom: 0 }}>
+                                <Button
+                                  key={opt.value + '-' + formRerenderKey}
+                                  size="small"
+                                  type={selectedState[opt.value] ? 'primary' : 'default'}
+                                  onClick={() => { setSelectedState(prev => ({ ...prev, [opt.value]: !prev[opt.value] })); form.setFieldValue(opt.value, !form.getFieldValue(opt.value)); }}
+                                  style={{ marginRight: 4, marginBottom: 4 }}
+                                >{opt.label}</Button>
                               </Form.Item>
                             ))}
                           </div>
@@ -344,8 +744,14 @@ export default function OrderEntryPage() {
                           <div style={{ fontSize: 12, color: '#718096', marginBottom: 4 }}>特殊工艺</div>
                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                             {TESHU_OPTIONS.map(opt => (
-                              <Form.Item key={opt.value} name={opt.value} valuePropName="checked" style={{ marginBottom: 4 }}>
-                                <Checkbox>{opt.label}</Checkbox>
+                              <Form.Item key={opt.value} name={opt.value} valuePropName="checked" style={{ marginBottom: 0 }}>
+                                <Button
+                                  key={opt.value + '-' + formRerenderKey}
+                                  size="small"
+                                  type={selectedState[opt.value] ? 'primary' : 'default'}
+                                  onClick={() => { setSelectedState(prev => ({ ...prev, [opt.value]: !prev[opt.value] })); form.setFieldValue(opt.value, !form.getFieldValue(opt.value)); }}
+                                  style={{ marginRight: 4, marginBottom: 4 }}
+                                >{opt.label}</Button>
                               </Form.Item>
                             ))}
                           </div>
@@ -373,9 +779,9 @@ export default function OrderEntryPage() {
                             { label: '电化铝', sl: 'yssl5', je: 'jine5' },
                             { label: '钢刀', sl: 'yssl6', je: 'jine6' },
                             { label: '轧钢刀', sl: 'yssl7', je: 'jine7' },
-                            { label: '贴塑', sl: 'yssl8', je: 'jine8' },
+                            { label: '贴塑双(单)面', sl: 'yssl8', je: 'jine8' },
                             { label: 'UV', sl: 'yss20', je: 'jine10' },
-                            { label: '切折', sl: 'yssl9', je: 'jine9' },
+                            { label: '切刀打洞/圆角穿线/整理包扎', sl: 'yssl9', je: 'jine9' },
                           ].map(function(item) {
                             return React.createElement('tr', { key: item.label },
                               React.createElement('td', { style: { padding: '4px 8px', border: '1px solid #d0dce8' } }, item.label),
@@ -386,16 +792,49 @@ export default function OrderEntryPage() {
                               ),
                               React.createElement('td', { style: { padding: '2px 4px', border: '1px solid #d0dce8' } },
                                 React.createElement(Form.Item, { name: item.je, style: { marginBottom: 0 } },
-                                  React.createElement(Input, { size: 'small', type: 'number', placeholder: '-', step: '0.01', style: { textAlign: 'right' } })
+                                  React.createElement(Input, { size: 'small', type: 'number', placeholder: '-', step: '0.0001', style: { textAlign: 'right' } })
                                 )
                               )
                             );
                           })}
                           <tr style={{ background: '#e8f4fd', fontWeight: 600 }}>
-                            <td style={{ padding: '6px 8px', border: '1px solid #d0dce8' }}>总计 元/只</td>
-                            <td colSpan="2" style={{ padding: '2px 4px', border: '1px solid #d0dce8', textAlign: 'right' }}>
+                            <td style={{ padding: '6px 8px', border: '1px solid #d0dce8' }}>
+                              总计 元/只
+                            </td>
+                            <td style={{ padding: '4px 6px', border: '1px solid #d0dce8' }}>
+                              <Button
+                                size="small"
+                                onClick={function() {
+                                  if (priceMode === 'calc') {
+                                    setPriceMode('edit');
+                                  } else {
+                                    setPriceMode('calc');
+                                    calcTotal(form, 'YS');
+                                  }
+                                }}
+                                style={{
+                                  fontSize: 12,
+                                  fontWeight: 600,
+                                  height: 24,
+                                  borderRadius: 4,
+                                  padding: '0 10px',
+                                  color: priceMode === 'edit' ? '#c0392b' : '#1d5fb5',
+                                  background: priceMode === 'edit' ? '#fdf0f0' : '#eff6ff',
+                                  border: '1px solid ' + (priceMode === 'edit' ? '#e77' : '#93c5fd'),
+                                }}
+                              >{priceMode === 'calc' ? '计算' : '编辑'}</Button>
+                            </td>
+                            <td style={{ padding: '2px 4px', border: '1px solid #d0dce8', textAlign: 'right' }}>
                               <Form.Item name="yszj" style={{ marginBottom: 0 }}>
-                                <Input size="small" type="number" placeholder="自动计算" step="0.01" style={{ textAlign: 'right', fontWeight: 600 }} disabled />
+                                <Input
+                                  size="small"
+                                  type="number"
+                                  placeholder={priceMode === 'calc' ? '自动计算' : '手动输入'}
+                                  step="0.0001"
+                                  style={{ textAlign: 'right', fontWeight: 600 }}
+                                  disabled={priceMode === 'calc'}
+                                  onChange={function(e) { setYszjManual(e.target.value); }}
+                                />
                               </Form.Item>
                             </td>
                           </tr>
@@ -413,7 +852,8 @@ export default function OrderEntryPage() {
               },
               {
                                 key: 'YM',
-                label: '📄 印刷面(YM)',
+                label: '📄 印唛(YM)',
+                disabled: isEdit || copySource,
                 children: (
                   <div>
                     {/* 基本信息 - 按老系统顺序 */}
@@ -422,7 +862,16 @@ export default function OrderEntryPage() {
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0 12px' }}>
                         <Form.Item label="订单编号" name="ddbh" style={{ marginBottom: 4 }}><Input disabled /></Form.Item>
                         <Form.Item label="生成日期" name="prouddate" style={{ marginBottom: 4 }}><DatePicker disabled style={{ width: '100%' }} /></Form.Item>
-                        <Form.Item label="交货日期" name="overdate" style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
+                        <Form.Item label="交货日期" name="overdate" rules={[{ validator: function(_, value) {
+                          if (!value) return Promise.resolve();
+                          var pd = form.getFieldValue('prouddate');
+                          if (pd && value && value.isBefore) {
+                            if (value.isBefore(pd, 'day') || value.isSame(pd, 'day')) {
+                              return Promise.reject('交货日期不能早于生成日期');
+                            }
+                          }
+                          return Promise.resolve();
+                        } }]} style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
                         <Form.Item label="制单" name="zhidan" style={{ marginBottom: 4 }}><Input disabled /></Form.Item>
                         <Form.Item label={<LabelWithStar required>委印单位</LabelWithStar>} name="company" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="客户公司名称" /></Form.Item>
                         <Form.Item label="发货单位" name="fahuodanwei" style={{ marginBottom: 4 }}><Input placeholder="发货单位" /></Form.Item>
@@ -440,11 +889,13 @@ export default function OrderEntryPage() {
                         <Form.Item label={<LabelWithStar required>用料质地</LabelWithStar>} name="ylzd" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="如128G双铜" /></Form.Item>
                         <Form.Item label="业务员" name="ywy" style={{ marginBottom: 4 }}>
                           <Select placeholder="选择业务员" allowClear>
-                            {users.map(u => <Option key={u.UserID || u.userId} value={u.UserID || u.userId}>{u.UserName || u.username}</Option>)}
+                            {users.map(u => <Option key={u.id} value={u.id}>{u.name}</Option>)}
                           </Select>
                         </Form.Item>
                         <Form.Item label="款号" name="kuanhao" style={{ marginBottom: 4 }}><Input placeholder="款号" /></Form.Item>
-                        <Form.Item label="品名" name="proudnumber" style={{ marginBottom: 4 }}><Input placeholder="品名" /></Form.Item>
+                        <Form.Item label="加工费" name="jiagongfei" style={{ marginBottom: 4 }}><Input placeholder="加工费" type="number" step="0.01" /></Form.Item>
+                        <Form.Item label="机印型号" name="proudnumber" style={{ marginBottom: 4 }}><Input placeholder="机印型号" /></Form.Item>
+                        <Form.Item label="品名" name="jiagongfei" style={{ marginBottom: 4 }}><Input placeholder="品名" /></Form.Item>
                         <Form.Item label="外发" name="waifa" valuePropName="checked" style={{ marginBottom: 4 }}><Checkbox /></Form.Item>
                       </div>
                     </div>
@@ -453,9 +904,9 @@ export default function OrderEntryPage() {
                     <div style={{ marginBottom: 16 }}>
                       <div style={{ fontSize: 13, fontWeight: 600, color: '#2b6cb0', marginBottom: 8 }}>| 纸张用量及价格</div>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0 12px' }}>
-                        <Form.Item label="实用米数" name="sydazhang" style={{ marginBottom: 4 }}><Input placeholder="实用米数" type="number" /></Form.Item>
-                        <Form.Item label="单价(元/米)" name="danjia" style={{ marginBottom: 4 }}><Input placeholder="单价" type="number" step="0.01" /></Form.Item>
-                        <Form.Item label="金额" name="syMoney" style={{ marginBottom: 4 }}><Input placeholder="金额" type="number" step="0.01" /></Form.Item>
+                        <Form.Item label="实用米数" name="sydazhang" style={{ marginBottom: 4 }}><Input placeholder="实用米数" type="number" step="0.0001" /></Form.Item>
+                        <Form.Item label="单价(元/米)" name="danjia" style={{ marginBottom: 4 }}><Input placeholder="单价" type="number" step="0.0001" /></Form.Item>
+                        <Form.Item label="金额" name="syMoney" style={{ marginBottom: 4 }}><Input placeholder="金额" type="number" step="0.0001" /></Form.Item>
                       </div>
                     </div>
 
@@ -472,17 +923,28 @@ export default function OrderEntryPage() {
                     <div style={{ marginBottom: 16 }}>
                       <div style={{ fontSize: 13, fontWeight: 600, color: '#2b6cb0', marginBottom: 8 }}>| 后整理工艺</div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-                        {[
+                        {[ // 后整理工艺 - YM（标签顺序与旧系统 YMinput_Add.asp L313-347 一致）
                           { label: '烘色牢度', value: 'hzl1' },
                           { label: '切割', value: 'hzl2' },
                           { label: '超声波切割', value: 'hzl3' },
-                          { label: '三角折', value: 'hzl7' },
                           { label: '手工切折', value: 'hzl4' },
                           { label: '手工对折', value: 'hzl5' },
                           { label: '其它', value: 'hzl6' },
+                          { label: '三角折', value: 'hzl7' },
                         ].map(function(opt) {
-                          return React.createElement(Form.Item, { key: opt.value, name: opt.value, valuePropName: 'checked', style: { marginBottom: 4 } },
-                            React.createElement(Checkbox, null, opt.label)
+                          var btnKey = opt.value + '-' + formRerenderKey;
+                          return React.createElement(Form.Item, {
+                            key: opt.value,
+                            name: opt.value,
+                            valuePropName: 'checked',
+                            style: { marginBottom: 0 }
+                          },
+                            React.createElement(Button, {
+                              key: btnKey,
+                              size: 'small',
+                              type: selectedState[opt.value] ? 'primary' : 'default',
+                              onClick: function() { setSelectedState(function(prev) { var n = Object.assign({}, prev); n[opt.value] = !prev[opt.value]; return n; }); form.setFieldValue(opt.value, !form.getFieldValue(opt.value)); }
+                            }, opt.label)
                           );
                         })}
                       </div>
@@ -511,6 +973,7 @@ export default function OrderEntryPage() {
                             { label: '钢刀', sl: 'yssl6', yl: 'ysyl6', je: 'jine6' },
                             { label: '轧钢刀', sl: 'yssl7', yl: 'ysyl7', je: 'jine7' },
                             { label: '贴塑双(单)面', sl: 'yssl8', yl: 'ysyl8', je: 'jine8' },
+                            { label: 'UV', sl: 'yss20', yl: 'ysy20', dw: 'ysdw10', je: 'jine10' },
                             { label: '切刀打洞/圆角穿线/整理包扎', sl: 'yssl9', yl: 'ysyl9', je: 'jine9' },
                           ].map(function(item) {
                             return React.createElement('tr', { key: item.label },
@@ -520,7 +983,13 @@ export default function OrderEntryPage() {
                                   React.createElement(Input, { size: 'small', type: 'number', placeholder: '-', style: { textAlign: 'right' } })
                                 )
                               ),
-                              React.createElement('td', { style: { padding: '4px 8px', border: '1px solid #d0dce8', textAlign: 'center', fontSize: 11, color: '#666' } }, '米/只'),
+                              React.createElement('td', { style: { padding: '4px 8px', border: '1px solid #d0dce8', textAlign: 'center', fontSize: 11, color: '#666' } },
+                                item.dw
+                                  ? React.createElement(Form.Item, { name: item.dw, style: { marginBottom: 0 } },
+                                      React.createElement(Input, { size: 'small', style: { textAlign: 'center' } })
+                                    )
+                                  : '米/只'
+                              ),
                               React.createElement('td', { style: { padding: '2px 4px', border: '1px solid #d0dce8' } },
                                 React.createElement(Form.Item, { name: item.yl, style: { marginBottom: 0 } },
                                   React.createElement(Input, { size: 'small', type: 'number', placeholder: '-', style: { textAlign: 'right' } })
@@ -528,16 +997,49 @@ export default function OrderEntryPage() {
                               ),
                               React.createElement('td', { style: { padding: '2px 4px', border: '1px solid #d0dce8' } },
                                 React.createElement(Form.Item, { name: item.je, style: { marginBottom: 0 } },
-                                  React.createElement(Input, { size: 'small', type: 'number', placeholder: '-', step: '0.01', style: { textAlign: 'right' } })
+                                  React.createElement(Input, { size: 'small', type: 'number', placeholder: '-', step: '0.0001', style: { textAlign: 'right' } })
                                 )
                               )
                             );
                           })}
                           <tr style={{ background: '#e8f4fd', fontWeight: 600 }}>
-                            <td style={{ padding: '6px 8px', border: '1px solid #d0dce8' }}>总计 元/只</td>
+                            <td style={{ padding: '6px 8px', border: '1px solid #d0dce8' }}>
+                              总计 元/只
+                            </td>
+                            <td style={{ padding: '4px 6px', border: '1px solid #d0dce8' }}>
+                              <Button
+                                size="small"
+                                onClick={function() {
+                                  if (priceMode === 'calc') {
+                                    setPriceMode('edit');
+                                  } else {
+                                    setPriceMode('calc');
+                                    calcTotal(form, 'YM');
+                                  }
+                                }}
+                                style={{
+                                  fontSize: 12,
+                                  fontWeight: 600,
+                                  height: 24,
+                                  borderRadius: 4,
+                                  padding: '0 10px',
+                                  color: priceMode === 'edit' ? '#c0392b' : '#0f766e',
+                                  background: priceMode === 'edit' ? '#fdf0f0' : '#f0fdfa',
+                                  border: '1px solid ' + (priceMode === 'edit' ? '#e77' : '#5eead4'),
+                                }}
+                              >{priceMode === 'calc' ? '计算' : '编辑'}</Button>
+                            </td>
                             <td colSpan="4" style={{ padding: '2px 4px', border: '1px solid #d0dce8', textAlign: 'right' }}>
                               <Form.Item name="yszj" style={{ marginBottom: 0 }}>
-                                <Input size="small" type="number" placeholder="自动计算" step="0.01" style={{ textAlign: 'right', fontWeight: 600 }} disabled />
+                                <Input
+                                  size="small"
+                                  type="number"
+                                  placeholder={priceMode === 'calc' ? '自动计算' : '手动输入'}
+                                  step="0.001"
+                                  style={{ textAlign: 'right', fontWeight: 600 }}
+                                  disabled={priceMode === 'calc'}
+                                  onChange={function(e) { setYszjManual(e.target.value); }}
+                                />
                               </Form.Item>
                             </td>
                           </tr>
@@ -561,7 +1063,8 @@ export default function OrderEntryPage() {
               },
               {
                                 key: 'ZM',
-                label: '📦 纸盒(ZM)',
+                label: '📦 织唛(ZM)',
+                disabled: isEdit || copySource,
                 children: (
                   <div>
                     {/* 基本信息 */}
@@ -570,20 +1073,42 @@ export default function OrderEntryPage() {
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0 12px' }}>
                         <Form.Item label="订单编号" name="ddbh" style={{ marginBottom: 4 }}><Input disabled /></Form.Item>
                         <Form.Item label="生成日期" name="prouddate" style={{ marginBottom: 4 }}><DatePicker disabled style={{ width: '100%' }} /></Form.Item>
-                        <Form.Item label="交货日期" name="overdate" style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
+                        <Form.Item label="交货日期" name="overdate" rules={[{ validator: function(_, value) {
+                          if (!value) return Promise.resolve();
+                          var pd = form.getFieldValue('prouddate');
+                          if (pd && value && value.isBefore) {
+                            if (value.isBefore(pd, 'day') || value.isSame(pd, 'day')) {
+                              return Promise.reject('交货日期不能早于生成日期');
+                            }
+                          }
+                          return Promise.resolve();
+                        } }]} style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
                         <Form.Item label="制单" name="zhidan" style={{ marginBottom: 4 }}><Input disabled /></Form.Item>
                         <Form.Item label={<LabelWithStar required>花号</LabelWithStar>} name="huahao" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="花号" /></Form.Item>
-                        <Form.Item label="订货数量" name="shuliang" style={{ marginBottom: 4 }}><Input placeholder="数量" type="number" /></Form.Item>
+                        <Form.Item label="订货数量" style={{ marginBottom: 4 }}>
+                          <div style={{ display: 'flex', gap: 8 }}>
+                            <Form.Item name="shuliang" style={{ marginBottom: 0, flex: 2 }}>
+                              <Input placeholder="数量" type="number" />
+                            </Form.Item>
+                            <Form.Item name="dhdw" style={{ marginBottom: 0, flex: 1 }}>
+                              <Select placeholder="单位">
+                                <Option value="只">只</Option>
+                                <Option value="米">米</Option>
+                              </Select>
+                            </Form.Item>
+                          </div>
+                        </Form.Item>
                         <Form.Item label="所需时间" name="sxdate" style={{ marginBottom: 4 }}><Input placeholder="所需时间" /></Form.Item>
                         <Form.Item label="业务员" name="ywy" style={{ marginBottom: 4 }}>
                           <Select placeholder="选择业务员" allowClear>
-                            {users.map(u => <Option key={u.UserID || u.userId} value={u.UserID || u.userId}>{u.UserName || u.username}</Option>)}
+                            {users.map(u => <Option key={u.id} value={u.id}>{u.name}</Option>)}
                           </Select>
                         </Form.Item>
                         <Form.Item label="下单公司" name="company" style={{ marginBottom: 4 }}><Input placeholder="下单公司" /></Form.Item>
                         <Form.Item label="发货单位" name="fahuodanwei" style={{ marginBottom: 4 }}><Input placeholder="发货单位" /></Form.Item>
                         <Form.Item label="款号" name="kuanhao" style={{ marginBottom: 4 }}><Input placeholder="款号" /></Form.Item>
-                        <Form.Item label="磁钉号" name="cidiehao" style={{ marginBottom: 4 }}><Input placeholder="磁钉号" /></Form.Item>
+                        <Form.Item label="外发" name="waifa" valuePropName="checked" style={{ marginBottom: 4 }}><Checkbox /></Form.Item>
+
                       </div>
                     </div>
 
@@ -592,7 +1117,7 @@ export default function OrderEntryPage() {
                       <div style={{ fontSize: 13, fontWeight: 600, color: '#2b6cb0', marginBottom: 8 }}>| 生产规格</div>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0 12px' }}>
                         <Form.Item label="卷送生产班别" name="proudbanbie" style={{ marginBottom: 4 }}><Input placeholder="卷送生产班别" /></Form.Item>
-                        <Form.Item label="生产机型" name="dhdw" style={{ marginBottom: 4 }}><Input placeholder="生产机型" /></Form.Item>
+                        <Form.Item label="生产机型" name="proudnumber" style={{ marginBottom: 4 }}><Input placeholder="生产机型" /></Form.Item>
                         <Form.Item label="基价" name="jijia" style={{ marginBottom: 4 }}><Input placeholder="基价" type="number" step="0.01" /></Form.Item>
                         <Form.Item label="总干纬" name="allcount" style={{ marginBottom: 4 }}><Input placeholder="总干纬" type="number" /></Form.Item>
                         <Form.Item label="纬密" name="weidu" style={{ marginBottom: 4 }}><Input placeholder="纬密" /></Form.Item>
@@ -601,7 +1126,8 @@ export default function OrderEntryPage() {
                         <Form.Item label="总长" name="changdu" style={{ marginBottom: 4 }}><Input placeholder="总长" /></Form.Item>
                         <Form.Item label="花长" name="huachang" style={{ marginBottom: 4 }}><Input placeholder="花长" /></Form.Item>
                         <Form.Item label="成品尺寸" name="chenpingcc" style={{ marginBottom: 4 }}><Input placeholder="成品尺寸" /></Form.Item>
-                        <Form.Item label="加工费" name="jiagongfei" style={{ marginBottom: 4 }}><Input placeholder="加工费" type="number" step="0.01" /></Form.Item>
+                        <Form.Item label="加工费" name="jiagongfei" style={{ marginBottom: 4 }}><Input placeholder="加工费" type="number" step="0.0001" /></Form.Item>
+                        <Form.Item label="首检记录" name="soujianjl" style={{ marginBottom: 4 }}><Input placeholder="首检记录" /></Form.Item>
                       </div>
                     </div>
 
@@ -714,8 +1240,19 @@ export default function OrderEntryPage() {
                           { label: '烫钻', value: 'hzl15' },
                           { label: '盒装', value: 'hzl16' },
                         ].map(function(opt) {
-                          return React.createElement(Form.Item, { key: opt.value, name: opt.value, valuePropName: 'checked', style: { marginBottom: 4 } },
-                            React.createElement(Checkbox, null, opt.label)
+                          var btnKey = opt.value + '-' + formRerenderKey;
+                          return React.createElement(Form.Item, {
+                            key: opt.value,
+                            name: opt.value,
+                            valuePropName: 'checked',
+                            style: { marginBottom: 0 }
+                          },
+                            React.createElement(Button, {
+                              key: btnKey,
+                              size: 'small',
+                              type: selectedState[opt.value] ? 'primary' : 'default',
+                              onClick: function() { setSelectedState(function(prev) { var n = Object.assign({}, prev); n[opt.value] = !prev[opt.value]; return n; }); form.setFieldValue(opt.value, !form.getFieldValue(opt.value)); }
+                            }, opt.label)
                           );
                         })}
                       </div>
@@ -734,40 +1271,34 @@ export default function OrderEntryPage() {
                         <Input.TextArea placeholder="质检记录" rows={2} />
                       </Form.Item>
                     </div>
-
-                    {/* 送检记录 */}
-                    <div style={{ marginBottom: 16 }}>
-                      <Form.Item label="送检记录" name="soujianjl" style={{ marginBottom: 4 }}>
-                        <Input.TextArea placeholder="送检记录" rows={1} />
-                      </Form.Item>
-                    </div>
-
-                    {/* 备注 */}
-                    <div style={{ marginBottom: 8 }}>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0 12px' }}>
-                        <Form.Item label="发货单位" name="fhdw" style={{ marginBottom: 4 }}><Input placeholder="发货单位" /></Form.Item>
-                        <Form.Item label="发货日期" name="fhdate" style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
-                        <Form.Item label="发货人" name="fhr" style={{ marginBottom: 4 }}><Input placeholder="发货人" /></Form.Item>
-                      </div>
-                    </div>
                   </div>
                 ),
               },
               {
                                 key: 'DS',
-                label: '🃏 模切(DS)',
+                label: '🃏 滴塑(DS)',
+                disabled: isEdit || copySource,
                 children: (
                   <div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0 12px', marginBottom: 12 }}>
                       <Form.Item label="订单编号" name="ddbh" style={{ marginBottom: 4 }}><Input disabled /></Form.Item>
                       <Form.Item label={<LabelWithStar required>印件编号</LabelWithStar>} name="yjbhao" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="印件编号" /></Form.Item>
-                      <Form.Item label="交货日期" name="overdate" style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
+                      <Form.Item label="交货日期" name="overdate" rules={[{ validator: function(_, value) {
+                          if (!value) return Promise.resolve();
+                          var pd = form.getFieldValue('prouddate');
+                          if (pd && value && value.isBefore) {
+                            if (value.isBefore(pd, 'day') || value.isSame(pd, 'day')) {
+                              return Promise.reject('交货日期不能早于生成日期');
+                            }
+                          }
+                          return Promise.resolve();
+                        } }]} style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
                       <Form.Item label="生产日期" name="prouddate" style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
                       <Form.Item label={<LabelWithStar required>委印单位</LabelWithStar>} name="company" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}><Input placeholder="委印单位" /></Form.Item>
                       <Form.Item label="款号" name="kuanhao" style={{ marginBottom: 4 }}><Input placeholder="款号" /></Form.Item>
                       <Form.Item label="价格" name="jiage" style={{ marginBottom: 4 }}><Input placeholder="价格" type="number" step="0.01" /></Form.Item>
-                      <Form.Item label="发货" name="dhdw" style={{ marginBottom: 4 }}><Input placeholder="发货" /></Form.Item>
-                      <Form.Item label="品名" name="proudnumber" style={{ marginBottom: 4 }}><Input placeholder="品名" /></Form.Item>
+                      <Form.Item label="发货" name="fahuodanwei" style={{ marginBottom: 4 }}><Input placeholder="发货单位" /></Form.Item>
+                      <Form.Item label="生产机型" name="proudnumber" style={{ marginBottom: 4 }}><Input placeholder="生产机型" /></Form.Item>
                     </div>
 
                     <div style={{ marginBottom: 12, padding: '8px 12px', border: '1px solid #d0dce8', borderRadius: 4 }}>
@@ -787,14 +1318,14 @@ export default function OrderEntryPage() {
                       <Form.Item label="发货日期" name="fhdate" style={{ marginBottom: 4 }}><DatePicker style={{ width: '100%' }} /></Form.Item>
                       <Form.Item label={<LabelWithStar required>业务员</LabelWithStar>} name="ywy" rules={[{ required: true, message: ' ' }]} style={{ marginBottom: 4 }}>
                         <Select placeholder="选择业务员" allowClear>
-                          {users.map(function(u) { return React.createElement(Option, { key: u.UserID || u.userId, value: u.UserID || u.userId }, u.UserName || u.username); })}
+                          {users.map(function(u) { return React.createElement(Option, { key: u.id, value: u.id }, u.name); })}
                         </Select>
                       </Form.Item>
                       <Form.Item label="发货人" name="fhr" style={{ marginBottom: 4 }}><Input placeholder="发货人" /></Form.Item>
                       <Form.Item label="发货单位" name="fahuodanwei" style={{ marginBottom: 4 }}><Input placeholder="发货单位" /></Form.Item>
                       <Form.Item label="整烫" name="zhengli" style={{ marginBottom: 4 }}><Input placeholder="整烫" /></Form.Item>
                       <Form.Item label="外发" name="waifa" valuePropName="checked" style={{ marginBottom: 4 }}><Checkbox /></Form.Item>
-                      <Form.Item label="加工费" name="jiagongfei" style={{ marginBottom: 4 }}><Input placeholder="加工费" type="number" step="0.01" /></Form.Item>
+                      <Form.Item label="加工费" name="jiagongfei" style={{ marginBottom: 4 }}><Input placeholder="加工费" type="number" step="0.0001" /></Form.Item>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0 12px' }}>
@@ -807,6 +1338,92 @@ export default function OrderEntryPage() {
           />
         </Form>
       </div>
+      {/* 引用复制订单查询对话框 */}
+      <Modal
+        title="选择引用订单"
+        open={copyDialogVisible}
+        onCancel={function() { setCopyDialogVisible(false); setCopySource(null); }}
+        footer={null}
+        width={800}
+        destroyOnClose
+      >
+        <div style={{ marginBottom: 16, padding: '12px 16px', background: '#f0f6ff', borderRadius: 6, fontSize: 13 }}>
+          <strong>提示：</strong>选择订单后将复制该单数据到表单，保存后生成新订单。原单数据不变。
+        </div>
+        <Form form={copyForm} layout="inline" style={{ marginBottom: 12 }} onFinish={function() {
+          var vals = copyForm.getFieldsValue();
+          var pt = vals.productType || 'YS';
+          var params = { product_type: pt };
+          if (vals.company) params.company = vals.company;
+          if (vals.dateRange && vals.dateRange[0]) params.start_date = vals.dateRange[0].format('YYYY-MM-DD');
+          if (vals.dateRange && vals.dateRange[1]) params.end_date = vals.dateRange[1].format('YYYY-MM-DD');
+          if (vals.yjbhao) params.yjbhao = vals.yjbhao;
+          if (vals.kuanhao) params.kuanhao = vals.kuanhao;
+          if (vals.huahao) params.huahao = vals.huahao;
+          if (vals.proudnumber) params.proudnumber = vals.proudnumber;
+          setCopyLoading(true);
+          api.get('/api/order-entry/copy-list', { params: params }).then(function(res) {
+            var items = (res.items || []).map(function(item) { return Object.assign({}, item, { product_type: res.product_type }); });
+            setCopyList(items);
+            setCopyLoading(false);
+          }).catch(function() { setCopyLoading(false); });
+        }}>
+          <Form.Item name="productType" label="订单类型" initialValue="YS" style={{ marginBottom: 8 }}>
+            <Select style={{ width: 120 }} onChange={function() { copyForm.resetFields(['yjbhao','kuanhao','huahao','proudnumber']); }}>
+              <Option value="YS">YS {PRODUCT_LABELS.YS}</Option>
+              <Option value="YM">YM {PRODUCT_LABELS.YM}</Option>
+              <Option value="ZM">ZM {PRODUCT_LABELS.ZM}</Option>
+              <Option value="DS">DS {PRODUCT_LABELS.DS}</Option>
+            </Select>
+          </Form.Item>
+          <Form.Item name="company" label="公司名称" style={{ marginBottom: 8 }}><Input placeholder="客户名称" style={{ width: 140 }} /></Form.Item>
+          <Form.Item name="dateRange" label="制单日期" style={{ marginBottom: 8 }}><RangePicker /></Form.Item>
+          <Form.Item noStyle shouldUpdate={function(a,b) { return b.productType !== a.productType; }}>
+            {function({getFieldValue}) {
+              var pt = getFieldValue('productType') || 'YS';
+              return React.createElement(React.Fragment, null,
+                (pt === 'YS' || pt === 'YM') && React.createElement(Form.Item, { name: 'yjbhao', label: '印件编号', style: { marginBottom: 8 } },
+                  React.createElement(Input, { placeholder: '印件编号', style: { width: 120 } })
+                ),
+                (pt === 'YS' || pt === 'YM') && React.createElement(Form.Item, { name: 'kuanhao', label: '款号', style: { marginBottom: 8 } },
+                  React.createElement(Input, { placeholder: '款号', style: { width: 120 } })
+                ),
+                pt === 'ZM' && React.createElement(Form.Item, { name: 'huahao', label: '花号', style: { marginBottom: 8 } },
+                  React.createElement(Input, { placeholder: '花号', style: { width: 120 } })
+                ),
+                pt === 'ZM' && React.createElement(Form.Item, { name: 'proudnumber', label: '生产机型', style: { marginBottom: 8 } },
+                  React.createElement(Input, { placeholder: '生产机型', style: { width: 120 } })
+                )
+              );
+            }}
+          </Form.Item>
+          <Form.Item style={{ marginBottom: 8 }}>
+            <Button type="primary" htmlType="submit" loading={copyLoading}>查询</Button>
+            <Button style={{ marginLeft: 8 }} onClick={function() { setCopyDialogVisible(false); setCopySource(null); }}>空白订单</Button>
+          </Form.Item>
+        </Form>
+
+        <Table
+          dataSource={copyList}
+          rowKey="DD_id"
+          size="small"
+          loading={copyLoading}
+          pagination={{ pageSize: 8, size: 'small' }}
+          onRow={function(record) { return { onClick: function() { handleCopySelect(record); }, style: { cursor: 'pointer' } }; }}
+          columns={[
+            { title: '订单号', dataIndex: 'DD_id', width: 80, render: function(v) { return '#' + v; } },
+            { title: '类型', dataIndex: 'product_type', width: 70, render: function(v) { return v; } },
+            { title: '公司名称', dataIndex: 'company', ellipsis: true },
+            { title: '制单日期', dataIndex: 'prouddate', width: 100, render: function(v) { return v ? dayjs(v).format('YYYY-MM-DD') : '-'; } },
+            { title: '印件编号', dataIndex: 'yjbhao', width: 100, render: function(v) { return v || '-'; } },
+            { title: '款号', dataIndex: 'kuanhao', width: 100, render: function(v) { return v || '-'; } },
+            { title: '花号', dataIndex: 'huahao', width: 80, render: function(v) { return v || '-'; } },
+            { title: '生产机型', dataIndex: 'proudnumber', width: 90, render: function(v) { return v || '-'; } },
+            { title: '总价', dataIndex: 'yszj', width: 80, render: function(v) { return v != null ? parseFloat(v).toFixed(4) : '-'; } },
+          ]}
+          style={{ marginTop: 8 }}
+        />
+      </Modal>
     </AppLayout>
   );
 }

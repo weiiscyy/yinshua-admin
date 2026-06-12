@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Spin, Button } from 'antd';
 import { PrinterOutlined } from '@ant-design/icons';
 import { adminGetOrder } from '../api';
+import { PRODUCT_LABELS } from '../utils/productColors';
 import dayjs from 'dayjs';
 import './PrintPage.css';
 
-const PRODUCT_LABELS = { YS: '印刷', YM: '印刷面', ZM: '纸盒', DS: '模切' };
-const COMPANY_NAME = '兰花印刷包装有限公司';
+const COMPANY_NAME = '嘉兴亚欣商标印务有限公司';
 
 export default function PrintOrderPage({ productType, ddId }) {
   const [order, setOrder] = useState(null);
@@ -85,7 +85,7 @@ export default function PrintOrderPage({ productType, ddId }) {
             {o.yjbhao ? <div><span className="label">料号/花号：</span><span className="value">{o.yjbhao}</span></div> : null}
             {o.kuanhao ? <div><span className="label">款号：</span><span className="value">{o.kuanhao}</span></div> : null}
             {o.fahuodanwei ? <div><span className="label">发货单位：</span><span className="value">{o.fahuodanwei}</span></div> : null}
-            {o.waifa ? <div><span className="label">外发：</span><span className="value">是</span></div> : null}
+            {o.waifa == 1 ? <div><span className="label">外发：</span><span className="value">是</span></div> : <div><span className="label">外发：</span><span className="value">否</span></div>}
           </div>
         </div>
 
@@ -144,12 +144,11 @@ export default function PrintOrderPage({ productType, ddId }) {
         )}
 
         {/* ZM 特有字段 */}
-        {productType === 'ZM' && (o.huahao || o.cidiehao || o.zm_zhijian || o.allcount || o.weidu || o.kuandu || o.changdu) && (
+        {productType === 'ZM' && (o.huahao || o.zm_zhijian || o.allcount || o.weidu || o.kuandu || o.changdu) && (
           <div className="print-order-section">
             <div className="print-order-section-title">📦 纸盒特有信息</div>
             <div className="print-order-grid">
               {o.huahao ? <div><span className="label">花号：</span><span className="value">{o.huahao}</span></div> : null}
-              {o.cidiehao ? <div><span className="label">刺绣号：</span><span className="value">{o.cidiehao}</span></div> : null}
               {o.zm_zhijian ? <div><span className="label">纸盒质检：</span><span className="value">{o.zm_zhijian}</span></div> : null}
               {o.allcount ? <div><span className="label">总数量：</span><span className="value">{o.allcount}</span></div> : null}
               {o.weidu ? <div><span className="label">纬度：</span><span className="value">{o.weidu}</span></div> : null}

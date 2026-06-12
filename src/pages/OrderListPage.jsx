@@ -4,19 +4,15 @@ import { SearchOutlined, PlusOutlined, FilterOutlined, ArrowRightOutlined } from
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
 import { adminListOrders, adminListUsers } from '../api';
+import { PRODUCT_MAP, PRODUCT_COLORS, PRODUCT_BORDER, PRODUCT_BG } from '../utils/productColors';
 import dayjs from 'dayjs';
-
-const PRODUCT_MAP = { YS: '印刷', YM: '印刷面', ZM: '纸盒', DS: '模切' };
-const PRODUCT_COLORS = { YS: '#2563eb', YM: '#0891b2', ZM: '#059669', DS: '#d97706' };
-const PRODUCT_BG = { YS: '#eff6ff', YM: '#ecfeff', ZM: '#ecfdf5', DS: '#fffbeb' };
-const PRODUCT_BORDER = { YS: '#bfdbfe', YM: '#a5f3fc', ZM: '#a7f3d0', DS: '#fde68a' };
 
 const PRODUCT_TABS = [
   { key: '', label: '全部', color: '#64748b' },
-  { key: 'YS', label: '印刷', color: PRODUCT_COLORS.YS },
-  { key: 'YM', label: '印刷面', color: PRODUCT_COLORS.YM },
-  { key: 'ZM', label: '纸盒', color: PRODUCT_COLORS.ZM },
-  { key: 'DS', label: '模切', color: PRODUCT_COLORS.DS },
+  { key: 'YS', label: PRODUCT_MAP.YS, color: PRODUCT_COLORS.YS },
+  { key: 'YM', label: PRODUCT_MAP.YM, color: PRODUCT_COLORS.YM },
+  { key: 'ZM', label: PRODUCT_MAP.ZM, color: PRODUCT_COLORS.ZM },
+  { key: 'DS', label: PRODUCT_MAP.DS, color: PRODUCT_COLORS.DS },
 ];
 
 const PAGE_SIZE = 24;

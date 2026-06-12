@@ -1,25 +1,533 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { Card, Button, Tag, Typography, Space, message, Spin, Descriptions, Tooltip, Popconfirm } from 'antd';
-import { ArrowLeftOutlined, CheckOutlined, UndoOutlined, PrinterOutlined } from '@ant-design/icons';
+import React, { useEffect, useState } from 'react';
+import { Card, Button, Tag, Typography, message, Spin, Tooltip, Popconfirm } from 'antd';
+import { ArrowLeftOutlined, CheckOutlined, UndoOutlined, PrinterOutlined, EditOutlined, BugOutlined } from '@ant-design/icons';
 import { openOrderPrint } from '../utils/print';
 import { useNavigate, useParams } from 'react-router-dom';
 import { adminGetOrder, adminUpdateStep } from '../api';
 import AppLayout from '../components/AppLayout';
+import { PRODUCT_MAP, PRODUCT_COLORS } from '../utils/productColors';
 
-const { Title, Text } = Typography;
-const PRODUCT_MAP = { YS: '印刷', YM: '印刷面', ZM: '纸盒', DS: '模切' };
-const PRODUCT_COLORS = { YS: '#2563eb', YM: '#06b6d4', ZM: '#10b981', DS: '#f59e0b' };
+const { Text } = Typography;
 
+// ============== 辅助函数 ==============
+function fmtDate(v) {
+  if (!v) return null;
+  try { return new Date(v).toLocaleDateString('zh-CN'); } catch { return null; }
+}
+function fmtNum(v, decimals) {
+  if (v == null || v === '') return null;
+  const n = Number(v);
+  if (isNaN(n)) return null;
+  return decimals != null ? n.toFixed(decimals) : n.toLocaleString();
+}
+function hasValue(order, fields) {
+  return fields.some(f => { const v = order[f]; return v != null && v !== '' && v !== 0; });
+}
+
+// ============== 通用组件 ==============
+function FieldRow({ label, value, unit }) {
+  if (value == null || value === '' || value === 0) value = '-';
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8, padding: '3px 0', borderBottom: '1px solid #f0f0f0' }}>
+      <Text style={{ fontSize: 12, color: '#666', flexShrink: 0 }}>{label}</Text>
+      <Text style={{ fontSize: 13, color: '#333', fontWeight: 500, textAlign: 'right', wordBreak: 'break-all' }}>{value}{unit ? <span style={{ color: '#888', fontWeight: 400 }}> {unit}</span> : null}</Text>
+    </div>
+  );
+}
+function SectionTitle({ color, children }) {
+  return (
+    <div style={{ fontSize: 12, fontWeight: 600, color: color || '#2b6cb0', marginBottom: 6, marginTop: 14, paddingBottom: 4, borderBottom: `1px solid ${color || '#2b6cb0'}30` }}>
+      {children}
+    </div>
+  );
+}
+function FieldGrid({ children }) {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0 12px' }}>
+      {children}
+    </div>
+  );
+}
+function FieldRow2({ label, value }) {
+  if (!value) value = '-';
+  return (
+    <div style={{ padding: '3px 0', borderBottom: '1px solid #f0f0f0' }}>
+      <Text style={{ fontSize: 12, color: '#666' }}>{label}：</Text>
+      <Text style={{ fontSize: 12, color: '#333', fontWeight: 500 }}>{value}</Text>
+    </div>
+  );
+}
+function ReadOnlyCheckboxGroup({ options, order }) {
+  const checked = options.filter(opt => order[opt.value]);
+  if (checked.length === 0) return null;
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, padding: '4px 0' }}>
+      {checked.map(opt => <Tag key={opt.value} style={{ borderRadius: 4, fontSize: 12 }}>{opt.label}</Tag>)}
+    </div>
+  );
+}
+
+// ============== YS 详情 ==============
+// 来源: 旧系统 YSinput_Add.asp
+// 贴膜: hzlA1-6 + hzlC3(外加工上光)
+const TIEMO_OPTIONS = [
+  { label: '单面光膜', value: 'hzlA1' }, { label: '单面亚膜', value: 'hzlA2' },
+  { label: '双面光膜', value: 'hzlA3' }, { label: '双面亚膜', value: 'hzlA4' },
+  { label: '单面专用膜', value: 'hzlA5' }, { label: '双面专用膜', value: 'hzlA6' },
+  { label: '外加工上光', value: 'hzlC3' },
+];
+// 常规工艺: hzlB3-8/11-15
+const CHANGGUI_OPTIONS = [
+  { label: '烫金', value: 'hzlB3' }, { label: '压钢刀', value: 'hzlB4' },
+  { label: '穿线', value: 'hzlB5' }, { label: '糊纸粘合', value: 'hzlB6' },
+  { label: '打汽眼', value: 'hzlB7' }, { label: '凹凸', value: 'hzlB8' },
+  { label: '激光切割', value: 'hzlB11' }, { label: '穿别针', value: 'hzlB12' },
+  { label: '路线', value: 'hzlB13' }, { label: '敲柳钉', value: 'hzlB14' },
+  { label: '包边', value: 'hzlB15' },
+];
+// 特殊工艺: hzlC1/4-10
+const TESHU_OPTIONS = [
+  { label: '局部丝网印', value: 'hzlC1' },
+  { label: '绣花', value: 'hzlC4' }, { label: '烫钻', value: 'hzlC5' },
+  { label: '胶印上光', value: 'hzlC6' }, { label: '粘备用袋', value: 'hzlC7' },
+  { label: '揉皱', value: 'hzlC8' }, { label: '敲毛边', value: 'hzlC9' },
+  { label: '其它', value: 'hzlC10' },
+];
+const YSS_ANALYSIS = [
+  { label: '软片', sl: 'yssl1', je: 'jine1' },
+  { label: '印工', sl: 'yssl2', je: 'jine2' },
+  { label: 'PS版', sl: 'yssl3', je: 'jine3' },
+  { label: '铜锌版', sl: 'yssl4', je: 'jine4' },
+  { label: '电化铝', sl: 'yssl5', je: 'jine5' },
+  { label: '钢刀', sl: 'yssl6', je: 'jine6' },
+  { label: '轧钢刀', sl: 'yssl7', je: 'jine7' },
+  { label: '贴塑双(单)面', sl: 'yssl8', je: 'jine8' },
+  { label: 'UV', sl: 'yss20', je: 'jine10' },
+  { label: '切刀打洞/圆角穿线/整理包扎', sl: 'yssl9', je: 'jine9' },
+];
+
+function yssAnalysisRowHasValue(order, item) {
+  return true; // 所有行都显示，空值显示-
+}
+
+function YSOrderDetail({ order, productColor }) {
+  // YSGX 表字段：hzlA1-6 / hzlB3-15(缺几个) / hzlC1-10(缺几个)，不在 YS 主表
+  const hasAnyCraft = hasValue(order, [
+    'hzlA1','hzlA2','hzlA3','hzlA4','hzlA5','hzlA6',
+    'hzlB3','hzlB4','hzlB5','hzlB6','hzlB7','hzlB8','hzlB9','hzlB10','hzlB11','hzlB12','hzlB13','hzlB14','hzlB15',
+    'hzlC1','hzlC3','hzlC4','hzlC5','hzlC6','hzlC7','hzlC8','hzlC9','hzlC10',
+    // ts*/cg*/tm* 是前端误用字段，仅作兼容（数据库不存在这些列）
+    'tsJS','tsWX','tsZS','tsJY','tsOT',
+  ]);
+  const hasAnyAnalysis = YSS_ANALYSIS.some(r => yssAnalysisRowHasValue(order, r));
+  const hasAnyRequire = hasValue(order, ['klyaoqiu', 'jyyaoqiu']);
+  const hasAnyPrice = hasValue(order, ['sydazhang', 'danjia', 'syMoney', 'yszj']);
+
+  return (
+    <div>
+      <SectionTitle color={productColor}>基本信息</SectionTitle>
+      <FieldGrid>
+        <FieldRow label="订单编号" value={order.ddbh} />
+        <FieldRow label="生成日期" value={fmtDate(order.prouddate)} />
+        <FieldRow label="交货日期" value={fmtDate(order.overdate)} />
+        <FieldRow label="制单" value={order.zhidan} />
+        <FieldRow label="委印单位" value={order.company} />
+        <FieldRow label="发货单位" value={order.fahuodanwei} />
+        <FieldRow label="款号" value={order.kuanhao} />
+        <FieldRow label="印件编号" value={order.yjbhao} />
+        <FieldRow label="品名" value={order.jiagongfei} />
+        <FieldRow label="所属车间" value={['', '纸盒', '印刷单', '客户印'][order.sclcClass] || '-'} />
+        <FieldRow label="业务员" value={order.ywy_name || order.ywy} />
+        <FieldRow label="外发" value={order.waifa == 1 ? '是' : '否'} />
+      </FieldGrid>
+
+      <SectionTitle color={productColor}>用料与规格</SectionTitle>
+      <FieldGrid>
+        <FieldRow label="用料质地" value={order.ylzd} />
+        <FieldRow label="成品规格" value={order.cpgg} />
+        <FieldRow label="印刷数量" value={fmtNum(order.shuliang)} />
+        <FieldRow label="拼数" value={fmtNum(order.pingshu)} />
+        <FieldRow label="开料尺寸" value={order.klcc} />
+        <FieldRow label="开数" value={fmtNum(order.kaishu)} />
+        <FieldRow label="需开数量" value={fmtNum(order.xukaisl)} />
+        <FieldRow label="备次数量" value={fmtNum(order.bcsl)} />
+      </FieldGrid>
+
+      {hasAnyPrice && (
+        <>
+          <SectionTitle color={productColor}>纸张用量及价格</SectionTitle>
+          <FieldGrid>
+            <FieldRow label="实印大张" value={fmtNum(order.sydazhang)} />
+            <FieldRow label="单价(元/张)" value={fmtNum(order.danjia, 4)} />
+            <FieldRow label="实印金额" value={fmtNum(order.syMoney, 2)} />
+            <FieldRow label="订单总价" value={fmtNum(order.yszj, 2)} />
+          </FieldGrid>
+        </>
+      )}
+
+      {hasAnyRequire && (
+        <>
+          <SectionTitle color={productColor}>要求</SectionTitle>
+          <FieldRow2 label="开料要求" value={order.klyaoqiu} />
+          <FieldRow2 label="机印要求" value={order.jyyaoqiu} />
+        </>
+      )}
+
+      {hasAnyCraft && (
+        <>
+          <SectionTitle color={productColor}>工艺配置</SectionTitle>
+          <div style={{ marginBottom: 6 }}>
+            <Text style={{ fontSize: 11, color: '#888' }}>贴膜：</Text>
+            <ReadOnlyCheckboxGroup options={TIEMO_OPTIONS} order={order} />
+          </div>
+          <div style={{ marginBottom: 6 }}>
+            <Text style={{ fontSize: 11, color: '#888' }}>常规工艺：</Text>
+            <ReadOnlyCheckboxGroup options={CHANGGUI_OPTIONS} order={order} />
+          </div>
+          <div>
+            <Text style={{ fontSize: 11, color: '#888' }}>特殊工艺：</Text>
+            <ReadOnlyCheckboxGroup options={TESHU_OPTIONS} order={order} />
+          </div>
+        </>
+      )}
+
+      {hasAnyAnalysis && (
+        <>
+          <SectionTitle color={productColor}>印件总价分析</SectionTitle>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, marginBottom: 4 }}>
+            <thead>
+              <tr style={{ background: '#f0f4f8' }}>
+                <th style={{ padding: '4px 6px', textAlign: 'left', border: '1px solid #d0dce8', width: '40%' }}>类别</th>
+                <th style={{ padding: '4px 6px', textAlign: 'right', border: '1px solid #d0dce8' }}>印量</th>
+                <th style={{ padding: '4px 6px', textAlign: 'right', border: '1px solid #d0dce8' }}>金额</th>
+              </tr>
+            </thead>
+            <tbody>
+              {YSS_ANALYSIS.filter(r => yssAnalysisRowHasValue(order, r)).map(r => (
+                <tr key={r.label}>
+                  <td style={{ padding: '3px 6px', border: '1px solid #e8e8e8', fontSize: 11 }}>{r.label}</td>
+                  <td style={{ padding: '3px 6px', border: '1px solid #e8e8e8', textAlign: 'right', fontSize: 12 }}>{order[r.sl] ?? '-'}</td>
+                  <td style={{ padding: '3px 6px', border: '1px solid #e8e8e8', textAlign: 'right', fontSize: 12 }}>{fmtNum(order[r.je], 2) ?? '-'}</td>
+                </tr>
+              ))}
+              <tr style={{ background: '#e8f4fd', fontWeight: 600 }}>
+                <td style={{ padding: '4px 6px', border: '1px solid #d0dce8' }}>总价 元/只</td>
+                <td colSpan="2" style={{ padding: '4px 6px', border: '1px solid #d0dce8', textAlign: 'right', fontSize: 13 }}>{fmtNum(order.yszj, 3) ?? '-'}</td>
+              </tr>
+            </tbody>
+          </table>
+        </>
+      )}
+
+      {order.beizhu && (
+        <>
+          <SectionTitle color={productColor}>备注</SectionTitle>
+          <div style={{ padding: '4px 0', fontSize: 12, color: '#555' }}>{order.beizhu}</div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ============== YM 详情 ==============
+const YM_HZL_OPTIONS = [
+  { label: '烘色牢度', value: 'hzl1' }, { label: '切割', value: 'hzl2' },
+  { label: '超声波切割', value: 'hzl3' }, { label: '三角折', value: 'hzl7' },
+  { label: '手工切折', value: 'hzl4' }, { label: '手工对折', value: 'hzl5' },
+  { label: '其它', value: 'hzl6' },
+];
+const YM_ANALYSIS = [
+  { label: '软片', sl: 'yssl1', je: 'jine1' },
+  { label: '印工', sl: 'yssl2', je: 'jine2' },
+  { label: 'PS版', sl: 'yssl3', je: 'jine3' },
+  { label: '铜锌版', sl: 'yssl4', je: 'jine4' },
+  { label: '电化铝', sl: 'yssl5', je: 'jine5' },
+  { label: '钢刀', sl: 'yssl6', je: 'jine6' },
+  { label: '轧钢刀', sl: 'yssl7', je: 'jine7' },
+  { label: '贴塑双(单)面', sl: 'yssl8', je: 'jine8' },
+  { label: 'UV', sl: 'yss20', je: 'jine10' },
+  { label: '切刀打洞/圆角穿线/整理包扎', sl: 'yssl9', je: 'jine9' },
+];
+
+function ymAnalysisRowHasValue(order, item) {
+  const v1 = order[item.sl]; const v2 = order[item.je];
+  if (item.yl) { const v3 = order[item.yl]; return v3 != null && v3 !== ''; }
+  return (v1 != null && v1 !== '') || (v2 != null && v2 !== '');
+}
+
+function YMOrderDetail({ order, productColor }) {
+  const hasAnyCraft = hasValue(order, ['hzl1','hzl2','hzl3','hzl4','hzl5','hzl6','hzl7']);
+  const hasAnyAnalysis = YM_ANALYSIS.some(r => ymAnalysisRowHasValue(order, r));
+  const hasAnyRequire = hasValue(order, ['jyyaoqiu', 'gyyq']);
+  const hasAnyPrice = hasValue(order, ['sydazhang', 'danjia', 'syMoney']);
+
+  return (
+    <div>
+      <SectionTitle color={productColor}>基本信息</SectionTitle>
+      <FieldGrid>
+        <FieldRow label="订单编号" value={order.ddbh} />
+        <FieldRow label="生成日期" value={fmtDate(order.prouddate)} />
+        <FieldRow label="交货日期" value={fmtDate(order.overdate)} />
+        <FieldRow label="制单" value={order.zhidan} />
+        <FieldRow label="委印单位" value={order.company} />
+        <FieldRow label="发货单位" value={order.fahuodanwei} />
+        <FieldRow label="印件编号" value={order.yjbhao} />
+        <FieldRow label="印刷数量" value={fmtNum(order.shuliang)} />
+        <FieldRow label="拼数" value={fmtNum(order.pingshu)} />
+        <FieldRow label="成品规格" value={order.cpgg} />
+        <FieldRow label="所属车间" value={['', '纸盒', '印刷单', '客户印'][order.sclcClass] || '-'} />
+        <FieldRow label="用料质地" value={order.ylzd} />
+        <FieldRow label="业务员" value={order.ywy_name || order.ywy} />
+        <FieldRow label="款号" value={order.kuanhao} />
+        <FieldRow label="品名" value={order.jiagongfei} />
+        <FieldRow label="外发" value={order.waifa == 1 ? '是' : '否'} />
+      </FieldGrid>
+
+      {hasAnyPrice && (
+        <>
+          <SectionTitle color={productColor}>纸张用量及价格</SectionTitle>
+          <FieldGrid>
+            <FieldRow label="实用米数" value={fmtNum(order.sydazhang)} />
+            <FieldRow label="单价(元/米)" value={fmtNum(order.danjia, 4)} />
+            <FieldRow label="金额" value={fmtNum(order.syMoney, 2)} />
+          </FieldGrid>
+        </>
+      )}
+
+      {hasAnyRequire && (
+        <>
+          <SectionTitle color={productColor}>要求</SectionTitle>
+          <FieldRow2 label="机印要求" value={order.jyyaoqiu} />
+          <FieldRow2 label="工艺要求" value={order.gyyq} />
+        </>
+      )}
+
+      {hasAnyCraft && (
+        <>
+          <SectionTitle color={productColor}>后整理工艺</SectionTitle>
+          <ReadOnlyCheckboxGroup options={YM_HZL_OPTIONS} order={order} />
+        </>
+      )}
+
+      {hasAnyAnalysis && (
+        <>
+          <SectionTitle color={productColor}>印件总价分析</SectionTitle>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, marginBottom: 4 }}>
+            <thead>
+              <tr style={{ background: '#f0f4f8' }}>
+                <th style={{ padding: '4px 6px', textAlign: 'left', border: '1px solid #d0dce8', width: '30%' }}>类别</th>
+                <th style={{ padding: '4px 6px', textAlign: 'right', border: '1px solid #d0dce8', width: '20%' }}>数量</th>
+                <th style={{ padding: '4px 6px', textAlign: 'center', border: '1px solid #d0dce8', width: '15%' }}>单位</th>
+                <th style={{ padding: '4px 6px', textAlign: 'right', border: '1px solid #d0dce8' }}>金额</th>
+              </tr>
+            </thead>
+            <tbody>
+              {YM_ANALYSIS.filter(r => ymAnalysisRowHasValue(order, r)).map(r => (
+                <tr key={r.label}>
+                  <td style={{ padding: '3px 6px', border: '1px solid #e8e8e8', fontSize: 11 }}>{r.label}</td>
+                  <td style={{ padding: '3px 6px', border: '1px solid #e8e8e8', textAlign: 'right', fontSize: 12 }}>{order[r.sl] ?? '-'}</td>
+                  <td style={{ padding: '3px 6px', border: '1px solid #e8e8e8', textAlign: 'center', fontSize: 11, color: '#888' }}>米/只</td>
+                  <td style={{ padding: '3px 6px', border: '1px solid #e8e8e8', textAlign: 'right', fontSize: 12 }}>{fmtNum(order[r.je], 2) ?? '-'}</td>
+                </tr>
+              ))}
+              <tr style={{ background: '#e8f4fd', fontWeight: 600 }}>
+                <td style={{ padding: '4px 6px', border: '1px solid #d0dce8' }}>总价 元/只</td>
+                <td colSpan="3" style={{ padding: '4px 6px', border: '1px solid #d0dce8', textAlign: 'right', fontSize: 13 }}>{fmtNum(order.yszj, 3) ?? '-'}</td>
+              </tr>
+            </tbody>
+          </table>
+        </>
+      )}
+
+      <SectionTitle color={productColor}>其他</SectionTitle>
+      <FieldGrid>
+        <FieldRow label="印机型号" value={order.beizhu8} />
+        <FieldRow label="发料日期" value={fmtDate(order.lldate)} />
+        <FieldRow label="附件" value={order.upfile ? '有' : '-'} />
+      </FieldGrid>
+      {(order.beizhuYM || order.beizhu) && (
+        <div style={{ padding: '4px 0', fontSize: 12, color: '#555', marginTop: 4 }}>备注：{order.beizhuYM || order.beizhu}</div>
+      )}
+    </div>
+  );
+}
+
+// ============== ZM 详情 ==============
+const ZM_HZL_OPTIONS = [
+  { label: '切折', value: 'hzl1' }, { label: '三角折', value: 'hzl2' },
+  { label: '对折', value: 'hzl3' }, { label: '切割', value: 'hzl4' },
+  { label: '超声波', value: 'hzl5' }, { label: '热切粘衬', value: 'hzl6' },
+  { label: '包边', value: 'hzl7' }, { label: '卷装', value: 'hzl8' },
+  { label: '留样', value: 'hzl9' }, { label: '热切', value: 'hzl10' },
+  { label: '划口', value: 'hzl11' }, { label: '充棉', value: 'hzl12' },
+  { label: '打汽眼', value: 'hzl13' }, { label: '踩线', value: 'hzl14' },
+  { label: '烫钻', value: 'hzl15' }, { label: '盒装', value: 'hzl16' },
+];
+
+function ZMOrderDetail({ order, productColor }) {
+  const hasAnyCraft = hasValue(order, ['hzl1','hzl2','hzl3','hzl4','hzl5','hzl6','hzl7','hzl8','hzl9','hzl10','hzl11','hzl12','hzl13','hzl14','hzl15','hzl16']);
+  const colorRows = Array.from({ length: 12 }, (_, i) => i + 1).filter(idx =>
+    order[`qw${idx}`] || order[`ss${idx}`] || order[`bz${idx}`]
+  );
+  const sizeCols = Array.from({ length: 10 }, (_, i) => i + 1).filter(idx =>
+    order[`cmh${idx}`] || order[`sl${idx}`] || order[`lieshu${idx}`]
+  );
+
+  return (
+    <div>
+      <SectionTitle color={productColor}>基本信息</SectionTitle>
+      <FieldGrid>
+        <FieldRow label="订单编号" value={order.ddbh} />
+        <FieldRow label="生成日期" value={fmtDate(order.prouddate)} />
+        <FieldRow label="交货日期" value={fmtDate(order.overdate)} />
+        <FieldRow label="制单" value={order.zhidan} />
+        <FieldRow label="花号" value={order.huahao} />
+        <FieldRow label="订货数量" value={fmtNum(order.shuliang)} unit={order.dhdw} />
+        <FieldRow label="所需时间" value={fmtDate(order.sxdate)} />
+        <FieldRow label="业务员" value={order.ywy_name || order.ywy} />
+        <FieldRow label="下单公司" value={order.company} />
+        <FieldRow label="发货单位" value={order.fahuodanwei} />
+        <FieldRow label="款号" value={order.kuanhao} />
+        <FieldRow label="外发" value={order.waifa == 1 ? '是' : '否'} />
+      </FieldGrid>
+
+      <SectionTitle color={productColor}>生产规格</SectionTitle>
+      <FieldGrid>
+        <FieldRow label="卷送生产班别" value={order.proudbanbie} />
+        <FieldRow label="生产机型" value={order.proudnumber} />
+        <FieldRow label="基价" value={fmtNum(order.jijia, 4)} />
+        <FieldRow label="总干纬" value={fmtNum(order.allcount)} />
+        <FieldRow label="纬密" value={order.weidu} />
+        <FieldRow label="宽度" value={order.kuandu} />
+        <FieldRow label="开条数" value={fmtNum(order.kts)} />
+        <FieldRow label="总长" value={order.changdu} />
+        <FieldRow label="花长" value={order.huachang} />
+        <FieldRow label="成品尺寸" value={order.chenpingcc} />
+        <FieldRow label="加工费" value={fmtNum(order.jiagongfei, 4)} />
+        <FieldRow2 label="首检记录" value={order.soujianjl} />
+      </FieldGrid>
+
+      {colorRows.length > 0 && (
+        <>
+          <SectionTitle color="#059669">色卡明细</SectionTitle>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, marginBottom: 8 }}>
+            <thead>
+              <tr>
+                {['序', '千纬(QW)', '色纱(SS)', '备注(BZ)'].map((h, i) => (
+                  <th key={i} style={{ padding: '3px 6px', background: '#f0fdf4', color: '#059669', border: '1px solid #a7f3d0', textAlign: 'center', fontSize: 11 }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {colorRows.map(idx => (
+                <tr key={idx}>
+                  <td style={{ padding: '2px 4px', textAlign: 'center', color: '#94a3b8', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: 11 }}>{idx}</td>
+                  <td style={{ padding: '2px 4px', border: '1px solid #e2e8f0', fontSize: 12 }}>{order[`qw${idx}`] || '-'}</td>
+                  <td style={{ padding: '2px 4px', border: '1px solid #e2e8f0', fontSize: 12 }}>{order[`ss${idx}`] || '-'}</td>
+                  <td style={{ padding: '2px 4px', border: '1px solid #e2e8f0', fontSize: 12, color: '#94a3b8' }}>{order[`bz${idx}`] || '-'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
+
+      {sizeCols.length > 0 && (
+        <>
+          <SectionTitle color="#2563eb">尺码明细</SectionTitle>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, marginBottom: 8 }}>
+            <thead>
+              <tr>
+                <th style={{ padding: '3px 4px', background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', textAlign: 'center', fontSize: 11 }}>尺码号</th>
+                {sizeCols.map(n => (
+                  <th key={n} style={{ padding: '3px 4px', background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', textAlign: 'center', fontSize: 11 }}>{n}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {['cmh', 'sl', 'lieshu'].map((prefix, pi) => (
+                <tr key={prefix}>
+                  <td style={{ padding: '2px 4px', background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', textAlign: 'center', fontSize: 10 }}>{['尺码', '数量', '列数'][pi]}</td>
+                  {sizeCols.map(n => (
+                    <td key={n} style={{ padding: '2px 4px', border: '1px solid #bfdbfe', textAlign: 'center', fontSize: 12 }}>{order[`${prefix}${n}`] || '-'}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
+
+      {hasAnyCraft && (
+        <>
+          <SectionTitle color={productColor}>整理工序</SectionTitle>
+          <ReadOnlyCheckboxGroup options={ZM_HZL_OPTIONS} order={order} />
+        </>
+      )}
+
+      <SectionTitle color={productColor}>其他信息</SectionTitle>
+      <FieldRow2 label="工艺要求" value={order.gyyq} />
+      <FieldRow2 label="质检" value={order.zm_zhijian} />
+    </div>
+  );
+}
+
+// ============== DS 详情 ==============
+const DS_CRAFT = [{ label: '制版', value: 'hzl1' }, { label: '生产', value: 'hzl2' }];
+
+function DSOrderDetail({ order, productColor }) {
+  const hasAnyCraft = hasValue(order, ['hzl1', 'hzl2']);
+
+  return (
+    <div>
+      <SectionTitle color={productColor}>基本信息</SectionTitle>
+      <FieldGrid>
+        <FieldRow label="订单编号" value={order.ddbh} />
+        <FieldRow label="印件编号" value={order.yjbhao} />
+        <FieldRow label="交货日期" value={fmtDate(order.overdate)} />
+        <FieldRow label="生产日期" value={fmtDate(order.prouddate)} />
+        <FieldRow label="委印单位" value={order.company} />
+        <FieldRow label="款号" value={order.kuanhao} />
+        <FieldRow label="价格" value={fmtNum(order.jiage, 2)} />
+        <FieldRow label="发货" value={order.dhdw} />
+        <FieldRow label="品名" value={order.jiagongfei} />
+      </FieldGrid>
+
+      {hasAnyCraft && (
+        <>
+          <SectionTitle color={productColor}>整理环节</SectionTitle>
+          <ReadOnlyCheckboxGroup options={DS_CRAFT} order={order} />
+        </>
+      )}
+
+      <SectionTitle color={productColor}>其他信息</SectionTitle>
+      <FieldGrid>
+        <FieldRow label="制单人" value={order.zhidan} />
+        <FieldRow label="发货日期" value={fmtDate(order.fhdate)} />
+        <FieldRow label="业务员" value={order.ywy_name || order.ywy} />
+        <FieldRow label="发货人" value={order.fhr} />
+        <FieldRow label="发货单位" value={order.fahuodanwei} />
+        <FieldRow label="整烫" value={order.zhengli} />
+        <FieldRow label="外发" value={order.waifa == 1 ? '是' : '否'} />
+        <FieldRow label="加工费" value={fmtNum(order.jiagongfei, 4)} />
+      </FieldGrid>
+      {order.upfile && <div style={{ padding: '4px 0', fontSize: 12, color: '#555' }}>附件：有</div>}
+    </div>
+  );
+}
+
+// ============== 主组件 ==============
 export default function OrderDetailPage() {
   const navigate = useNavigate();
-  const { productType, ddId } = useParams();
+  const { productType: rawProductType, ddId } = useParams();
+  const productType = rawProductType.toUpperCase();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
 
   const load = async () => {
     try {
-      const res = await adminGetOrder(productType, ddId);
+      const res = await adminGetOrder(rawProductType, ddId);
       setOrder(res);
     } catch (e) {
       message.error('加载失败');
@@ -33,7 +541,7 @@ export default function OrderDetailPage() {
   const handleStep = async (stepField, completed) => {
     setUpdating(true);
     try {
-      const res = await adminUpdateStep(productType, ddId, stepField, completed);
+      const res = await adminUpdateStep(rawProductType, ddId, stepField, completed);
       message.success(res.message);
       setOrder(res.data);
     } catch (e) {
@@ -58,127 +566,56 @@ export default function OrderDetailPage() {
 
   return (
     <AppLayout>
-      {/* ===== Header ===== */}
+      {/* Header */}
       <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-        <Button
-          icon={<ArrowLeftOutlined />}
-          onClick={() => navigate('/orders')}
-          style={{ borderRadius: 8 }}
-        >
+        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/orders')} style={{ borderRadius: 8 }}>
           返回订单列表
         </Button>
-
         <Tag className={`tag-${order.product_type.toLowerCase()}`} style={{ fontSize: 13, padding: '4px 12px', borderRadius: 20, fontWeight: 600 }}>
           {PRODUCT_MAP[order.product_type]}
         </Tag>
-
-        <Text strong style={{ fontSize: 20, color: 'var(--text-primary)', letterSpacing: 1 }}>
-          {order.ddbh}
-        </Text>
-
-        <Button
-          icon={<PrinterOutlined />}
-          onClick={() => openOrderPrint(order, productType)}
-          style={{ borderRadius: 8 }}
-        >
+        <Text strong style={{ fontSize: 20, color: 'var(--text-primary)', letterSpacing: 1 }}>{order.ddbh}</Text>
+        <Button icon={<PrinterOutlined />} onClick={() => openOrderPrint(order, productType)} style={{ borderRadius: 8 }}>
           打印订单
         </Button>
-
-        <Tag
-          className={order.fahuo ? 'tag-shipped' : 'tag-pending'}
-          style={{ fontSize: 12, padding: '2px 10px', borderRadius: 20 }}
-        >
+        {(productType === 'YS' || productType === 'YM' || productType === 'ZM') && (
+          <Tooltip title="DEV测试版打印（不影响正式版）">
+            <Button icon={<BugOutlined />} onClick={() => {
+              window.open('/print-dev/' + productType.toLowerCase() + '/' + ddId, '_blank', 'width=800,height=700,scrollbars=yes');
+            }} style={{ borderRadius: 8, background: '#fff3cd', borderColor: '#ffc107', color: '#856404' }}>
+              调试打印
+            </Button>
+          </Tooltip>
+        )}
+        {(!order.jhkprint || !order.jhkprintTime) && (
+          <Button icon={<EditOutlined />} onClick={() => navigate('/orders/edit/' + productType + '/' + ddId)} style={{ borderRadius: 8 }}>
+            编辑订单
+          </Button>
+        )}
+        <Tag className={order.fahuo ? 'tag-shipped' : 'tag-pending'} style={{ fontSize: 12, padding: '2px 10px', borderRadius: 20 }}>
           {order.fahuo ? '✓ 已发货' : '○ 进行中'}
         </Tag>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '480px 1fr', gap: 20, alignItems: 'start' }}>
-        {/* ===== 左侧：基本信息 ===== */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <Card
-            title={
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 4, height: 16, background: productColor, borderRadius: 2, display: 'inline-block' }} />
-                基本信息
-              </span>
-            }
-            style={{ borderRadius: 12 }}
-            styles={{ body: { padding: '20px 20px' } }}
-          >
-            {/* 基本信息 - 双栏布局 */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px 16px' }}>
-              <InfoRow label="订单编号" value={order.ddbh || '-'} />
-              <InfoRow label="生成日期" value={order.prouddate ? new Date(order.prouddate).toLocaleDateString('zh-CN') : '-'} />
-              <InfoRow label="交货日期" value={order.overdate ? new Date(order.overdate).toLocaleDateString('zh-CN') : '-'} />
-              <InfoRow label="制单人" value={order.zhidan || '-'} />
-              <InfoRow label="业务员" value={order.ywy || '-'} />
-              <InfoRow label="订单类型" value={order.sclcClass === 2 ? '印刷单' : order.sclcClass === 3 ? '客户印' : order.sclcClass === 1 ? '纸盒单' : order.sclcClass === 4 ? '模切单' : order.sclcClass === 5 || order.sclcClass === 6 ? '印面单' : '-'} />
-              <InfoRow label="客户公司" value={order.company || '-'} />
-              <InfoRow label="委印单位" value={order.company || '-'} />
-              <InfoRow label="发货单位" value={order.fahuodanwei || '-'} />
-              <InfoRow label="款号" value={order.kuanhao || '-'} />
-              <InfoRow label="印件编号" value={order.yjbhao || '-'} />
-              <InfoRow label="产品规格" value={order.cpgg || '-'} />
-              <InfoRow label="印刷数量" value={order.shuliang != null ? Number(order.shuliang).toLocaleString() : '-'} />
-              <InfoRow label="拼数" value={order.pingshu || '-'} />
-              {/* YS/YM 专用字段 */}
-              {(productType === 'YS' || productType === 'YM') && <>
-                <InfoRow label="印刷色数" value={order.ylzd || '-'} />
-                <InfoRow label="成品尺寸" value={order.klcc || '-'} />
-                <InfoRow label="开数" value={order.kaishu || '-'} />
-                <InfoRow label="需开数量" value={order.xukaisl != null ? Number(order.xukaisl).toLocaleString() : '-'} />
-                <InfoRow label="补充数量" value={order.bcsl != null ? Number(order.bcsl).toLocaleString() : '-'} />
-                <InfoRow label="实印大张" value={order.sydazhang != null ? Number(order.sydazhang).toLocaleString() : '-'} />
-                <InfoRow label="单价(元/张)" value={order.danjia != null ? Number(order.danjia).toFixed(4) : '-'} />
-                <InfoRow label="实印金额" value={order.syMoney != null ? Number(order.syMoney).toFixed(2) : '-'} />
-                <InfoRow label="订单总价" value={order.yszj != null ? Number(order.yszj).toFixed(2) : '-'} />
-                <InfoRow label="客户要求" value={order.klyaoqiu || '-'} />
-                <InfoRow label="印件要求" value={order.jyyaoqiu || '-'} />
-                <InfoRow label="工艺要求" value={order.gyyq || '-'} />
-                <InfoRow label="品名/货号" value={order.proudnumber || '-'} />
-                <InfoRow label="来单日期" value={order.lldate ? new Date(order.lldate).toLocaleDateString('zh-CN') : '-'} />
-              </>}
-              {/* ZM 专用字段 */}
-              {productType === 'ZM' && <>
-                <InfoRow label="花号" value={order.huahao || '-'} />
-                <InfoRow label="产品编号" value={order.proudnumber || '-'} />
-                <InfoRow label="产品版别" value={order.proudbanbie || '-'} />
-                <InfoRow label="纬数" value={order.weidu || '-'} />
-                <InfoRow label="宽度" value={order.kuandu || '-'} />
-                <InfoRow label="棵台数" value={order.kts || '-'} />
-                <InfoRow label="长度" value={order.changdu || '-'} />
-                <InfoRow label="花长" value={order.huachang || '-'} />
-                <InfoRow label="基价" value={order.jijia != null ? Number(order.jijia).toFixed(4) : '-'} />
-                <InfoRow label="加工费" value={order.jiagongfei || '-'} />
-                <InfoRow label="缩件记录" value={order.soujianjl || '-'} />
-                <InfoRow label="发货时间" value={order.sxdate ? new Date(order.sxdate).toLocaleDateString('zh-CN') : '-'} />
-              </>}
-              {/* DS 专用字段 */}
-              {productType === 'DS' && <>
-                <InfoRow label="单价" value={order.jiage != null ? Number(order.jiage).toFixed(2) : '-'} />
-                <InfoRow label="发货人" value={order.fhr || '-'} />
-                <InfoRow label="发货单位" value={order.fhdw || '-'} />
-                <InfoRow label="发货日期" value={order.fhdate ? new Date(order.fhdate).toLocaleDateString('zh-CN') : '-'} />
-              </>}
-              {/* 共同字段 */}
-              <InfoRow label="加工费" value={order.jiagongfei || '-'} />
-              <InfoRow label="外发" value={order.waifa ? '是' : '否'} />
-              <InfoRow label="备注" value={order.beizhuYS || order.beizhu || '-'} style={{ gridColumn: '1 / -1' }} />
-            </div>
-          </Card>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 220px', gap: 20, alignItems: 'start' }}>
+        {/* 左侧：基本信息（按录入页分组） */}
+        <Card
+          title={
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 4, height: 16, background: productColor, borderRadius: 2, display: 'inline-block' }} />
+              基本信息
+            </span>
+          }
+          style={{ borderRadius: 12 }}
+          styles={{ body: { padding: '20px 20px' } }}
+        >
+          {productType === 'YS' && <YSOrderDetail order={order} productColor={productColor} />}
+          {productType === 'YM' && <YMOrderDetail order={order} productColor={productColor} />}
+          {productType === 'ZM' && <ZMOrderDetail order={order} productColor={productColor} />}
+          {productType === 'DS' && <DSOrderDetail order={order} productColor={productColor} />}
+        </Card>
 
-          {/* 统计卡片 */}
-          <Card style={{ borderRadius: 12, background: `linear-gradient(135deg, ${productColor}08 0%, ${productColor}15 100%)`, border: `1px solid ${productColor}30` }} styles={{ body: { padding: '20px' } }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 36, fontWeight: 700, color: productColor, lineHeight: 1, fontFeatureSettings: '"tnum"' }}>
-                {completedCount}/{totalCount}
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 6, letterSpacing: 1 }}>已完成工序</div>
-            </div>
-          </Card>
-        </div>
-
-        {/* ===== 右侧：工序流水线 ===== */}
+        {/* 右侧：工序进度（竖排紧凑） */}
         <Card
           title={
             <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -187,276 +624,74 @@ export default function OrderDetailPage() {
             </span>
           }
           extra={
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ width: 120, height: 6, background: 'var(--progress-bg)', borderRadius: 3, overflow: 'hidden' }}>
-                <div style={{
-                  width: `${progressPercent}%`,
-                  height: '100%',
-                  background: progressPercent === 100
-                    ? 'var(--success)'
-                    : `linear-gradient(90deg, ${productColor}, ${productColor}aa)`,
-                  borderRadius: 3,
-                  transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-                }} />
-              </div>
-              <Text style={{ fontSize: 12, color: 'var(--text-secondary)', minWidth: 40 }}>{Math.round(progressPercent)}%</Text>
-            </div>
+            <Text style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{Math.round(progressPercent)}%</Text>
           }
           style={{ borderRadius: 12 }}
-          styles={{ body: { padding: '24px 24px 16px' } }}
+          styles={{ body: { padding: '16px' } }}
         >
-          {/* 流水线进度条 */}
-          <div style={{ position: 'relative', marginBottom: 32 }}>
-            {/* 背景线 */}
+          {/* 进度条 */}
+          <div style={{ height: 6, background: 'var(--progress-bg)', borderRadius: 3, overflow: 'hidden', marginBottom: 16 }}>
             <div style={{
-              position: 'absolute',
-              top: 20,
-              left: 0,
-              right: 0,
-              height: 4,
-              background: 'var(--progress-bg)',
-              borderRadius: 2,
-            }} />
-            {/* 进度线 */}
-            <div style={{
-              position: 'absolute',
-              top: 20,
-              left: 0,
-              width: `calc(${progressPercent}% - ${completedCount > 0 ? 0 : 0}px)`,
-              maxWidth: 'calc(100% - 40px)',
-              height: 4,
-              background: progressPercent === 100
-                ? 'var(--success)'
-                : `linear-gradient(90deg, ${productColor}, ${productColor}88)`,
-              borderRadius: 2,
+              width: `${progressPercent}%`,
+              height: '100%',
+              background: progressPercent === 100 ? 'var(--success)' : productColor,
+              borderRadius: 3,
               transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
             }} />
+          </div>
 
-            {/* 节点 */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              position: 'relative',
-            }}>
-              {steps.map((s, i) => {
-                const isCompleted = s.completed;
-                const isCurrent = !isCompleted && (i === 0 || steps[i - 1]?.completed);
-                const nodeColor = isCompleted ? 'var(--success)' : isCurrent ? productColor : '#cbd5e1';
-                const isLast = i === steps.length - 1;
-
-                return (
-                  <Tooltip
-                    key={s.field}
-                    title={
-                      <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontWeight: 600 }}>{s.step}</div>
-                        {s.time ? (
-                          <div style={{ fontSize: 11, opacity: 0.85, marginTop: 2 }}>
-                            {new Date(s.time).toLocaleString('zh-CN')}
-                          </div>
-                        ) : (
-                          <div style={{ fontSize: 11, opacity: 0.7, marginTop: 2 }}>等待中</div>
-                        )}
-                      </div>
-                    }
-                    placement="top"
-                  >
+          {/* 竖排工序列表 */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {steps.map((s, i) => {
+              const isCompleted = s.completed;
+              const isCurrent = !isCompleted && (i === 0 || steps[i - 1]?.completed);
+              return (
+                <Popconfirm key={s.field} title={s.completed ? `撤销「${s.step}」？` : `确认完成「${s.step}」？`} onConfirm={() => handleStep(s.field, !s.completed)} okText="确认" cancelText="取消" disabled={updating}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '8px 10px',
+                    borderRadius: 8,
+                    cursor: 'pointer',
+                    background: isCompleted ? '#f0fdf4' : isCurrent ? `${productColor}0a` : 'var(--bg-page)',
+                    border: `1px solid ${isCompleted ? 'var(--success)' : isCurrent ? productColor : 'var(--border)'}`,
+                    transition: 'all 0.2s',
+                  }}>
                     <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      cursor: 'pointer',
-                      flex: isLast ? '0 0 auto' : '1',
-                      minWidth: isLast ? 40 : 0,
+                      width: 28, height: 28, borderRadius: '50%',
+                      background: isCompleted ? 'var(--success)' : isCurrent ? productColor : '#fff',
+                      border: `2px solid ${isCompleted ? 'var(--success)' : isCurrent ? productColor : '#cbd5e1'}`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      flexShrink: 0,
                     }}>
-                      {/* 节点圆 */}
+                      {isCompleted ? (
+                        <CheckOutlined style={{ color: '#fff', fontSize: 12, fontWeight: 700 }} />
+                      ) : (
+                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: isCurrent ? '#fff' : '#cbd5e1' }} />
+                      )}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: '50%',
-                        background: isCompleted
-                          ? 'var(--success)'
-                          : isCurrent
-                            ? productColor
-                            : '#fff',
-                        border: `3px solid ${nodeColor}`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'all 0.3s ease',
-                        boxShadow: isCompleted || isCurrent
-                          ? `0 0 0 4px ${nodeColor}22`
-                          : 'none',
-                        zIndex: 1,
-                      }}>
-                        {isCompleted ? (
-                          <CheckOutlined style={{ color: '#fff', fontSize: 14, fontWeight: 700 }} />
-                        ) : (
-                          <div style={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: '50%',
-                            background: isCurrent ? '#fff' : '#cbd5e1',
-                          }} />
-                        )}
-                      </div>
-
-                      {/* 工序名称 */}
-                      <div style={{
-                        marginTop: 10,
-                        fontSize: 11,
-                        fontWeight: isCompleted || isCurrent ? 600 : 400,
-                        color: isCompleted
-                          ? 'var(--success)'
-                          : isCurrent
-                            ? 'var(--text-primary)'
-                            : 'var(--text-muted)',
-                        textAlign: 'center',
-                        whiteSpace: 'nowrap',
-                        maxWidth: 70,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
+                        fontSize: 12, fontWeight: isCompleted || isCurrent ? 600 : 400,
+                        color: isCompleted ? 'var(--success)' : isCurrent ? 'var(--text-primary)' : 'var(--text-muted)',
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                       }}>
                         {s.step}
                       </div>
-
-                      {/* 完成时间 */}
                       {s.time && (
-                        <div style={{
-                          fontSize: 10,
-                          color: 'var(--text-muted)',
-                          marginTop: 2,
-                          whiteSpace: 'nowrap',
-                        }}>
-                          {new Date(s.time).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })}
+                        <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 1 }}>
+                          {new Date(s.time).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
                         </div>
                       )}
                     </div>
-                  </Tooltip>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* 操作按钮行 */}
-          <div style={{
-            borderTop: '1px solid var(--border)',
-            paddingTop: 20,
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: 10,
-          }}>
-            {steps.map((s) => (
-              <Popconfirm
-                key={s.field}
-                title={s.completed ? `撤销「${s.step}」？` : `确认完成「${s.step}」？`}
-                onConfirm={() => handleStep(s.field, !s.completed)}
-                okText="确认"
-                cancelText="取消"
-                disabled={updating}
-              >
-                <Button
-                  size="small"
-                  icon={s.completed ? <UndoOutlined /> : <CheckOutlined />}
-                  loading={updating}
-                  style={{
-                    borderRadius: 6,
-                    fontSize: 12,
-                    ...(s.completed
-                      ? {
-                          color: 'var(--success)',
-                          borderColor: 'var(--success)',
-                          background: '#f0fdf4',
-                        }
-                      : {
-                          color: productColor,
-                          borderColor: productColor,
-                          background: `${productColor}0a`,
-                        }),
-                  }}
-                >
-                  {s.completed ? `撤销 ${s.step}` : `完成 ${s.step}`}
-                </Button>
-              </Popconfirm>
-            ))}
+                  </div>
+                </Popconfirm>
+              );
+            })}
           </div>
         </Card>
-
-        {/* ZM 色卡明细 + 尺码明细（仅 ZM 显示） */}
-        {productType === 'ZM' && (
-          <div style={{ gridColumn: '1 / -1', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            {/* 色卡明细 */}
-            <Card
-              title={
-                <span style={{ fontSize: 13, fontWeight: 600, color: '#059669', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  🎨 色卡明细
-                </span>
-              }
-              style={{ borderRadius: 12, border: '1px solid #a7f3d0' }}
-              styles={{ body: { padding: '14px 16px' } }}
-            >
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-                <thead>
-                  <tr>
-                    {['序', '颜色', '色号', '备注'].map((h, i) => (
-                      <th key={i} style={{ padding: '4px 8px', background: '#f0fdf4', color: '#059669', border: '1px solid #a7f3d0', textAlign: 'center', fontWeight: 700 }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {Array.from({ length: 12 }, (_, i) => i + 1).map(idx => (
-                    <tr key={idx}>
-                      <td style={{ padding: '3px 6px', textAlign: 'center', color: '#94a3b8', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: 11 }}>{idx}</td>
-                      <td style={{ padding: '2px 4px', border: '1px solid #e2e8f0', fontSize: 12 }}>{order[`qw${idx}`] || '-'}</td>
-                      <td style={{ padding: '2px 4px', border: '1px solid #e2e8f0', fontSize: 12 }}>{order[`ss${idx}`] || '-'}</td>
-                      <td style={{ padding: '2px 4px', border: '1px solid #e2e8f0', fontSize: 12, color: '#94a3b8' }}>{order[`bz${idx}`] || '-'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </Card>
-
-            {/* 尺码明细 */}
-            <Card
-              title={
-                <span style={{ fontSize: 13, fontWeight: 600, color: '#2563eb', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  📐 尺码明细
-                </span>
-              }
-              style={{ borderRadius: 12, border: '1px solid #bfdbfe' }}
-              styles={{ body: { padding: '14px 16px' } }}
-            >
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-                <thead>
-                  <tr>
-                    {['序', '数量（sl）', '列数（lieshu）'].map((h, i) => (
-                      <th key={i} style={{ padding: '4px 8px', background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', textAlign: 'center', fontWeight: 700 }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {Array.from({ length: 10 }, (_, i) => i + 1).map(idx => (
-                    <tr key={idx}>
-                      <td style={{ padding: '3px 6px', textAlign: 'center', color: '#94a3b8', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: 11 }}>{idx}</td>
-                      <td style={{ padding: '2px 4px', border: '1px solid #e2e8f0', fontSize: 12 }}>{order[`sl${idx}`] || '-'}</td>
-                      <td style={{ padding: '2px 4px', border: '1px solid #e2e8f0', fontSize: 12 }}>{order[`lieshu${idx}`] || '-'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </Card>
-          </div>
-        )}
       </div>
     </AppLayout>
-  );
-}
-
-function InfoRow({ label, value, style }) {
-  return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8, ...style }}>
-      <Text style={{ fontSize: 12, color: 'var(--text-secondary)', flexShrink: 0 }}>{label}</Text>
-      <Text style={{ fontSize: 13, color: 'var(--text-primary)', fontWeight: 500, textAlign: 'right', wordBreak: 'break-all' }}>{value}</Text>
-    </div>
   );
 }

@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   DashboardOutlined, UnorderedListOutlined, PlusSquareOutlined,
   SearchOutlined, SendOutlined, BarChartOutlined, LogoutOutlined,
-  AreaChartOutlined, PlayCircleOutlined, EditOutlined, ShopOutlined
+  AreaChartOutlined, PlayCircleOutlined, EditOutlined, ShopOutlined, UserOutlined, SettingOutlined
 } from '@ant-design/icons';
 
 const NAV_ITEMS = [
@@ -12,10 +12,13 @@ const NAV_ITEMS = [
   { key: 'label1', label: '订单管理', section: true },
   { key: '/orders', label: '订单列表', icon: <UnorderedListOutlined /> },
   { key: '/orders/new', label: '新建订单', icon: <PlusSquareOutlined /> },
+  { key: '/query-order', label: '查询下单', icon: <SearchOutlined /> },
   { key: 'divider2', label: '', divider: true },
   { key: '/production', label: '生产报工', icon: <PlayCircleOutlined />, highlight: true },
+  { key: '/process', label: '工序管理', icon: <SettingOutlined /> },
   { key: '/jhk-edit', label: '车间订单修改', icon: <EditOutlined /> },
   { key: 'divider3', label: '', divider: true },
+  { key: '/users', label: '用户管理', icon: <UserOutlined /> },
   { key: '/fahuo', label: '发货单管理', icon: <SendOutlined /> },
   { key: '/query', label: '综合查询', icon: <SearchOutlined /> },
   { key: '/stats', label: '数据统计', icon: <AreaChartOutlined /> },
@@ -26,6 +29,7 @@ const BOTTOM_TABS = [
   { key: '/', label: '首页', icon: <DashboardOutlined /> },
   { key: '/orders', label: '订单', icon: <UnorderedListOutlined /> },
   { key: '/orders/new', label: '新建', icon: <PlusSquareOutlined /> },
+  { key: '/query-order', label: '查询下单', icon: <SearchOutlined /> },
   { key: '/production', label: '报工', icon: <PlayCircleOutlined /> },
   { key: '/query', label: '查询', icon: <SearchOutlined /> },
 ];
@@ -33,7 +37,15 @@ const BOTTOM_TABS = [
 export default function AppLayout({ children, title, extra }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const [appVersion, setAppVersion] = useState('');
   const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+  useEffect(() => {
+    fetch('/version.json?t=' + Date.now())
+      .then(r => r.json())
+      .then(d => setAppVersion(d.version || ''))
+      .catch(() => {});
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -58,7 +70,7 @@ export default function AppLayout({ children, title, extra }) {
       <aside className="sidebar">
         <div className="sidebar-logo">
           <div className="sidebar-logo-title">📋 印刷订单管理系统</div>
-          <div className="sidebar-logo-sub">兰花印刷包装有限公司</div>
+          <div className="sidebar-logo-sub">嘉兴亚欣商标印务有限公司</div>
         </div>
 
         <nav className="sidebar-nav">
@@ -84,6 +96,14 @@ export default function AppLayout({ children, title, extra }) {
         </nav>
 
         <div className="sidebar-footer">
+          {appVersion && (
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', padding: '4px 12px', textAlign: 'center' }}>
+              <a href="http://10.147.19.111:8000/changelog" target="_blank" rel="noopener noreferrer"
+                style={{ color: 'rgba(255,255,255,0.45)', textDecoration: 'none' }}
+                title="点击查看开发记录"
+              >v{appVersion}</a>
+            </div>
+          )}
           <div className="sidebar-user">
             <div className="sidebar-user-avatar">
               {user.UserName ? user.UserName.slice(0, 1).toUpperCase() : 'U'}

@@ -1,0 +1,537 @@
+/* PrintYsPageDev.css — 黑白A4友好版 */
+
+/* ===== 页面框架 ===== */
+.ys-dev-page {
+  background: #f0f0f0;
+  min-height: 100vh;
+  padding: 24px 16px;
+  font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
+}
+
+/* ===== 工具栏 ===== */
+.ys-toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 18px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  margin-bottom: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.ys-dev-badge {
+  background: #000;
+  color: #fff;
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: bold;
+  margin-right: auto;
+  letter-spacing: 1px;
+}
+
+/* ===== A4 纸张 ===== */
+.ys-a4 {
+  background: #fff;
+  width: 190mm;
+  margin: 0 auto;
+  padding: 12mm 14mm;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  box-sizing: border-box;
+  font-size: 11px;
+  color: #000;
+}
+
+/* ===== 标题区 ===== */
+.ys-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  position: relative;
+  border-bottom: 2px solid #000;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+.ys-title-left {
+  text-align: left;
+  min-width: 0;
+}
+
+.ys-company {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: #000;
+  margin-bottom: 2px;
+}
+
+.ys-doc-title {
+  font-size: 11px;
+  color: #444;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.ys-title-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+.ys-meta-pair {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.ys-mlabel {
+  font-size: 10px;
+  color: #666;
+}
+
+.ys-mvalue {
+  font-size: 11px;
+  font-weight: 700;
+  color: #000;
+}
+
+/* 条码 — 绝对定位贴右侧，与生产版一致 */
+.ys-barcode {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+/* ===== 面板标题 ===== */
+.ys-panel-hd {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: #000;
+  text-transform: uppercase;
+  border-bottom: 1.5px solid #000;
+  padding-bottom: 3px;
+  margin-bottom: 6px;
+}
+
+/* ===== 基本信息 4列网格 ===== */
+.ys-base-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid #000;
+  margin-bottom: 8px;
+}
+
+.ys-base-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 5px 8px;
+  border-right: 1px solid #000;
+  border-bottom: 1px solid #000;
+  min-height: 36px;
+  justify-content: center;
+}
+
+.ys-base-cell:nth-child(4n) {
+  border-right: none;
+}
+
+.ys-base-cell:nth-last-child(-n+4) {
+  border-bottom: none;
+}
+
+.ys-cell-label {
+  font-size: 9px;
+  color: #555;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.ys-cell-value {
+  font-size: 11px;
+  color: #000;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.ys-cell-value.ys-cell-strong {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+/* ===== 2列行（价格+要求说明） ===== */
+.ys-2col-row {
+  display: grid;
+  grid-template-columns: 136px 1fr;
+  border: 1px solid #000;
+  margin-bottom: 8px;
+}
+
+.ys-price-panel,
+.ys-req-panel {
+  padding: 6px 8px;
+  border-right: 1px solid #000;
+}
+
+/* ===== 3列行（价格+要求+备注） ===== */
+/* .ys-3col-row 已废弃，改用 .ys-2col-row */
+
+/* 价格表 */
+.ys-price-tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+}
+
+.ys-price-tbl td {
+  padding: 3px 6px;
+  color: #000;
+}
+
+.ys-price-tbl td:first-child {
+  color: #444;
+  white-space: nowrap;
+  width: 1%;
+}
+
+.ys-specs-tbl {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 8px;
+  border: 1px solid #000;
+}
+
+.ys-specs-tbl td {
+  padding: 4px 8px;
+  border: 1px solid #000;
+  text-align: left;
+  width: 25%;
+}
+
+.ys-specs-tbl .ys-cell-label {
+  display: block;
+  font-size: 11px;
+  color: #666;
+  font-weight: normal;
+}
+
+.ys-specs-tbl .ys-cell-value {
+  display: block;
+  font-size: 12px;
+  color: #000;
+  font-weight: bold;
+}
+
+.ys-tbl-num {
+  text-align: right;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.ys-tbl-total td {
+  border-top: 1.5px solid #000;
+  padding-top: 4px;
+  font-size: 11px;
+}
+
+.ys-tbl-total .ys-tbl-num {
+  font-size: 14px;
+  font-weight: 900;
+}
+
+/* 要求 */
+.ys-req-row {
+  display: flex;
+  gap: 6px;
+  padding: 3px 0;
+  align-items: baseline;
+  font-size: 10px;
+}
+
+.ys-req-val {
+  color: #000;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+/* 备注 */
+.ys-note-val {
+  font-size: 11px;
+  color: #000;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* ===== 工艺说明 ===== */
+.ys-gongyi-block {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid #000;
+  margin-bottom: 8px;
+}
+
+.ys-gy-left {
+  padding: 6px 8px;
+  border-right: 1px solid #000;
+}
+
+.ys-gy-right {
+  background: #fff;
+}
+
+.ys-gy-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.ys-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 0;
+  font-size: 10px;
+  align-items: center;
+}
+
+.ys-gy-group {
+  color: #000;
+}
+
+.ys-gy-group b {
+  font-weight: 900;
+}
+
+/* ===== 价格明细表 ===== */
+.ys-detail-block {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid #000;
+  margin-bottom: 8px;
+}
+
+.ys-detail-left {
+  padding: 6px 8px;
+  border-right: 1px solid #000;
+}
+
+.ys-detail-right {
+  background: #fff;
+}
+
+.ys-detail-tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+}
+
+/* 表头 — 白底粗黑字 */
+.ys-detail-tbl thead tr {
+  background: #fff;
+}
+
+.ys-detail-tbl th {
+  padding: 5px 7px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-align: center;
+  color: #000;
+  border-bottom: 2px solid #000;
+}
+
+.ys-th-left {
+  text-align: left !important;
+}
+
+.ys-th-right {
+  text-align: right !important;
+}
+
+.ys-detail-tbl td {
+  padding: 4px 7px;
+  color: #000;
+  border-bottom: 1px solid #ccc;
+  border-right: 1px solid #e0e0e0;
+  font-size: 10px;
+}
+
+.ys-detail-tbl td:last-child {
+  border-right: none;
+}
+
+.ys-row-alt td {
+  background: #f5f5f5;
+}
+
+.ys-td-right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+/* 表尾 — 白底粗黑字 */
+.ys-detail-tbl tfoot tr {
+  background: #fff;
+  border-top: 2px solid #000;
+}
+
+.ys-tfoot-left {
+  text-align: right;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  padding: 5px 7px;
+  color: #000;
+}
+
+.ys-tfoot-right {
+  text-align: right !important;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  padding: 5px 7px;
+  color: #000 !important;
+}
+
+/* ===== 底部信息栏 ===== */
+.ys-footer {
+  border-top: 1px solid #000;
+  padding-top: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  align-items: center;
+  font-size: 10px;
+  color: #000;
+}
+
+.ys-footer-item {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+}
+
+.ys-footer-label {
+  font-size: 9px;
+  color: #555;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.ys-footer-value {
+  font-size: 11px;
+  font-weight: 700;
+  color: #000;
+}
+
+.ys-f-sep {
+  color: #ccc;
+}
+
+/* ===== 打印媒体查询 ===== */
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  body {
+    background: #fff;
+    margin: 0;
+    padding: 0;
+  }
+
+  .ys-dev-page {
+    background: #fff;
+    padding: 0;
+  }
+
+  .ys-toolbar,
+  .ys-dev-badge {
+    display: none !important;
+  }
+
+  .ys-a4 {
+    width: 100%;
+    box-shadow: none;
+    padding: 10mm 12mm;
+    margin: 0;
+  }
+
+  .ys-row-alt td {
+    background: #f5f5f5 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .ys-detail-tbl,
+  .ys-base-grid,
+  .ys-3col-row,
+  .ys-gongyi-block {
+    page-break-inside: avoid;
+  }
+
+  @page {
+    size: A4;
+    margin: 0;
+  }
+}
+
+/* ===== 工序二维码区块 P0-2 ===== */
+.ys-qr-section {
+  margin-top: 16px;
+  border: 1px solid #000;
+  padding: 10px 12px;
+}
+
+.ys-qr-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.ys-qr-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.ys-qr-step {
+  font-size: 11px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+@media print {
+  .ys-qr-section {
+    border: 1px solid #000;
+    page-break-inside: avoid;
+  }
+
+  .ys-qr-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .ys-qr-item > div:first-child {
+    font-size: 10px;
+  }
+
+  @page {
+    size: A4;
+    margin: 0;
+  }
+}

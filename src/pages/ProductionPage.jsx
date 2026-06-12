@@ -5,12 +5,10 @@ import dayjs from 'dayjs';
 import { ScanOutlined, HistoryOutlined, BarChartOutlined, CheckCircleFilled, ClockCircleOutlined, ExclamationCircleFilled, SendOutlined, ArrowLeftOutlined, MinusCircleFilled } from '@ant-design/icons';
 import AppLayout from '../components/AppLayout';
 import { getProductionOrders, getProductionOrder, submitReport, getMyReports, getProductionStatsDaily } from '../api';
+import { PRODUCT_MAP, PRODUCT_COLORS } from '../utils/productColors';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
-
-const PRODUCT_MAP = { YS: '印刷', YM: '印刷面', ZM: '纸盒', DS: '模切' };
-const PRODUCT_COLORS = { YS: '#2563eb', YM: '#0891b2', ZM: '#059669', DS: '#d97706' };
 
 // 工序步骤（与后端STEPS一致）
 const STEPS_DEF = [
@@ -650,23 +648,41 @@ function DefectStats() {
   };
 
   const handleReportSuccess = (reportData) => {
-    // 用报工返回的数据直接更新当前订单的统计，不跳转不刷新
-    setSelectedOrder(prev => ({
-      ...prev,
-      total_reported: reportData.total_reported,
-      remain: reportData.remain,
-      all_reported: reportData.all_reported,
-      // 同时更新当前工序的报工记录
-      steps: prev.steps.map(s =>
-        s.field === reportData.gongxu_field
-          ? { ...s, total_reported: reportData.total_reported }
-          : s
-      ),
-    }));
-    // 如果已报完，切换到记录页
-    if (reportData.all_reported) {
-      setActiveTab('reports');
-      setTimeout(() => setActiveTab('report'), 100);
+    // P0-1：工序自动完工 — 报工成功后更新 UI
+    setSelectedOrder(prev => {
+      const updatedSteps = prev.steps.map(s => {
+        if (s.field === reportData.gongxu_field) {
+          return {
+            ...s,
+            total_reported: reportData.total_reported,
+            completed: reportData.step_completed || false, // 工序自动完工
+            completed_at: reportData.step_completed
+              ? new Date().toISOString()
+              : (s.completed_at || null),
+          };
+        }
+        // 下一工序标记为新的 current_step
+        if (reportData.next_step && s.field === reportData.next_step.field) {
+          return { ...s, can_report: true };
+        }
+        return s;
+      });
+      return {
+        ...prev,
+        total_reported: reportData.total_reported,
+        remain: reportData.remain,
+        all_reported: reportData.all_reported,
+        current_step: reportData.next_step || prev.current_step,
+        steps: updatedSteps,
+      };
+    });
+
+    // P0-1：显示下一工序交接提示
+    if (reportData.step_completed && reportData.next_step) {
+      message.success({
+        content: `✓ ${reportData.gongxu_name} 工序已完工，请交接给【${reportData.next_step.label}】工序`,
+        duration: 5,
+      });
     }
   };
 

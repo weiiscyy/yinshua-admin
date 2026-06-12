@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { message } from 'antd';
+import { getRouter } from '../router';
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://10.147.19.111:8000';
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 
 const api = axios.create({
   baseURL: API_BASE,
@@ -23,7 +24,14 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      // 用 React Router 跳转替代 window.location.href，避免全页刷新
+      try {
+        const router = getRouter();
+        if (router) router.navigate('/login', { replace: true });
+        else window.location.href = '/login';
+      } catch {
+        window.location.href = '/login';
+      }
     }
     const errMsg = error.response?.data?.error || '请求失败';
     message.error(errMsg);
@@ -51,16 +59,16 @@ export const adminListOrders = (params) =>
   api.get('/api/admin/orders', { params });
 
 export const adminGetOrder = (productType, ddId) =>
-  api.get(`/api/admin/orders/${productType}/${ddId}`);
+  api.get(`/api/admin/orders/${productType.toUpperCase()}/${ddId}`);
 
 export const adminUpdateStep = (productType, ddId, step, completed) =>
-  api.post(`/api/admin/orders/${productType}/${ddId}/step`, { step, completed });
+  api.post(`/api/admin/orders/${productType.toUpperCase()}/${ddId}/step`, { step, completed });
 
 export const adminUpdateOrder = (productType, ddId, fields) =>
-  api.patch(`/api/admin/orders/${productType}/${ddId}`, fields);
+  api.patch(`/api/admin/orders/${productType.toUpperCase()}/${ddId}`, fields);
 
 export const adminCreateOrder = (data) =>
-  api.post('/api/admin/orders', data);
+  api.post('/api/order-entry', data);
 
 export const adminGetOverview = () =>
   api.get('/api/admin/orders/stats/overview');
@@ -70,6 +78,17 @@ export const adminListUsers = () =>
 
 export const salespersonsList = () =>
   api.get('/api/base-data/salespersons');
+
+// 用户管理
+export const getUsers = (params) => api.get('/api/users', { params });
+export const getUser = (id) => api.get(`/api/users/${id}`);
+export const createUser = (data) => api.post('/api/users', data);
+export const updateUser = (id, data) => api.put(`/api/users/${id}`, data);
+export const deleteUser = (id) => api.delete(`/api/users/${id}`);
+export const resetUserPassword = (id) => api.post(`/api/users/${id}/reset-password`);
+export const changePassword = (data) => api.post('/api/users/change-password', data);
+export const getDeptOptions = () => api.get('/api/users/options/departments');
+export const getCjOptions = () => api.get('/api/users/options/cj');
 
 // 发货单
 const fh = (method, url, data) => api[method](`/api/fahuo${url}`, data);
@@ -97,7 +116,10 @@ export const getStatsOverview = () => api.get('/api/stats/overview');
 export const getStatsStatusDist = () => api.get('/api/stats/status_dist');
 export const getStatsYwy = () => api.get('/api/stats/ywy_stats');
 
-// 生产报工
+// 工序管理
+export const processList = (params) => api.get('/api/process/orders', { params });
+export const processAdvance = (data) => api.post('/api/process/advance', data);
+export const processBatchAdvance = (data) => api.post('/api/process/batch-advance', data);
 export const getProductionOrders = (params) => api.get('/api/production/orders', { params });
 export const getProductionOrder = (ddId, productType) => api.get(`/api/production/order/${ddId}?product_type=${productType}`);
 export const submitReport = (data) => api.post('/api/production/report', data);

@@ -1,8 +1,9 @@
 // 打印工具 - 生成打印页面 HTML，在新窗口中打开并打印
 import dayjs from 'dayjs';
 import QRCode from 'qrcode';
+import { PRODUCT_LABELS } from './productColors';
 
-const COMPANY_NAME = '兰花印刷包装有限公司';
+const COMPANY_NAME = '嘉兴亚欣商标印务有限公司';
 
 // ── 共享 CSS ────────────────────────────────────────────────────────────────
 const PRINT_CSS = `
@@ -187,11 +188,10 @@ function printFahuoHtml(data) {
 // ── 生成订单打印 HTML（异步，含二维码）──────────────────────────────────────
 async function buildPrintHtml(order, productType) {
   var o = order;
-  var PRODUCT_LABELS = { YS: '印刷', YM: '印刷面', ZM: '纸盒', DS: '模切' };
   var ptLabel = PRODUCT_LABELS[productType] || productType;
 
-  // 扫码报工 URL（使用当前页面 origin，方便部署）
-  var baseUrl = window.location.origin + '/production/report';
+  // 扫码报工 URL（使用当前页面 origin，指向 /production 页面）
+  var baseUrl = window.location.origin + '/production';
 
   // 生成未完成工序的二维码
   var qrUrls = {};
@@ -227,6 +227,7 @@ async function buildPrintHtml(order, productType) {
   if (o.kuanhao) baseInfoItems.push({ label: '款号', value: o.kuanhao });
   if (o.fahuodanwei) baseInfoItems.push({ label: '发货单位', value: o.fahuodanwei });
   if (o.waifa) baseInfoItems.push({ label: '外发', value: '是' });
+  else if (o.waifa == 0) baseInfoItems.push({ label: '外发', value: '否' });
 
   var baseInfoGrid = '';
   for (var bi = 0; bi < baseInfoItems.length; bi++) {
@@ -248,7 +249,6 @@ async function buildPrintHtml(order, productType) {
   if (o.jyyaoqiu) specRows.push('<div style="grid-column:span 2"><span class="label">经验要求：</span><span class="value">' + o.jyyaoqiu + '</span></div>');
   if (o.zhengli) specRows.push('<div><span class="label">整烫：</span><span class="value">' + o.zhengli + '</span></div>');
   if (o.yssj) specRows.push('<div><span class="label">样色色价：</span><span class="value">' + o.yssj + '</span></div>');
-  if (o.cidiehao) specRows.push('<div><span class="label">刺绣号：</span><span class="value">' + o.cidiehao + '</span></div>');
   if (o.zm_zhijian) specRows.push('<div><span class="label">纸盒质检：</span><span class="value">' + o.zm_zhijian + '</span></div>');
   if (o.allcount) specRows.push('<div><span class="label">总数量：</span><span class="value">' + o.allcount + '</span></div>');
   if (o.weidu) specRows.push('<div><span class="label">纬度：</span><span class="value">' + o.weidu + '</span></div>');
@@ -303,6 +303,11 @@ export function openFahuoPrint(data) {
 
 // ── 打开订单打印窗口 ─────────────────────────────────────────────────────────
 export async function openOrderPrint(order, productType) {
+  // YS 使用 React 打印页（还原旧系统格式）
+  if (productType === 'YS') {
+    var win = window.open('/print/ys/' + order.DD_id, '_blank', 'width=800,height=700,scrollbars=yes');
+    return;
+  }
   var html = await buildPrintHtml(order, productType);
   var win = window.open('', '_blank', 'width=800,height=600,scrollbars=yes');
   if (win) { win.document.write(html); win.document.close(); }

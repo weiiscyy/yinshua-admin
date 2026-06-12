@@ -10,12 +10,11 @@ import {
 import dayjs from 'dayjs';
 import { fahuoList, fahuoGet, fahuoCreate, fahuoUpdate, fahuoDelete, fahuoGetPending, fahuoCancelOrder, adminListUsers } from '../api';
 import { openFahuoPrint } from '../utils/print';
+import { PRODUCT_LABELS } from '../utils/productColors';
 import AppLayout from '../components/AppLayout';
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
-
-const PRODUCT_LABELS = { YS: '印刷', YM: '印刷面', ZM: '纸盒', DS: '模切' };
 
 // 手工录入初始值
 function initManualForm() {
@@ -79,6 +78,13 @@ function PendingOrderModal({ open, onClose, onSelect, formSelectedOrders, loadin
       filter: null,
     },
     {
+      title: '花号',
+      dataIndex: 'huahao',
+      width: 100,
+      ellipsis: true,
+      filter: null,
+    },
+    {
       title: '订单数量',
       dataIndex: 'shuliang',
       width: 80,
@@ -123,12 +129,41 @@ function PendingOrderModal({ open, onClose, onSelect, formSelectedOrders, loadin
       destroyOnClose
       styles={{ body: { padding: '12px' } }}
     >
-      <Space wrap style={{ marginBottom: 12 }}>
+      <Space wrap direction="vertical" style={{ marginBottom: 12 }}>
+        <Space wrap>
         <Input
           placeholder="客户名称"
           value={searchProps.company}
           onChange={e => onSearchChange('company', e.target.value)}
-          style={{ width: 160 }}
+          style={{ width: 140 }}
+          allowClear
+        />
+        <Input
+          placeholder="订单号"
+          value={searchProps.ddbh}
+          onChange={e => onSearchChange('ddbh', e.target.value)}
+          style={{ width: 120 }}
+          allowClear
+        />
+        <Input
+          placeholder="花号/印件编号"
+          value={searchProps.proudnumber}
+          onChange={e => onSearchChange('proudnumber', e.target.value)}
+          style={{ width: 140 }}
+          allowClear
+        />
+        <DatePicker
+          placeholder="开始日期"
+          value={searchProps.start_date ? dayjs(searchProps.start_date) : null}
+          onChange={(d, ds) => onSearchChange('start_date', ds || '')}
+          style={{ width: 120 }}
+          allowClear
+        />
+        <DatePicker
+          placeholder="结束日期"
+          value={searchProps.end_date ? dayjs(searchProps.end_date) : null}
+          onChange={(d, ds) => onSearchChange('end_date', ds || '')}
+          style={{ width: 120 }}
           allowClear
         />
         <Select
@@ -136,16 +171,17 @@ function PendingOrderModal({ open, onClose, onSelect, formSelectedOrders, loadin
           value={searchProps.product_type || undefined}
           onChange={v => onSearchChange('product_type', v || '')}
           allowClear
-          style={{ width: 120 }}
+          style={{ width: 100 }}
           options={[
             { label: '全部', value: '' },
-            { label: '印刷', value: 'YS' },
-            { label: '印刷面', value: 'YM' },
-            { label: '纸盒', value: 'ZM' },
-            { label: '模切', value: 'DS' },
+            { label: PRODUCT_LABELS.YS, value: 'YS' },
+            { label: PRODUCT_LABELS.YM, value: 'YM' },
+            { label: PRODUCT_LABELS.ZM, value: 'ZM' },
+            { label: PRODUCT_LABELS.DS, value: 'DS' },
           ]}
         />
         <Button type="primary" icon={<SearchOutlined />} onClick={onSearch}>搜索</Button>
+        </Space>
         <span style={{ color: '#888', fontSize: 12 }}>
           共 {orders.length} 条待发货订单
         </span>
@@ -209,7 +245,7 @@ export default function FahuoListPage() {
   const [pendingVisible, setPendingVisible] = useState(false);
   const [pendingOrders, setPendingOrders] = useState([]);
   const [pendingLoading, setPendingLoading] = useState(false);
-  const [pendingSearch, setPendingSearch] = useState({ company: '', product_type: '' });
+  const [pendingSearch, setPendingSearch] = useState({ company: '', product_type: '', ddbh: '', proudnumber: '', start_date: '', end_date: '' });
 
   const fetchUsers = async () => {
     try {
@@ -309,17 +345,21 @@ export default function FahuoListPage() {
     if (!form.company) { message.error('收货单位不能为空'); return; }
     setSaving(true);
     try {
+      // 后端期望 pingming1/2/3... 格式
       const payload = {
         company: form.company,
         kdgs: form.kdgs,
         kdhao: form.kdhao,
         ywy: form.ywy,
-        pingming: form.items.map(i => i.pingming),
-        khao: form.items.map(i => i.khao),
-        dnbh: form.items.map(i => i.dnbh),
-        shuliang: form.items.map(i => i.shuliang),
-        beizhu: form.items.map(i => i.beizhu),
       };
+      for (let i = 0; i < 9; i++) {
+        const item = form.items[i] || {};
+        payload['pingming' + (i + 1)] = item.pingming || '';
+        payload['khao' + (i + 1)] = item.khao || '';
+        payload['dnbh' + (i + 1)] = item.dnbh || '';
+        payload['shuliang' + (i + 1)] = item.shuliang || '';
+        payload['beizhu' + (i + 1)] = item.beizhu || '';
+      }
       if (editId) {
         await fahuoUpdate(editId, payload);
         message.success('修改成功');
@@ -423,7 +463,7 @@ export default function FahuoListPage() {
   const openPendingModal = async () => {
     setPendingVisible(true);
     setPendingLoading(true);
-    setPendingSearch({ company: '', product_type: '' });
+    setPendingSearch({ company: '', product_type: '', ddbh: '', proudnumber: '', start_date: '', end_date: '' });
     try {
       const res = await fahuoGetPending({ page_size: 300 });
       setPendingOrders(Array.isArray(res?.items) ? res.items : []);
@@ -441,6 +481,10 @@ export default function FahuoListPage() {
       const params = { page_size: 300 };
       if (pendingSearch.company) params.company = pendingSearch.company;
       if (pendingSearch.product_type) params.product_type = pendingSearch.product_type;
+      if (pendingSearch.ddbh) params.ddbh = pendingSearch.ddbh;
+      if (pendingSearch.proudnumber) params.proudnumber = pendingSearch.proudnumber;
+      if (pendingSearch.start_date) params.start_date = pendingSearch.start_date;
+      if (pendingSearch.end_date) params.end_date = pendingSearch.end_date;
       const res = await fahuoGetPending(params);
       setPendingOrders(Array.isArray(res?.items) ? res.items : []);
     } catch {
@@ -456,11 +500,11 @@ export default function FahuoListPage() {
     const existing = (form.selectedOrders || []).find(o => o.dd_id === order.dd_id && o.product_type === order.product_type);
     if (existing) {
       // Remove it
-      const key = keyForOrder(order);
+      const key = keyFor(order);
       const next = (form.selectedOrders || []).filter(o => !(o.dd_id === order.dd_id && o.product_type === order.product_type));
       selectedOrdersRef.current = next;
       setForm({ ...form, selectedOrders: next });
-      setSelectedKeys(selectedKeys.filter(k => k !== key));
+      setSelectedKeys(prev => prev.filter(k => k !== key));
     } else {
       // Add it
       const next = [...(form.selectedOrders || []), {
@@ -470,7 +514,7 @@ export default function FahuoListPage() {
       }];
       selectedOrdersRef.current = next;
       setForm({ ...form, selectedOrders: next });
-      setSelectedKeys([...selectedKeys, keyForOrder(order)]);
+      setSelectedKeys(prev => [...prev, keyFor(order)]);
     }
   };
 

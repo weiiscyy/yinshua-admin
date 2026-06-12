@@ -3,12 +3,11 @@ import { Row, Col, Card, Typography, Select, Spin } from 'antd';
 import { Pie, Line, Column } from '@ant-design/plots';
 import dayjs from 'dayjs';
 import { getStatsTrend, getStatsOverview, getStatsStatusDist, getStatsYwy } from '../api';
+import { PRODUCT_LABELS, PRODUCT_COLORS } from '../utils/productColors';
 import AppLayout from '../components/AppLayout';
 
 const { Title } = Typography;
-
-const PRODUCT_LABELS = { YS: '印刷', YM: '印刷面', ZM: '纸盒', DS: '模切' };
-const PRODUCT_COLORS_ARR = ['#2563eb', '#06b6d4', '#10b981', '#f59e0b'];
+const PRODUCT_COLORS_ARR = Object.values(PRODUCT_COLORS); // ['#2563eb','#0891b2','#059669','#d97706']
 
 export default function StatsPage() {
   const [trendDays, setTrendDays] = useState(30);

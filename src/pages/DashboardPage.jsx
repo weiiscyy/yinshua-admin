@@ -9,9 +9,7 @@ import AppLayout from '../components/AppLayout';
 import { adminGetOverview, getLatestOrders } from '../api';
 import dayjs from 'dayjs';
 
-const PRODUCT_LABELS = { YS: '印刷', YM: '印刷面', ZM: '纸盒', DS: '模切' };
-const PRODUCT_COLORS = { YS: '#2563eb', YM: '#0891b2', ZM: '#059669', DS: '#d97706' };
-const PRODUCT_BG = { YS: '#eff6ff', YM: '#ecfeff', ZM: '#ecfdf5', DS: '#fffbeb' };
+import { PRODUCT_COLORS, PRODUCT_BG, PRODUCT_LABELS } from '../utils/productColors';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
